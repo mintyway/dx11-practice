@@ -20,5 +20,6 @@ public:
 private:
     ID3D11Device* device = nullptr;
     ID3D11DeviceContext* immediateContext = nullptr;
+    IDXGISwapChain* swapChain = nullptr;
     D3D_FEATURE_LEVEL featureLevel{};
 };
