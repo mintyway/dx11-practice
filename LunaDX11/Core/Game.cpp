@@ -85,12 +85,12 @@ bool Game::Init(HWND hWnd)
 
     hr = dxgiFactory->CreateSwapChain(device, &sd, &swapChain); // 스왑체인 생성.
     dxgiFactory->Release();
-    CHECK_HR(hr, L"스왑체인 생성 실패")
+    CHECK_HR(hr, L"스왑체인 생성 실패");
 
     // 백버퍼 텍스처 가져오기
     ID3D11Texture2D* backBuffer = nullptr;
     hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
-    CHECK_HR(hr, L"백버퍼 가져오기 실패")
+    CHECK_HR(hr, L"백버퍼 가져오기 실패");
 
     // 렌더 타겟 뷰 생성
     hr = device->CreateRenderTargetView(backBuffer, nullptr, &renderTargetView);
@@ -121,6 +121,17 @@ bool Game::Init(HWND hWnd)
 
     // 출력 병합기 바인딩
     immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+
+    D3D11_VIEWPORT viewport;
+    viewport.TopLeftX = 0.0f;
+    viewport.TopLeftY = 0.0f;
+    viewport.Width = static_cast<FLOAT>(width);
+    viewport.Height = static_cast<FLOAT>(height);
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+
+    // 뷰포트 설정
+    immediateContext->RSSetViewports(1, &viewport);
 
     return true;
 }
