@@ -86,6 +86,25 @@ bool Game::Init(HWND hWnd)
     if (FAILED(hr))
     {
         MessageBox(nullptr, L"스왑체인 생성 실패", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    // 백버퍼 텍스처 가져오기
+    ID3D11Texture2D* backBuffer = nullptr;
+    hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
+    if (FAILED(hr))
+    {
+        MessageBox(nullptr, L"백버퍼 가져오기 실패", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    // 렌더 타겟 뷰 생성
+    hr = device->CreateRenderTargetView(backBuffer, nullptr, &renderTargetView);
+    backBuffer->Release();
+    if (FAILED(hr))
+    {
+        MessageBox(nullptr, L"렌더 타겟 뷰 생성 실패", L"Error", MB_OK | MB_ICONERROR);
+        return false;
     }
 
     return true;
