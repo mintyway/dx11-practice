@@ -129,7 +129,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Game.cpp" />
     <ClCompile Include="LunaDX11.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\Game.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
