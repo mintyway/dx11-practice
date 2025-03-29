@@ -114,9 +114,13 @@ bool Game::Init(HWND hWnd)
     hr = device->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilBuffer);
     CHECK_HR(hr, L"깊이/스텐실 텍스쳐 생성 실패");
 
+    // 깊이/스텐실 뷰 생성
     hr = device->CreateDepthStencilView(depthStencilBuffer, nullptr, &depthStencilView);
     depthStencilBuffer->Release();
     CHECK_HR(hr, L"깊이/스텐실 뷰 생성 실패");
+
+    // 출력 병합기 바인딩
+    immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
 
     return true;
 }
