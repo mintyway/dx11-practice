@@ -22,5 +22,6 @@ private:
     ID3D11DeviceContext* immediateContext = nullptr;
     IDXGISwapChain* swapChain = nullptr;
     ID3D11RenderTargetView* renderTargetView = nullptr;
+    ID3D11DepthStencilView* depthStencilView = nullptr;
     D3D_FEATURE_LEVEL featureLevel{};
 };

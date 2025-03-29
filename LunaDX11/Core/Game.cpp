@@ -1,5 +1,12 @@
 #include "Game.h"
 
+#define CHECK_HR(hr, text)\
+if (FAILED(hr))\
+{\
+    MessageBox(nullptr, text, L"Error", MB_OK | MB_ICONERROR);\
+    return false;\
+}
+
 bool Game::Init(HWND hWnd)
 {
     UINT createDeviceFlags = 0;
@@ -21,11 +28,8 @@ bool Game::Init(HWND hWnd)
      * ppImmediateContext: 생성된 immediate device context를 반환한다.
      */
     HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, nullptr, 0, D3D11_SDK_VERSION, &device, &featureLevel, &immediateContext);
-    if (FAILED(hr))
-    {
-        MessageBox(nullptr, L"D3D11 Device 생성 실패", L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
+    CHECK_HR(hr, L"D3D11 Device 생성 실패");
+
     if (featureLevel < D3D_FEATURE_LEVEL_11_0)
     {
         MessageBox(nullptr, L"dx11 미지원", L"Error", MB_OK | MB_ICONERROR);
@@ -40,18 +44,16 @@ bool Game::Init(HWND hWnd)
      */
     UINT msaaQuality;
     hr = device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 4, &msaaQuality);
-    if (FAILED(hr))
-    {
-        MessageBox(nullptr, L"4x MSAA 품질 검사 실패", L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
+    CHECK_HR(hr, L"4x MSAA 품질 검사 실패");
 
     RECT rc;
     GetClientRect(hWnd, &rc);
+    const LONG width = rc.right - rc.left;
+    const LONG height = rc.bottom - rc.top;
 
-    DXGI_SWAP_CHAIN_DESC sd{};
-    sd.BufferDesc.Width = rc.right - rc.left; // 백 버퍼 너비
-    sd.BufferDesc.Height = rc.bottom - rc.top; // 백 버퍼 높이
+    DXGI_SWAP_CHAIN_DESC sd;
+    sd.BufferDesc.Width = width; // 백 버퍼 너비
+    sd.BufferDesc.Height = height; // 백 버퍼 높이
     sd.BufferDesc.RefreshRate.Numerator = 60; // 리프레시율 (60Hz)
     sd.BufferDesc.RefreshRate.Denominator = 1;
     sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // 32비트 RGBA 포맷
@@ -83,29 +85,38 @@ bool Game::Init(HWND hWnd)
 
     hr = dxgiFactory->CreateSwapChain(device, &sd, &swapChain); // 스왑체인 생성.
     dxgiFactory->Release();
-    if (FAILED(hr))
-    {
-        MessageBox(nullptr, L"스왑체인 생성 실패", L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
+    CHECK_HR(hr, L"스왑체인 생성 실패")
 
     // 백버퍼 텍스처 가져오기
     ID3D11Texture2D* backBuffer = nullptr;
     hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
-    if (FAILED(hr))
-    {
-        MessageBox(nullptr, L"백버퍼 가져오기 실패", L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
+    CHECK_HR(hr, L"백버퍼 가져오기 실패")
 
     // 렌더 타겟 뷰 생성
     hr = device->CreateRenderTargetView(backBuffer, nullptr, &renderTargetView);
     backBuffer->Release();
-    if (FAILED(hr))
-    {
-        MessageBox(nullptr, L"렌더 타겟 뷰 생성 실패", L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
+    CHECK_HR(hr, L"렌더 타겟 뷰 생성 실패");
+
+    D3D11_TEXTURE2D_DESC depthStencilDesc;
+    depthStencilDesc.Width = width;
+    depthStencilDesc.Height = height;
+    depthStencilDesc.MipLevels = 1;
+    depthStencilDesc.ArraySize = 1;
+    depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthStencilDesc.SampleDesc.Count = 4;
+    depthStencilDesc.SampleDesc.Quality = msaaQuality - 1;
+    depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+    depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    depthStencilDesc.CPUAccessFlags = 0;
+    depthStencilDesc.MiscFlags = 0;
+
+    ID3D11Texture2D* depthStencilBuffer = nullptr;
+    hr = device->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilBuffer);
+    CHECK_HR(hr, L"깊이/스텐실 텍스쳐 생성 실패");
+
+    hr = device->CreateDepthStencilView(depthStencilBuffer, nullptr, &depthStencilView);
+    depthStencilBuffer->Release();
+    CHECK_HR(hr, L"깊이/스텐실 뷰 생성 실패");
 
     return true;
 }
