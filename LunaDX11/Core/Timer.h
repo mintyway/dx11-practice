@@ -16,9 +16,9 @@ public:
     [[nodiscard]] inline float GetDeltaSeconds() const { return deltaSeconds; }
     [[nodiscard]] inline double GetTotalSeconds() const { return isStopped ? GetElapsedSeconds(stopTime) : GetElapsedSeconds(Clock::now()); }
 
-    void reset();
-    void start();
-    void stop();
+    void Reset();
+    void Start();
+    void Stop();
     void Tick();
 
 private:

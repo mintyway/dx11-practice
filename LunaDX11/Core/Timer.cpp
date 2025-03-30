@@ -2,7 +2,7 @@
 
 Timer::Timer() : pausedDuration(Duration<double>::zero()), deltaSeconds(0.0f), isReset(true), isStopped(true) {}
 
-void Timer::reset()
+void Timer::Reset()
 {
     baseTime = TimePoint{};
     previousTime = TimePoint{};
@@ -13,7 +13,7 @@ void Timer::reset()
     isStopped = true;
 }
 
-void Timer::start()
+void Timer::Start()
 {
     const TimePoint currentTime = Clock::now();
 
@@ -31,7 +31,7 @@ void Timer::start()
     }
 }
 
-void Timer::stop()
+void Timer::Stop()
 {
     if (!isStopped)
     {

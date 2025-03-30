@@ -16,6 +16,13 @@
 #include "GameInstance.h"
 #include "Timer.h"
 
+enum class WindowState : uint8_t
+{
+    Window,
+    Minimized,
+    Maximized
+};
+
 class Engine
 {
 public:
@@ -57,6 +64,8 @@ private:
     std::wstring className;
     std::wstring windowName;
     bool isPaused = false;
+    WindowState windowState;
+    bool isResizing = false;
 
     int clientWidth = 800;
     int clientHeight = 600;

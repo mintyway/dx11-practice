@@ -12,7 +12,7 @@ if (FAILED(hr))\
 
 Engine::~Engine()
 {
-    timer.stop();
+    timer.Stop();
 
     device->Release();
     immediateContext->Release();
@@ -44,7 +44,7 @@ bool Engine::Init(HINSTANCE hInstance)
 
 void Engine::Run()
 {
-    timer.start();
+    timer.Start();
 
     MSG message{};
     while (message.message != WM_QUIT)
@@ -68,12 +68,12 @@ LRESULT Engine::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             if (LOWORD(wParam) == WA_INACTIVE)
             {
                 isPaused = true;
-                timer.stop();
+                timer.Stop();
             }
             else
             {
                 isPaused = false;
-                timer.start();
+                timer.Start();
             }
 
             return 0;
@@ -82,25 +82,61 @@ LRESULT Engine::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         {
             clientWidth = LOWORD(lParam);
             clientHeight = HIWORD(lParam);
-            OnResize();
+
+            switch (wParam)
+            {
+                case SIZE_MINIMIZED:
+                {
+                    OutputDebugString(L"최소화\n");
+                    isPaused = true;
+                    windowState = WindowState::Minimized;
+                    break;
+                }
+                case SIZE_MAXIMIZED:
+                {
+                    OutputDebugString(L"최대화\n");
+                    isPaused = false;
+                    windowState = WindowState::Maximized;
+                    OnResize();
+                    break;
+                }
+                case SIZE_RESTORED:
+                {
+                    if (windowState == WindowState::Minimized || windowState == WindowState::Maximized)
+                    {
+                        OutputDebugString(L"창모드\n");
+                        isPaused = false;
+                        windowState = WindowState::Window;
+                        OnResize();
+                    }
+                    else if (isResizing) {}
+                    else
+                    {
+                        OutputDebugString(L"전체화면\n");
+                        OnResize();
+                    }
+
+                    break;
+                }
+                default:
+                    break;
+            }
 
             return 0;
         }
         case WM_ENTERSIZEMOVE:
         {
+            isPaused = true;
+            isResizing = true;
+            timer.Stop();
             return 0;
         }
         case WM_EXITSIZEMOVE:
         {
-            return 0;
-        }
-        case WM_KEYDOWN:
-        {
-            if (wParam == VK_ESCAPE)
-            {
-                PostQuitMessage(0);
-            }
-
+            isPaused = false;
+            isResizing = false;
+            timer.Start();
+            OnResize();
             return 0;
         }
         case WM_DESTROY:
@@ -108,15 +144,40 @@ LRESULT Engine::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             PostQuitMessage(0);
             return 0;
         }
+        case WM_MENUCHAR: // Alt + Enter 전체화면 비프음 제거
+        {
+            return MAKELRESULT(0, MNC_CLOSE);
+        }
+        case WM_GETMINMAXINFO: // 최소 앱 크기 제한
+        {
+            MINMAXINFO* minMax = reinterpret_cast<MINMAXINFO*>(lParam); // NOLINT(performance-no-int-to-ptr)
+            minMax->ptMinTrackSize.x = 200;
+            minMax->ptMinTrackSize.y = 200;
+            return 0;
+        }
+        case WM_KEYDOWN:
+        {
+            if (wParam == VK_ESCAPE)
+            {
+                OutputDebugString(L"ESC");
+                PostQuitMessage(0);
+            }
+
+            return 0;
+        }
         case WM_LBUTTONDOWN:
+            [[fallthrough]];
         case WM_MBUTTONDOWN:
+            [[fallthrough]];
         case WM_RBUTTONDOWN:
         {
             OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
             return 0;
         }
         case WM_LBUTTONUP:
+            [[fallthrough]];
         case WM_MBUTTONUP:
+            [[fallthrough]];
         case WM_RBUTTONUP:
         {
             OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
