@@ -1,14 +1,9 @@
 #include "BaseEngine.h"
 
+#include "Utility.h"
+
 #include <windowsx.h>
 #include <thread>
-
-#define CHECK_HR(hr, text, ...)\
-if (FAILED(hr))\
-{\
-    MessageBox(nullptr, text, L"Error", MB_OK | MB_ICONERROR);\
-    return __VA_ARGS__;\
-}
 
 BaseEngine::~BaseEngine()
 {

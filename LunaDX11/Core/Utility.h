@@ -3,6 +3,13 @@
 
 using namespace DirectX;
 
+#define CHECK_HR(hr, text, ...)\
+if (FAILED(hr))\
+{\
+MessageBox(nullptr, text, L"Error", MB_OK | MB_ICONERROR);\
+return __VA_ARGS__;\
+}
+
 namespace Colors
 {
     constexpr XMVECTORF32 White = {1.0f, 1.0f, 1.0f, 1.0f};
