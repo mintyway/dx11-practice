@@ -28,25 +28,29 @@ public:
         return &instance;
     }
 
-    bool Init(HINSTANCE hInstance);
+    virtual bool Init(HINSTANCE hInstance);
 
     void Run();
-    LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+    virtual LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
     void Tick();
 
-    void OnResize();
+    virtual void OnResize();
+
+    virtual void OnMouseDown(WPARAM buttonState, int x, int y) {}
+    virtual void OnMouseUp(WPARAM buttonState, int x, int y) {}
+    virtual void OnMouseMove(WPARAM buttonState, int x, int y) {}
 
 private:
     Engine() = default;
-    ~Engine();
+    virtual ~Engine();
 
     bool InitWindow();
     bool InitDirectX();
 
     void UpdateFrameInfo(float deltaSeconds);
 
-    void Update(float deltaSeconds);
-    void Render();
+    virtual void Update(float deltaSeconds);
+    virtual void Render();
 
     HINSTANCE instanceHandle = nullptr;
     HWND windowHandle = nullptr;

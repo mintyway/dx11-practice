@@ -1,5 +1,6 @@
 #include "Engine.h"
 
+#include <windowsx.h>
 #include <thread>
 
 #define CHECK_HR(hr, text, ...)\
@@ -105,6 +106,25 @@ LRESULT Engine::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         case WM_DESTROY:
         {
             PostQuitMessage(0);
+            return 0;
+        }
+        case WM_LBUTTONDOWN:
+        case WM_MBUTTONDOWN:
+        case WM_RBUTTONDOWN:
+        {
+            OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            return 0;
+        }
+        case WM_LBUTTONUP:
+        case WM_MBUTTONUP:
+        case WM_RBUTTONUP:
+        {
+            OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            return 0;
+        }
+        case WM_MOUSEMOVE:
+        {
+            OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
             return 0;
         }
         default:
