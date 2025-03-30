@@ -129,12 +129,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\BaseEngine.cpp" />
     <ClCompile Include="Core\Engine.cpp" />
     <ClCompile Include="Core\GameInstance.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="LunaDX11.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\BaseEngine.h" />
     <ClInclude Include="Core\Engine.h" />
     <ClInclude Include="Core\GameInstance.h" />
     <ClInclude Include="Core\Timer.h" />
