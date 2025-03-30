@@ -133,6 +133,7 @@
     <ClCompile Include="Core\Engine.cpp" />
     <ClCompile Include="Core\GameInstance.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
+    <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="LunaDX11.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -140,6 +141,7 @@
     <ClInclude Include="Core\Engine.h" />
     <ClInclude Include="Core\GameInstance.h" />
     <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Core\Utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
