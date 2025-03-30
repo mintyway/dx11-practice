@@ -52,11 +52,10 @@ private:
     HWND windowHandle = nullptr;
     std::wstring className;
     std::wstring windowName;
+    bool isPaused = false;
 
     int clientWidth = 800;
     int clientHeight = 600;
-
-    std::unique_ptr<GameInstance> gameInstance;
 
     Timer timer;
     std::wostringstream frameInfoStream = []
@@ -71,8 +70,7 @@ private:
     IDXGISwapChain* swapChain = nullptr;
     ID3D11RenderTargetView* renderTargetView = nullptr;
     ID3D11DepthStencilView* depthStencilView = nullptr;
-
     UINT msaaQuality;
 
-    bool isAppPaused = false;
+    std::unique_ptr<GameInstance> gameInstance;
 };

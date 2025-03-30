@@ -66,12 +66,12 @@ LRESULT Engine::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         {
             if (LOWORD(wParam) == WA_INACTIVE)
             {
-                isAppPaused = true;
+                isPaused = true;
                 timer.stop();
             }
             else
             {
-                isAppPaused = false;
+                isPaused = false;
                 timer.start();
             }
 
@@ -118,7 +118,7 @@ void Engine::Tick()
 {
     timer.Tick();
 
-    if (!isAppPaused)
+    if (!isPaused)
     {
         const float deltaSeconds = timer.GetDeltaSeconds();
         UpdateFrameInfo(deltaSeconds);
@@ -151,9 +151,12 @@ void Engine::OnResize()
         }
     }
 
+    HRESULT hr = swapChain->ResizeBuffers(1, clientWidth, clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+    CHECK_HR(hr, L"백버퍼 사이즈 변경 실패");
+
     // 백버퍼 텍스처 가져오기
     ID3D11Texture2D* backBuffer = nullptr;
-    HRESULT hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
+    hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
     CHECK_HR(hr, L"백버퍼 가져오기 실패");
 
     // 렌더 타겟 뷰 생성
