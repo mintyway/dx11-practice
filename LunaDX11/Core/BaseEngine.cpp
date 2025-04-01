@@ -5,6 +5,13 @@
 #include <windowsx.h>
 #include <thread>
 
+namespace
+{
+    LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) { return BaseEngine::Get()->HandleMessage(hWnd, message, wParam, lParam); }
+}
+
+std::unique_ptr<BaseEngine> BaseEngine::engineInstance;
+
 BaseEngine::~BaseEngine()
 {
     timer.Stop();
@@ -16,13 +23,13 @@ BaseEngine::~BaseEngine()
     depthStencilView->Release();
 }
 
-bool BaseEngine::Init(HINSTANCE hInstance, WNDPROC wndProc)
+bool BaseEngine::Init(HINSTANCE inInstanceHandle)
 {
-    instanceHandle = hInstance;
+    instanceHandle = inInstanceHandle;
     className = L"Engine";
     windowName = L"DirectX11";
 
-    if (!InitWindow(wndProc))
+    if (!InitWindow())
     {
         return false;
     }
@@ -277,13 +284,13 @@ void BaseEngine::OnResize()
     immediateContext->RSSetViewports(1, &viewport);
 }
 
-bool BaseEngine::InitWindow(WNDPROC wndProc)
+bool BaseEngine::InitWindow()
 {
     // 윈도우 클래스 정의 및 등록
     WNDCLASSEX wc{};
     wc.cbSize = sizeof(WNDCLASSEX);
     wc.style = CS_HREDRAW | CS_VREDRAW;
-    wc.lpfnWndProc = wndProc;
+    wc.lpfnWndProc = WndProc;
     wc.hInstance = instanceHandle;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wc.lpszClassName = className.c_str();

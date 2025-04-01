@@ -4,18 +4,8 @@
 
 class Engine : public BaseEngine
 {
-    using Super = BaseEngine;
+    DECLARE_ENGINE(Engine, BaseEngine)
 
 public:
-    static Engine* Get()
-    {
-        static Engine instance;
-        return &instance;
-    }
-
     virtual void Render() override;
-
-protected:
-    Engine() = default;
-    virtual ~Engine() = default;
 };

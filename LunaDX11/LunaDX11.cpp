@@ -1,7 +1,6 @@
 #include <Windows.h>
 
 #include "Core/Engine.h"
-#include <iostream>
 
 void CreateDebugConsole()
 {
@@ -16,14 +15,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 {
     CreateDebugConsole();
 
+    // 엔진 등록
+    BaseEngine::Register<Engine>();
+
     // 게임 엔진 초기화
-    if (!Engine::Get()->Init(hInstance, [](HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) { return Engine::Get()->HandleMessage(hWnd, message, wParam, lParam); }))
+    if (!BaseEngine::Get()->Init(hInstance))
     {
         return 0;
     }
 
     // 엔진 실행
-    Engine::Get()->Run();
+    BaseEngine::Get()->Run();
 
     return 0;
 }

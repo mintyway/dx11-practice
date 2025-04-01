@@ -16,6 +16,15 @@
 #include "GameInstance.h"
 #include "Timer.h"
 
+#define DECLARE_ENGINE(ClassName, ParentClassName)\
+    friend class BaseEngine;\
+    using Super = ParentClassName;\
+    using ThisClass = ClassName;\
+    public:\
+    ClassName(const ClassName&) = delete;\
+    ClassName& operator=(const ClassName&) = delete; /*NOLINT(bugprone-macro-parentheses)*/\
+    private:
+
 enum class WindowState : uint8_t
 {
     Window,
@@ -26,10 +35,25 @@ enum class WindowState : uint8_t
 class BaseEngine
 {
 public:
+    virtual ~BaseEngine();
     BaseEngine(const BaseEngine&) = delete;
     BaseEngine& operator=(const BaseEngine&) = delete;
 
-    virtual bool Init(HINSTANCE hInstance, WNDPROC wndProc);
+    template <typename T, typename = std::enable_if_t<std::is_base_of_v<BaseEngine, T>>>
+    static void Register()
+    {
+        if (!engineInstance) // 등록된 이후 바꿀 수 없음
+        {
+            engineInstance.reset(new T);
+        }
+    }
+
+    static BaseEngine* Get() { return engineInstance.get(); }
+
+    template <typename T>
+    static T* Get() { return dynamic_cast<T*>(Get()); }
+
+    virtual bool Init(HINSTANCE inInstanceHandle);
 
     void Run();
     virtual LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -43,9 +67,8 @@ public:
 
 protected:
     BaseEngine() = default;
-    virtual ~BaseEngine();
 
-    bool InitWindow(WNDPROC wndProc);
+    bool InitWindow();
     bool InitDirectX();
 
     void UpdateFrameInfo(float deltaSeconds);
@@ -77,7 +100,10 @@ protected:
     IDXGISwapChain* swapChain = nullptr;
     ID3D11RenderTargetView* renderTargetView = nullptr;
     ID3D11DepthStencilView* depthStencilView = nullptr;
-    UINT msaaQuality;
+    UINT msaaQuality = 0;
 
     std::unique_ptr<GameInstance> gameInstance;
+
+private:
+    static std::unique_ptr<BaseEngine> engineInstance;
 };
