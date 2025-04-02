@@ -39,7 +39,7 @@ enum class WindowState : uint8_t
 class BaseEngine
 {
 public:
-    virtual ~BaseEngine();
+    virtual ~BaseEngine() = default;
     BaseEngine(const BaseEngine&) = delete;
     BaseEngine& operator=(const BaseEngine&) = delete;
 
@@ -101,11 +101,11 @@ protected:
         return oss;
     }();
 
-    ID3D11Device* device = nullptr;
-    ID3D11DeviceContext* immediateContext = nullptr;
-    IDXGISwapChain* swapChain = nullptr;
-    ID3D11RenderTargetView* renderTargetView = nullptr;
-    ID3D11DepthStencilView* depthStencilView = nullptr;
+    ComPtr<ID3D11Device> device;
+    ComPtr<ID3D11DeviceContext> immediateContext;
+    ComPtr<IDXGISwapChain> swapChain;
+    ComPtr<ID3D11RenderTargetView> renderTargetView;
+    ComPtr<ID3D11DepthStencilView> depthStencilView;
     UINT msaaQuality = 0;
 
     std::unique_ptr<GameInstance> gameInstance;

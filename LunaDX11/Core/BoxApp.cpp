@@ -129,8 +129,8 @@ void BoxApp::Render()
     }
 
     // 클리어
-    immediateContext->ClearRenderTargetView(renderTargetView, Colors::Blue);
-    immediateContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    immediateContext->ClearRenderTargetView(renderTargetView.Get(), Colors::Blue);
+    immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     // input assembler 단계
     immediateContext->IASetInputLayout(inputLayout.Get());

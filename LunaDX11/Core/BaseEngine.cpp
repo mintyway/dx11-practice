@@ -12,17 +12,6 @@ namespace
 
 std::unique_ptr<BaseEngine> BaseEngine::engineInstance;
 
-BaseEngine::~BaseEngine()
-{
-    timer.Stop();
-
-    device->Release();
-    immediateContext->Release();
-    swapChain->Release();
-    renderTargetView->Release();
-    depthStencilView->Release();
-}
-
 bool BaseEngine::Init(HINSTANCE inInstanceHandle)
 {
     instanceHandle = inInstanceHandle;
@@ -221,30 +210,16 @@ void BaseEngine::OnResize()
         return;
     }
 
-    // 새롭게 할당될 COM들을 정리합니다.
-    {
-        if (renderTargetView)
-        {
-            renderTargetView->Release();
-        }
-
-        if (depthStencilView)
-        {
-            depthStencilView->Release();
-        }
-    }
-
     HRESULT hr = swapChain->ResizeBuffers(1, clientWidth, clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
     CHECK_HR(hr, L"백버퍼 사이즈 변경 실패");
 
     // 백버퍼 텍스처 가져오기
-    ID3D11Texture2D* backBuffer = nullptr;
-    hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
+    ComPtr<ID3D11Texture2D> backBuffer;
+    hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBuffer);
     CHECK_HR(hr, L"백버퍼 가져오기 실패");
 
     // 렌더 타겟 뷰 생성
-    hr = device->CreateRenderTargetView(backBuffer, nullptr, &renderTargetView);
-    backBuffer->Release();
+    hr = device->CreateRenderTargetView(backBuffer.Get(), nullptr, &renderTargetView);
     CHECK_HR(hr, L"렌더 타겟 뷰 생성 실패");
 
     D3D11_TEXTURE2D_DESC depthStencilDesc;
@@ -260,17 +235,16 @@ void BaseEngine::OnResize()
     depthStencilDesc.CPUAccessFlags = 0;
     depthStencilDesc.MiscFlags = 0;
 
-    ID3D11Texture2D* depthStencilBuffer = nullptr;
+    ComPtr<ID3D11Texture2D> depthStencilBuffer;
     hr = device->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilBuffer);
     CHECK_HR(hr, L"깊이/스텐실 텍스쳐 생성 실패");
 
     // 깊이/스텐실 뷰 생성
-    hr = device->CreateDepthStencilView(depthStencilBuffer, nullptr, &depthStencilView);
-    depthStencilBuffer->Release();
+    hr = device->CreateDepthStencilView(depthStencilBuffer.Get(), nullptr, &depthStencilView);
     CHECK_HR(hr, L"깊이/스텐실 뷰 생성 실패");
 
     // 출력 병합기 바인딩
-    immediateContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+    immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
     D3D11_VIEWPORT viewport;
     viewport.TopLeftX = 0.0f;
@@ -380,23 +354,17 @@ bool BaseEngine::InitDirectX()
     sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD; // 가장 일반적인 스왑 효과 전환하고나면 버퍼의 모든 내용을 버린다.
     sd.Flags = 0;
 
-    IDXGIFactory* dxgiFactory = nullptr; // 스왑체인은 반드시 디바이스를 생성한 팩토리를 통해서만 만들 수 있음. 이를 얻기 위한 과정.
-    {
-        IDXGIDevice* dxgiDevice;
-        device->QueryInterface(__uuidof(IDXGIDevice), reinterpret_cast<void**>(&dxgiDevice)); // dxgi 계층 구조로 접근하기위해 IDXGIDevice를 얻어옴
+    // 스왑체인은 반드시 디바이스를 생성한 팩토리를 통해서만 만들 수 있음. 아래는 이를 얻기 위한 과정.
+    ComPtr<IDXGIDevice> dxgiDevice;
+    device->QueryInterface(__uuidof(IDXGIDevice), &dxgiDevice); // dxgi 계층 구조로 접근하기위해 IDXGIDevice를 얻어옴
 
-        IDXGIAdapter* dxgiAdapter;
-        dxgiDevice->GetAdapter(&dxgiAdapter); // 실제로 디바이스가 할당 받은 어댑터(그래픽카드)를 얻음
+    ComPtr<IDXGIAdapter> dxgiAdapter;
+    dxgiDevice->GetAdapter(&dxgiAdapter); // 실제로 디바이스가 할당 받은 어댑터(그래픽카드)를 얻음
 
-        dxgiAdapter->GetParent(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&dxgiFactory)); // 어댑터의 부모는 스왑체인을 생성할 수 있는 인터페이스임.
+    ComPtr<IDXGIFactory> dxgiFactory;
+    dxgiAdapter->GetParent(__uuidof(IDXGIFactory), &dxgiFactory); // 어댑터의 부모만이 스왑체인을 생성할 수 있는 인터페이스임.
 
-        // COM 인터페이스는 가져오는 순간 AddRef()되며 참조 카운트가 증가하기때문에 쓰고 후 반드시 Release로 참조해제해야함.
-        dxgiDevice->Release();
-        dxgiAdapter->Release();
-    }
-
-    hr = dxgiFactory->CreateSwapChain(device, &sd, &swapChain); // 스왑체인 생성.
-    dxgiFactory->Release();
+    hr = dxgiFactory->CreateSwapChain(device.Get(), &sd, &swapChain); // 스왑체인 생성.
     CHECK_HR(hr, L"스왑체인 생성 실패", false);
 
     OnResize();
