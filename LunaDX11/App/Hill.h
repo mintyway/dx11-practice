@@ -49,6 +49,6 @@ private:
 
     POINT lastMousePosition{};
 
-    std::vector<Vertex> boxVertices;
+    std::vector<SimpleVertex> boxVertices;
     std::vector<UINT> boxIndices;
 };

@@ -13,14 +13,14 @@ HillApp::HillApp()
 
     boxVertices =
     {
-        Vertex{XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(Colors::White)},
-        Vertex{XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT3(Colors::Black)},
-        Vertex{XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT3(Colors::Red)},
-        Vertex{XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT3(Colors::Green)},
-        Vertex{XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT3(Colors::Blue)},
-        Vertex{XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT3(Colors::Yellow)},
-        Vertex{XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT3(Colors::Cyan)},
-        Vertex{XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT3(Colors::Magenta)}
+        SimpleVertex{XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(Colors::White)},
+        SimpleVertex{XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT3(Colors::Black)},
+        SimpleVertex{XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT3(Colors::Red)},
+        SimpleVertex{XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT3(Colors::Green)},
+        SimpleVertex{XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT3(Colors::Blue)},
+        SimpleVertex{XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT3(Colors::Yellow)},
+        SimpleVertex{XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT3(Colors::Cyan)},
+        SimpleVertex{XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT3(Colors::Magenta)}
     };
 
     boxIndices =
@@ -136,7 +136,7 @@ void HillApp::Render()
     immediateContext->IASetInputLayout(inputLayout.Get());
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    constexpr UINT stride = sizeof(Vertex);
+    constexpr UINT stride = sizeof(SimpleVertex);
     constexpr UINT offset = 0;
     immediateContext->IASetVertexBuffers(0, 1, boxVertexBuffer.GetAddressOf(), &stride, &offset);
     immediateContext->IASetIndexBuffer(boxIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
@@ -160,7 +160,7 @@ void HillApp::Render()
 void HillApp::CreateGeometryBuffers()
 {
     // 버텍스 버퍼 생성
-    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex) * boxVertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(SimpleVertex) * boxVertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA vertexInitData{boxVertices.data()};
     CHECK_HR(device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &boxVertexBuffer), L"버텍스 버퍼 생성에 실패했습니다.");
 
@@ -202,7 +202,7 @@ void HillApp::CreateShaders()
     CHECK_HR(device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader), L"픽셀 셰이더 생성 실패");
 
     // 인풋 레이아웃 생성
-    CHECK_HR(device->CreateInputLayout(VertexDesc.data(), static_cast<UINT>(VertexDesc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"인풋 레이아웃 생성 실패");
+    CHECK_HR(device->CreateInputLayout(SimpleVertexDesc.data(), static_cast<UINT>(SimpleVertexDesc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"인풋 레이아웃 생성 실패");
 
     // 상수버퍼 생성
     const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(XMMATRIX), D3D11_BIND_CONSTANT_BUFFER);
