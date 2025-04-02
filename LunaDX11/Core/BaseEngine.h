@@ -4,17 +4,21 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
+#include <wrl/client.h>
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 
+#include <iostream>
 #include <memory>
 #include <iomanip>
 #include <sstream>
 
 #include "GameInstance.h"
 #include "Timer.h"
+
+using namespace Microsoft::WRL;
 
 #define DECLARE_ENGINE(ClassName, ParentClassName)\
     friend class BaseEngine;\
@@ -53,6 +57,8 @@ public:
     template <typename T>
     static T* Get() { return dynamic_cast<T*>(Get()); }
 
+    float GetAspectRatio() const { return static_cast<float>(clientWidth) / static_cast<float>(clientHeight); }
+
     virtual bool Init(HINSTANCE inInstanceHandle);
 
     void Run();
@@ -61,9 +67,9 @@ public:
 
     virtual void OnResize();
 
-    virtual void OnMouseDown(WPARAM buttonState, int x, int y) {}
-    virtual void OnMouseUp(WPARAM buttonState, int x, int y) {}
-    virtual void OnMouseMove(WPARAM buttonState, int x, int y) {}
+    virtual void OnMouseDown(WPARAM buttonState, int x, int y) = 0;
+    virtual void OnMouseUp(WPARAM buttonState, int x, int y) = 0;
+    virtual void OnMouseMove(WPARAM buttonState, int x, int y) = 0;
 
 protected:
     BaseEngine() = default;

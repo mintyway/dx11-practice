@@ -111,6 +111,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -135,6 +138,16 @@
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="LunaDX11.cpp" />
+    <FxCompile Include="Shader\Pixel\Box_ps.hlsl">
+      <FileType>Document</FileType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Main</EntryPointName>
+    </FxCompile>
+    <FxCompile Include="Shader\Vertex\Box_vs.hlsl">
+      <FileType>Document</FileType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS_Main</EntryPointName>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\BaseEngine.h" />
@@ -142,6 +155,7 @@
     <ClInclude Include="Core\GameInstance.h" />
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Core\Utility.h" />
+    <ClInclude Include="Rendering\VertexTypes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

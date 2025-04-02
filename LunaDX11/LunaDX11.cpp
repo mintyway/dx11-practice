@@ -6,6 +6,8 @@ void CreateDebugConsole()
 {
     FILE* dummy; // 매개변수 채우기 용 더미 포인터
     AllocConsole(); // 콘솔 할당
+    MoveWindow(GetConsoleWindow(), 50, 50, 800, 600, true); // 사이즈 및 위치 조정
+
     (void)freopen_s(&dummy, "CONOUT$", "w", stdout); // 표준 출력 재지정
     (void)freopen_s(&dummy, "CONOUT$", "w", stderr); // 표준 에러 재지정
     (void)freopen_s(&dummy, "CONIN$", "r", stdin); // 표준 입력 재지정

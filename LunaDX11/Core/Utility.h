@@ -1,4 +1,5 @@
 #pragma once
+
 #include <DirectXMath.h>
 
 using namespace DirectX;
@@ -22,4 +23,10 @@ namespace Colors
     constexpr XMVECTORF32 Magenta = {1.0f, 0.0f, 1.0f, 1.0f};
     constexpr XMVECTORF32 Silver = {0.75f, 0.75f, 0.75f, 1.0f};
     constexpr XMVECTORF32 LightSteelBlue = {0.69f, 0.77f, 0.87f, 1.0f};
+}
+
+namespace Math
+{
+    // 구면 좌표(세타 가로 회전)-> 데카르트 좌표(Y-up 왼손 좌표계)
+    [[nodiscard]] XMVECTOR SphericalToCartesian(float radius, float theta, float phi);
 }

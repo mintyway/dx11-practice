@@ -300,13 +300,18 @@ bool BaseEngine::InitWindow()
         return false;
     }
 
+    // 창의 UI를 포함하지 않은 클라이언트 영역의 사이즈가 clientWidth, clientHeight가 되도록 보정
     RECT rect = {0, 0, clientWidth, clientHeight};
     AdjustWindowRectEx(&rect, WS_OVERLAPPEDWINDOW, false, WS_EX_APPWINDOW);
     const int width = rect.right - rect.left;
     const int height = rect.bottom - rect.top;
 
+    // 윈도우를 스크린 중심에 띄우기 위한 오프셋
+    const int centerX = (GetSystemMetrics(SM_CXSCREEN) - width) / 2;
+    const int centerY = (GetSystemMetrics(SM_CYSCREEN) - height) / 2;
+
     // 윈도우 생성
-    windowHandle = CreateWindowEx(WS_EX_APPWINDOW, className.c_str(), windowName.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, instanceHandle, nullptr);
+    windowHandle = CreateWindowEx(WS_EX_APPWINDOW, className.c_str(), windowName.c_str(), WS_OVERLAPPEDWINDOW, centerX, centerY, width, height, nullptr, nullptr, instanceHandle, nullptr);
     if (!windowHandle)
     {
         MessageBox(nullptr, L"윈도우 생성 실패", L"Error", MB_OK | MB_ICONERROR);
@@ -323,7 +328,7 @@ bool BaseEngine::InitWindow()
 bool BaseEngine::InitDirectX()
 {
     UINT createDeviceFlags = 0;
-#if defined(DEBUG)
+#ifdef _DEBUG
     createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
