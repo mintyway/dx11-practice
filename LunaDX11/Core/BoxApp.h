@@ -7,12 +7,12 @@
 
 using namespace DirectX;
 
-class Engine : public BaseEngine
+class BoxApp : public BaseEngine
 {
-    DECLARE_ENGINE(Engine, BaseEngine)
+    DECLARE_ENGINE(BoxApp, BaseEngine)
 
 public:
-    ~Engine() override = default;
+    ~BoxApp() override = default;
 
     bool Init(HINSTANCE inInstanceHandle) override;
     void OnResize() override;
@@ -21,7 +21,7 @@ public:
     void OnMouseMove(WPARAM buttonState, int x, int y) override;
 
 protected:
-    Engine();
+    BoxApp();
 
     void Update(float deltaSeconds) override;
     virtual void Render() override;

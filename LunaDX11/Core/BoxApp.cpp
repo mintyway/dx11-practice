@@ -1,10 +1,10 @@
-#include "Engine.h"
+#include "BoxApp.h"
 
 #include "Utility.h"
 
 #include <algorithm>
 
-Engine::Engine()
+BoxApp::BoxApp()
 {
     const XMMATRIX identityMatrix = XMMatrixIdentity();
     XMStoreFloat4x4(&worldMatrix, identityMatrix);
@@ -51,7 +51,7 @@ Engine::Engine()
     };
 }
 
-bool Engine::Init(HINSTANCE inInstanceHandle)
+bool BoxApp::Init(HINSTANCE inInstanceHandle)
 {
     if (!Super::Init(inInstanceHandle))
     {
@@ -64,7 +64,7 @@ bool Engine::Init(HINSTANCE inInstanceHandle)
     return true;
 }
 
-void Engine::OnResize()
+void BoxApp::OnResize()
 {
     Super::OnResize();
 
@@ -73,19 +73,19 @@ void Engine::OnResize()
     XMStoreFloat4x4(&projectionMatrix, newProjectionMatrix);
 }
 
-void Engine::OnMouseDown(WPARAM buttonState, int x, int y)
+void BoxApp::OnMouseDown(WPARAM buttonState, int x, int y)
 {
     lastMousePosition.x = x;
     lastMousePosition.y = y;
     SetCapture(windowHandle);
 }
 
-void Engine::OnMouseUp(WPARAM buttonState, int x, int y)
+void BoxApp::OnMouseUp(WPARAM buttonState, int x, int y)
 {
     ReleaseCapture();
 }
 
-void Engine::OnMouseMove(WPARAM buttonState, int x, int y)
+void BoxApp::OnMouseMove(WPARAM buttonState, int x, int y)
 {
     const POINT currentMousePosition{x, y};
 
@@ -109,7 +109,7 @@ void Engine::OnMouseMove(WPARAM buttonState, int x, int y)
     lastMousePosition = currentMousePosition;
 }
 
-void Engine::Update(float deltaSeconds)
+void BoxApp::Update(float deltaSeconds)
 {
     // 뷰 행렬 구축
     const XMVECTOR cameraPosition = Math::SphericalToCartesian(radius, theta, phi);
@@ -119,7 +119,7 @@ void Engine::Update(float deltaSeconds)
     XMStoreFloat4x4(&viewMatrix, newViewMatrix);
 }
 
-void Engine::Render()
+void BoxApp::Render()
 {
     Super::Render();
 
@@ -157,7 +157,7 @@ void Engine::Render()
     swapChain->Present(0, 0);
 }
 
-void Engine::CreateGeometryBuffers()
+void BoxApp::CreateGeometryBuffers()
 {
     // 버텍스 버퍼 생성
     const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex) * boxVertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
@@ -170,7 +170,7 @@ void Engine::CreateGeometryBuffers()
     CHECK_HR(device->CreateBuffer(&indexBufferDesc, &indexInitData, &boxIndexBuffer), L"인덱스 버퍼 생성에 실패했습니다.");
 }
 
-void Engine::CreateShaders()
+void BoxApp::CreateShaders()
 {
     UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 #ifdef _DEBUG
