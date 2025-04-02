@@ -1,6 +1,6 @@
 #include <Windows.h>
 
-#include "Core/BoxApp.h"
+#include "App/BoxApp.h"
 
 void CreateDebugConsole()
 {
