@@ -1,6 +1,6 @@
 #include <Windows.h>
 
-#include "App/BoxApp.h"
+#include "App/Hill.h"
 
 void CreateDebugConsole()
 {
@@ -18,7 +18,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     CreateDebugConsole();
 
     // 엔진 등록
-    BaseEngine::Register<BoxApp>();
+    BaseEngine::Register<HillApp>();
 
     // 게임 엔진 초기화
     if (!BaseEngine::Get()->Init(hInstance))
