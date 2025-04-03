@@ -13,14 +13,14 @@ BoxApp::BoxApp()
 
     boxVertices =
     {
-        Vertex{XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(Colors::White)},
-        Vertex{XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT3(Colors::Black)},
-        Vertex{XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT3(Colors::Red)},
-        Vertex{XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT3(Colors::Green)},
-        Vertex{XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT3(Colors::Blue)},
-        Vertex{XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT3(Colors::Yellow)},
-        Vertex{XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT3(Colors::Cyan)},
-        Vertex{XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT3(Colors::Magenta)}
+        Vertex{XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::White)},
+        Vertex{XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Black)},
+        Vertex{XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Red)},
+        Vertex{XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::Green)},
+        Vertex{XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Blue)},
+        Vertex{XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Yellow)},
+        Vertex{XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Cyan)},
+        Vertex{XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta)}
     };
 
     boxIndices =
