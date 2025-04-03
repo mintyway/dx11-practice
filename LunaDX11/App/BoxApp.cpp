@@ -152,7 +152,7 @@ void BoxApp::Render()
     immediateContext->VSSetShader(vertexShader.Get(), nullptr, 0);
     immediateContext->PSSetShader(pixelShader.Get(), nullptr, 0);
 
-    immediateContext->DrawIndexed(36, 0, 0);
+    immediateContext->DrawIndexed(static_cast<UINT>(boxIndices.size()), 0, 0);
 
     swapChain->Present(0, 0);
 }
