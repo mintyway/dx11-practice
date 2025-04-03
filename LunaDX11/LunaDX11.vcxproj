@@ -289,7 +289,6 @@
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="LunaDX11.cpp" />
-    <ClCompile Include="Rendering\MeshData.cpp" />
     <FxCompile Include="Shader\Pixel\Box_ps.hlsl">
       <FileType>Document</FileType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -309,7 +308,6 @@
     <ClInclude Include="Core\GeometryGenerator.h" />
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Core\Utility.h" />
-    <ClInclude Include="Rendering\MeshData.h" />
     <ClInclude Include="Rendering\VertexTypes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
