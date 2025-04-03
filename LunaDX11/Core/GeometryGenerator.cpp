@@ -1,6 +1,5 @@
 #include "GeometryGenerator.h"
 
-#include "../Rendering/MeshData.h"
 #include <vector>
 
 void GeometryGenerator::CreateGrid(float width, float depth, UINT rowVertexCount, UINT columnVertexCount, MeshData& meshData)
