@@ -135,8 +135,7 @@ void HillApp::Render()
 
 void HillApp::CreateGeometryBuffers()
 {
-    GeometryGenerator::MeshData grid;
-    GeometryGenerator::CreateGrid(160.0f, 160.0f, 50, 50, grid);
+    GeometryGenerator::MeshData grid = GeometryGenerator::CreateGrid(160.0f, 160.0f, 50, 50);
 
     std::vector<Vertex> vertices(grid.vertices.size());
     for (size_t i = 0; i < grid.vertices.size(); ++i)

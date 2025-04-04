@@ -2,7 +2,7 @@
 
 #include <vector>
 
-void GeometryGenerator::CreateGrid(float width, float depth, UINT rowVertexCount, UINT columnVertexCount, MeshData& meshData)
+GeometryGenerator::MeshData GeometryGenerator::CreateGrid(float width, float depth, UINT rowVertexCount, UINT columnVertexCount)
 {
     const UINT widthCellCount = columnVertexCount - 1;
     const UINT depthCellCount = rowVertexCount - 1;
@@ -19,6 +19,7 @@ void GeometryGenerator::CreateGrid(float width, float depth, UINT rowVertexCount
     const float du = 1.0f / static_cast<float>(widthCellCount);
     const float dv = 1.0f / static_cast<float>(depthCellCount);
 
+    MeshData meshData;
     meshData.vertices.resize(vertexCount);
     for (UINT i = 0; i < rowVertexCount; ++i)
     {
@@ -54,4 +55,6 @@ void GeometryGenerator::CreateGrid(float width, float depth, UINT rowVertexCount
             meshData.indices.push_back(bottomNextIndex);
         }
     }
+
+    return meshData;
 }
