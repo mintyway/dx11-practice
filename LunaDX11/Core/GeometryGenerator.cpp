@@ -4,48 +4,69 @@
 #include <cmath>
 #include <iostream>
 
-GeometryGenerator::MeshData GeometryGenerator::CreateGrid(float width, float depth, UINT rowVertexCount, UINT columnVertexCount)
+GeometryGenerator::MeshData GeometryGenerator::CreateSphere(float radius, UINT sliceCount, UINT stackCount)
 {
-    const UINT widthCellCount = columnVertexCount - 1;
-    const UINT depthCellCount = rowVertexCount - 1;
-
-    const UINT vertexCount = rowVertexCount * columnVertexCount;
-    const UINT triangleCount = 2 * widthCellCount * depthCellCount;
-
-    const float halfWidth = 0.5f * width;
-    const float halfDepth = 0.5f * depth;
-
-    const float dx = width / static_cast<float>(widthCellCount);
-    const float dz = depth / static_cast<float>(depthCellCount);
-
-    const float du = 1.0f / static_cast<float>(widthCellCount);
-    const float dv = 1.0f / static_cast<float>(depthCellCount);
-
     MeshData meshData;
-    meshData.vertices.resize(vertexCount);
-    for (UINT i = 0; i < rowVertexCount; ++i)
-    {
-        const float z = halfDepth - static_cast<float>(i) * dz;
-        for (UINT j = 0; j < columnVertexCount; ++j)
-        {
-            const float x = -halfWidth + static_cast<float>(j) * dx;
 
-            Vertex& vertex = meshData.vertices[i * columnVertexCount + j];
-            vertex.position = XMFLOAT3(x, 0.0f, z);
-            vertex.normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
-            vertex.tangentU = XMFLOAT3(1.0f, 0.0f, 0.0f);
-            vertex.texC = XMFLOAT2(static_cast<float>(j) * du, static_cast<float>(i) * dv);
+    const Vertex topVertex(XMFLOAT3(0.0f, radius, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f));
+    const Vertex bottomVertex(XMFLOAT3(0.0f, -radius, 0.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 1.0f));
+
+    constexpr UINT poleVertexCount = 2;
+    const UINT sideVertexCount = (stackCount - 1) * (sliceCount + 1);
+    meshData.vertices.reserve(poleVertexCount + sideVertexCount);
+    meshData.vertices.push_back(topVertex);
+
+    const float phiStep = XM_PI / static_cast<float>(stackCount);
+    const float thetaStep = XM_2PI / static_cast<float>(sliceCount);
+
+    for (UINT i = 1; i <= stackCount - 1; ++i)
+    {
+        const float phi = static_cast<float>(i) * phiStep;
+        const float sinPhi = std::sin(phi);
+        const float cosPhi = std::cos(phi);
+
+        for (UINT j = 0; j <= sliceCount; ++j)
+        {
+            const float theta = static_cast<float>(j) * thetaStep;
+            const float sinTheta = std::sin(theta);
+            const float cosTheta = std::cos(theta);
+
+            Vertex vertex;
+
+            vertex.position = XMFLOAT3(radius * sinPhi * cosTheta, radius * cosPhi, radius * sinPhi * sinTheta);
+
+            XMStoreFloat3(&vertex.normal, XMVector3Normalize(XMLoadFloat3(&vertex.position)));
+
+            vertex.tangentU = XMFLOAT3(-radius * sinPhi * sinTheta, 0.0f, radius * sinPhi * cosTheta);
+            XMStoreFloat3(&vertex.tangentU, XMVector3Normalize(XMLoadFloat3(&vertex.tangentU)));
+
+            vertex.texC = XMFLOAT2(theta / XM_2PI, phi / XM_PI);
+
+            meshData.vertices.push_back(vertex);
         }
     }
 
-    meshData.indices.reserve(triangleCount * 3);
-    for (UINT i = 0; i < rowVertexCount - 1; ++i)
+    meshData.vertices.push_back(bottomVertex);
+
+    const UINT capIndexCount = sliceCount * 3 * 2;
+    const UINT sideIndexCount = sliceCount * (stackCount - 2) * 6;
+    meshData.indices.reserve(capIndexCount + sideIndexCount);
+    for (UINT i = 1; i <= sliceCount; ++i)
     {
-        for (UINT j = 0; j < columnVertexCount - 1; ++j)
+        meshData.indices.push_back(0);
+        meshData.indices.push_back(i + 1);
+        meshData.indices.push_back(i);
+    }
+
+    const UINT ringVertexCount = sliceCount + 1;
+    for (UINT i = 0; i < stackCount - 2; ++i)
+    {
+        for (UINT j = 0; j < sliceCount; ++j)
         {
-            const UINT currentIndex = i * columnVertexCount + j;
+            constexpr UINT topOffsetIndex = 1;
+            const UINT currentIndex = topOffsetIndex + i * ringVertexCount + j;
             const UINT nextIndex = currentIndex + 1;
-            const UINT bottomIndex = currentIndex + columnVertexCount;
+            const UINT bottomIndex = currentIndex + ringVertexCount;
             const UINT bottomNextIndex = bottomIndex + 1;
 
             meshData.indices.push_back(currentIndex);
@@ -58,19 +79,30 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGrid(float width, float dep
         }
     }
 
+    const UINT bottomIndex = static_cast<UINT>(meshData.vertices.size() - 1);
+
+    const UINT bottomCapStartOffsetIndex = bottomIndex - ringVertexCount;
+
+    for (UINT i = 0; i < sliceCount; ++i)
+    {
+        meshData.indices.push_back(bottomIndex);
+        meshData.indices.push_back(bottomCapStartOffsetIndex + i);
+        meshData.indices.push_back(bottomCapStartOffsetIndex + i + 1);
+    }
+
     return meshData;
 }
 
 GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius, float topRadius, float height, UINT sliceCount, UINT stackCount)
 {
+    MeshData meshData;
+
     const float stackHeight = height / static_cast<float>(stackCount);
     const float radiusStep = (topRadius - bottomRadius) / static_cast<float>(stackCount);
     const UINT ringCount = stackCount + 1;
 
     const float dTheta = XM_2PI / static_cast<float>(sliceCount);
     const float dRadius = bottomRadius - topRadius;
-
-    MeshData meshData;
 
     const UINT sideVertexCount = (sliceCount + 1) * ringCount;
     const UINT capVertexCount = (sliceCount + 2) * 2;
@@ -183,6 +215,64 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius
 
     AddCap(topRadius, true);
     AddCap(bottomRadius, false);
+
+    return meshData;
+}
+
+GeometryGenerator::MeshData GeometryGenerator::CreateGrid(float width, float depth, UINT rowVertexCount, UINT columnVertexCount)
+{
+    MeshData meshData;
+
+    const UINT widthCellCount = columnVertexCount - 1;
+    const UINT depthCellCount = rowVertexCount - 1;
+
+    const UINT vertexCount = rowVertexCount * columnVertexCount;
+    const UINT triangleCount = 2 * widthCellCount * depthCellCount;
+
+    const float halfWidth = 0.5f * width;
+    const float halfDepth = 0.5f * depth;
+
+    const float dx = width / static_cast<float>(widthCellCount);
+    const float dz = depth / static_cast<float>(depthCellCount);
+
+    const float du = 1.0f / static_cast<float>(widthCellCount);
+    const float dv = 1.0f / static_cast<float>(depthCellCount);
+
+    meshData.vertices.resize(vertexCount);
+    for (UINT i = 0; i < rowVertexCount; ++i)
+    {
+        const float z = halfDepth - static_cast<float>(i) * dz;
+        for (UINT j = 0; j < columnVertexCount; ++j)
+        {
+            const float x = -halfWidth + static_cast<float>(j) * dx;
+
+            Vertex& vertex = meshData.vertices[i * columnVertexCount + j];
+            vertex.position = XMFLOAT3(x, 0.0f, z);
+            vertex.normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+            vertex.tangentU = XMFLOAT3(1.0f, 0.0f, 0.0f);
+            vertex.texC = XMFLOAT2(static_cast<float>(j) * du, static_cast<float>(i) * dv);
+        }
+    }
+
+    meshData.indices.reserve(triangleCount * 3);
+    for (UINT i = 0; i < rowVertexCount - 1; ++i)
+    {
+        for (UINT j = 0; j < columnVertexCount - 1; ++j)
+        {
+            const UINT currentIndex = i * columnVertexCount + j;
+            const UINT nextIndex = currentIndex + 1;
+            const UINT bottomIndex = currentIndex + columnVertexCount;
+            const UINT bottomNextIndex = bottomIndex + 1;
+
+            meshData.indices.push_back(currentIndex);
+            meshData.indices.push_back(nextIndex);
+            meshData.indices.push_back(bottomIndex);
+
+            meshData.indices.push_back(bottomIndex);
+            meshData.indices.push_back(nextIndex);
+            meshData.indices.push_back(bottomNextIndex);
+        }
+    }
 
     return meshData;
 }
