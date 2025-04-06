@@ -210,6 +210,12 @@ void BaseEngine::OnResize()
         return;
     }
 
+    // 이전 렌더 타겟 바인등 해제 및 이전 뷰, 버퍼 해제
+    // 이전 프레임의 렌더 타겟 혹은 버퍼가 GPU에서 사용중이면 ResizeBuffer에 실패하는데, 이를 방지하고자 깔끔하게 초기화해줌.
+    immediateContext->OMSetRenderTargets(0, nullptr, nullptr);
+    renderTargetView.Reset();
+    depthStencilView.Reset();
+
     HRESULT hr = swapChain->ResizeBuffers(1, clientWidth, clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
     CHECK_HR(hr, L"백버퍼 사이즈 변경 실패");
 
