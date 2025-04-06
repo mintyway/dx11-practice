@@ -21,9 +21,6 @@
     <ClCompile Include="Core\BaseEngine.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Engine.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Core\GameInstance.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -33,12 +30,18 @@
     <ClCompile Include="Core\Utility.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="App\BoxApp.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="App\Hill.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\GeometryGenerator.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\BaseEngine.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Engine.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Core\GameInstance.h">
@@ -51,6 +54,15 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\VertexTypes.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="App\BoxApp.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="App\Hill.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GeometryGenerator.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

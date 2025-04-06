@@ -36,5 +36,9 @@ public:
         std::vector<UINT> indices;
     };
 
-    [[nodiscard]] static MeshData CreateGrid(float width, float depth, UINT rowVertexCount, UINT columnVertexCount);
+    [[nodiscard]]
+    static MeshData CreateGrid(float width, float depth, UINT rowVertexCount, UINT columnVertexCount);
+
+    [[nodiscard]]
+    static MeshData CreateCylinder(float bottomRadius, float topRadius, float height, UINT sliceCount, UINT stackCount);
 };
