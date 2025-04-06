@@ -1,5 +1,8 @@
 #include "GeometryGenerator.h"
 
+#include "Utility.h"
+
+#include <array>
 #include <vector>
 #include <cmath>
 #include <iostream>
@@ -90,6 +93,87 @@ GeometryGenerator::MeshData GeometryGenerator::CreateSphere(float radius, UINT s
         meshData.indices.push_back(bottomCapStartOffsetIndex + i + 1);
     }
 
+    return meshData;
+}
+
+GeometryGenerator::MeshData GeometryGenerator::CreateGeodesicSphere(float radius, UINT subdivisionCount)
+{
+    MeshData meshData;
+
+    // 최대 분할은 5회로 제한한다. 5회만 되어도 이미 2만 폴리곤이 사용되므로 이 이상은 무의미하다.
+    subdivisionCount = std::min(subdivisionCount, 5u);
+
+    // 정이십면체를 테셀레이션해 구를 근사한다. 아래는 상수로 초기화하는 정이십면체이다.
+    constexpr size_t icosahedronVertexCount = 12;
+    constexpr size_t icosahedronIndexCount = 20ull * 3ull;
+
+    constexpr float X = 0.525731f;
+    constexpr float Z = 0.850651f;
+
+    constexpr std::array<XMFLOAT3, icosahedronVertexCount> icosahedronVertices =
+    {
+        XMFLOAT3(-X, 0.0f, Z), XMFLOAT3(X, 0.0f, Z),
+        XMFLOAT3(-X, 0.0f, -Z), XMFLOAT3(X, 0.0f, -Z),
+        XMFLOAT3(0.0f, Z, X), XMFLOAT3(0.0f, Z, -X),
+        XMFLOAT3(0.0f, -Z, X), XMFLOAT3(0.0f, -Z, -X),
+        XMFLOAT3(Z, X, 0.0f), XMFLOAT3(-Z, X, 0.0f),
+        XMFLOAT3(Z, -X, 0.0f), XMFLOAT3(-Z, -X, 0.0f)
+    };
+
+    constexpr std::array<UINT, icosahedronIndexCount> icosahedronIndices =
+    {
+        1, 4, 0, 4, 9, 0, 4, 5, 9, 8, 5, 4, 1, 8, 4,
+        1, 10, 8, 10, 3, 8, 8, 3, 5, 3, 2, 5, 3, 7, 2,
+        3, 10, 7, 10, 6, 7, 6, 11, 7, 6, 0, 11, 6, 1, 0,
+        10, 1, 6, 11, 0, 9, 2, 11, 9, 5, 2, 9, 11, 2, 7
+    };
+
+    meshData.vertices.resize(icosahedronVertexCount);
+    meshData.indices.resize(icosahedronIndexCount);
+
+    for (UINT i = 0; i < icosahedronVertexCount; ++i)
+    {
+        meshData.vertices[i].position = icosahedronVertices[i];
+    }
+
+    for (UINT i = 0; i < icosahedronIndexCount; ++i)
+    {
+        meshData.indices[i] = icosahedronIndices[i];
+    }
+
+    for (UINT i = 0; i < subdivisionCount; ++i)
+    {
+        Subdivide(meshData);
+    }
+
+    // 구 표면으로 정규화
+    for (UINT i = 0; i < meshData.vertices.size(); ++i)
+    {
+        const XMVECTOR normal = XMVector3Normalize(XMLoadFloat3(&meshData.vertices[i].position));
+        const XMVECTOR position = radius * normal;
+
+        XMStoreFloat3(&meshData.vertices[i].position, position);
+        XMStoreFloat3(&meshData.vertices[i].normal, normal);
+
+        // 구면 좌표를 통해 텍스처 좌표를 구한다.
+        const float theta = Math::AngleFromXY(meshData.vertices[i].position.x, meshData.vertices[i].position.z);
+
+        const float phi = std::acos(meshData.vertices[i].position.y / radius);
+
+        meshData.vertices[i].texC.x = theta / XM_2PI;
+        meshData.vertices[i].texC.y = phi / XM_PI;
+
+        // 세타에 대한 P의 편미분
+        meshData.vertices[i].tangentU.x = -radius * std::sin(phi) * std::sin(theta);
+        meshData.vertices[i].tangentU.y = 0.0f;
+        meshData.vertices[i].tangentU.z = radius * std::sin(phi) * std::cos(theta);
+
+        const XMVECTOR tangent = XMLoadFloat3(&meshData.vertices[i].tangentU);
+        XMStoreFloat3(&meshData.vertices[i].tangentU, XMVector3Normalize(tangent));
+    }
+
+    std::cout << meshData.vertices.size() << "\n";
+    std::cout << meshData.indices.size() << "\n";
     return meshData;
 }
 
@@ -275,4 +359,62 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGrid(float width, float dep
     }
 
     return meshData;
+}
+
+void GeometryGenerator::Subdivide(MeshData& meshData)
+{
+    // 기존 데이터 백업
+    MeshData inputCopy = meshData;
+
+    // 초기화
+    meshData.vertices.resize(0);
+    meshData.indices.resize(0);
+
+    const UINT triangleCount = static_cast<UINT>(inputCopy.indices.size() / 3);
+    for (UINT i = 0; i < triangleCount; ++i)
+    {
+        //       v1
+        //       *
+        //      / \
+        //     /   \
+        //  m0*-----*m1
+        //   / \   / \
+        //  /   \ /   \
+        // *-----*-----*
+        // v0    m2     v2
+
+        Vertex v0 = inputCopy.vertices[inputCopy.indices[i * 3 + 0]];
+        Vertex v1 = inputCopy.vertices[inputCopy.indices[i * 3 + 1]];
+        Vertex v2 = inputCopy.vertices[inputCopy.indices[i * 3 + 2]];
+
+        // 중점 생성
+        Vertex m0, m1, m2;
+        m0.position = XMFLOAT3((v0.position.x + v1.position.x) * 0.5f, (v0.position.y + v1.position.y) * 0.5f, (v0.position.z + v1.position.z) * 0.5f);
+        m1.position = XMFLOAT3((v1.position.x + v2.position.x) * 0.5f, (v1.position.y + v2.position.y) * 0.5f, (v1.position.z + v2.position.z) * 0.5f);
+        m2.position = XMFLOAT3((v0.position.x + v2.position.x) * 0.5f, (v0.position.y + v2.position.y) * 0.5f, (v0.position.z + v2.position.z) * 0.5f);
+
+        // 분할된 버텍스와 인덱스를 추가
+        meshData.vertices.push_back(v0); // 0
+        meshData.vertices.push_back(v1); // 1
+        meshData.vertices.push_back(v2); // 2
+        meshData.vertices.push_back(m0); // 3
+        meshData.vertices.push_back(m1); // 4
+        meshData.vertices.push_back(m2); // 5
+
+        meshData.indices.push_back(i * 6 + 0);
+        meshData.indices.push_back(i * 6 + 3);
+        meshData.indices.push_back(i * 6 + 5);
+
+        meshData.indices.push_back(i * 6 + 3);
+        meshData.indices.push_back(i * 6 + 4);
+        meshData.indices.push_back(i * 6 + 5);
+
+        meshData.indices.push_back(i * 6 + 5);
+        meshData.indices.push_back(i * 6 + 4);
+        meshData.indices.push_back(i * 6 + 2);
+
+        meshData.indices.push_back(i * 6 + 3);
+        meshData.indices.push_back(i * 6 + 1);
+        meshData.indices.push_back(i * 6 + 4);
+    }
 }

@@ -40,8 +40,14 @@ public:
     static MeshData CreateSphere(float radius, UINT sliceCount, UINT stackCount);
 
     [[nodiscard]]
+    static MeshData CreateGeodesicSphere(float radius, UINT subdivisionCount);
+
+    [[nodiscard]]
     static MeshData CreateCylinder(float bottomRadius, float topRadius, float height, UINT sliceCount, UINT stackCount);
 
     [[nodiscard]]
     static MeshData CreateGrid(float width, float depth, UINT rowVertexCount, UINT columnVertexCount);
+
+private:
+    static void Subdivide(MeshData& meshData);
 };

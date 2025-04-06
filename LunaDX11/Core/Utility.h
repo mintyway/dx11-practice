@@ -28,5 +28,9 @@ namespace Colors
 namespace Math
 {
     // 구면 좌표(세타 가로 회전)-> 데카르트 좌표(Y-up 왼손 좌표계)
-    [[nodiscard]] XMVECTOR SphericalToCartesian(float radius, float theta, float phi);
+    [[nodiscard]]
+    XMVECTOR SphericalToCartesian(float radius, float theta, float phi);
+
+    [[nodiscard]]
+    float AngleFromXY(float x, float y);
 }
