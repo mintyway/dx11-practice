@@ -7,6 +7,83 @@
 #include <cmath>
 #include <iostream>
 
+GeometryGenerator::MeshData GeometryGenerator::CreateBox(float width, float height, float depth)
+{
+    MeshData meshData;
+
+    const float halfWidth = 0.5f * width;
+    const float halfHeight = 0.5f * height;
+    const float halfDepth = 0.5f * depth;
+
+    meshData.vertices =
+    {
+        // 정면
+        Vertex(XMFLOAT3(-halfWidth, -halfHeight, -halfDepth), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 1.0f)),
+        Vertex(XMFLOAT3(-halfWidth, +halfHeight, -halfDepth), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)),
+        Vertex(XMFLOAT3(+halfWidth, +halfHeight, -halfDepth), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)),
+        Vertex(XMFLOAT3(+halfWidth, -halfHeight, -halfDepth), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)),
+
+        // 후면
+        Vertex(XMFLOAT3(-halfWidth, -halfHeight, +halfDepth), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)),
+        Vertex(XMFLOAT3(+halfWidth, -halfHeight, +halfDepth), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 1.0f)),
+        Vertex(XMFLOAT3(+halfWidth, +halfHeight, +halfDepth), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)),
+        Vertex(XMFLOAT3(-halfWidth, +halfHeight, +halfDepth), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)),
+
+        // 윗면
+        Vertex(XMFLOAT3(-halfWidth, +halfHeight, -halfDepth), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 1.0f)),
+        Vertex(XMFLOAT3(-halfWidth, +halfHeight, +halfDepth), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)),
+        Vertex(XMFLOAT3(+halfWidth, +halfHeight, +halfDepth), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)),
+        Vertex(XMFLOAT3(+halfWidth, +halfHeight, -halfDepth), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)),
+
+        // 아랫면
+        Vertex(XMFLOAT3(-halfWidth, -halfHeight, -halfDepth), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)),
+        Vertex(XMFLOAT3(+halfWidth, -halfHeight, -halfDepth), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 1.0f)),
+        Vertex(XMFLOAT3(+halfWidth, -halfHeight, +halfDepth), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)),
+        Vertex(XMFLOAT3(-halfWidth, -halfHeight, +halfDepth), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)),
+
+        // 좌측면
+        Vertex(XMFLOAT3(-halfWidth, -halfHeight, +halfDepth), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(0.0f, 1.0f)),
+        Vertex(XMFLOAT3(-halfWidth, +halfHeight, +halfDepth), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f)),
+        Vertex(XMFLOAT3(-halfWidth, +halfHeight, -halfDepth), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(1.0f, 0.0f)),
+        Vertex(XMFLOAT3(-halfWidth, -halfHeight, -halfDepth), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(1.0f, 1.0f)),
+
+        // 우측면
+        Vertex(XMFLOAT3(+halfWidth, -halfHeight, -halfDepth), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f)),
+        Vertex(XMFLOAT3(+halfWidth, +halfHeight, -halfDepth), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f)),
+        Vertex(XMFLOAT3(+halfWidth, +halfHeight, +halfDepth), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 0.0f)),
+        Vertex(XMFLOAT3(+halfWidth, -halfHeight, +halfDepth), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 1.0f))
+    };
+
+    meshData.indices =
+    {
+        // 정면
+        0, 1, 2,
+        0, 2, 3,
+
+        // 후면
+        4, 5, 6,
+        4, 6, 7,
+
+        // 윗면
+        8, 9, 10,
+        8, 10, 11,
+
+        // 아랫면
+        12, 13, 14,
+        12, 14, 15,
+
+        // 좌측면
+        16, 17, 18,
+        16, 18, 19,
+
+        // 우측면
+        20, 21, 22,
+        20, 22, 23
+    };
+
+    return meshData;
+}
+
 GeometryGenerator::MeshData GeometryGenerator::CreateSphere(float radius, UINT sliceCount, UINT stackCount)
 {
     MeshData meshData;

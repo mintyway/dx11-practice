@@ -37,6 +37,9 @@ public:
     };
 
     [[nodiscard]]
+    static MeshData CreateBox(float width, float height, float depth);
+
+    [[nodiscard]]
     static MeshData CreateSphere(float radius, UINT sliceCount, UINT stackCount);
 
     [[nodiscard]]
