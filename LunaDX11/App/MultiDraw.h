@@ -42,13 +42,35 @@ private:
 
     ComPtr<ID3D11Buffer> constantBuffer;
 
-    XMFLOAT4X4 worldMatrix;
+    ComPtr<ID3D11RasterizerState> wireframeRasterizerState;
+
     XMFLOAT4X4 viewMatrix;
     XMFLOAT4X4 projectionMatrix;
 
-    float radius = 200.0f;
+    float radius = 30.0f;
     float theta = -XM_PIDIV4;
     float phi = 0.25f * XM_PI;
 
     POINT lastMousePosition{};
+
+    std::array<XMFLOAT4X4, 10> sphereWorldMatrices;
+    std::array<XMFLOAT4X4, 10> cylinderWorldMatrices;
+    XMFLOAT4X4 boxWorldMatrix;
+    XMFLOAT4X4 gridWorldMatrix;
+    XMFLOAT4X4 centerSphereWorldMatrix;
+
+    INT boxVertexOffset = 0;
+    INT gridVertexOffset = 0;
+    INT sphereVertexOffset = 0;
+    INT cylinderVertexOffset = 0;
+
+    UINT boxIndexCount = 0;
+    UINT gridIndexCount = 0;
+    UINT sphereIndexCount = 0;
+    UINT cylinderIndexCount = 0;
+
+    UINT boxIndexOffset = 0;
+    UINT gridIndexOffset = 0;
+    UINT sphereIndexOffset = 0;
+    UINT cylinderIndexOffset = 0;
 };

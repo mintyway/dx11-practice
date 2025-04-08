@@ -8,9 +8,31 @@
 MultiDraw::MultiDraw()
 {
     const XMMATRIX identityMatrix = XMMatrixIdentity();
-    XMStoreFloat4x4(&worldMatrix, identityMatrix);
+
     XMStoreFloat4x4(&viewMatrix, identityMatrix);
     XMStoreFloat4x4(&projectionMatrix, identityMatrix);
+
+    XMStoreFloat4x4(&gridWorldMatrix, identityMatrix);
+
+    const XMMATRIX boxScaleMatrix = XMMatrixScaling(2.0f, 1.0f, 2.0f);
+    const XMMATRIX boxTranslationMatrix = XMMatrixTranslation(0.0f, 0.5f, 0.0f);
+    XMStoreFloat4x4(&boxWorldMatrix, boxScaleMatrix * boxTranslationMatrix);
+
+    const XMMATRIX centerSphereScaleMatrix = XMMatrixScaling(2.0f, 2.0f, 2.0f);
+    const XMMATRIX centerSphereTranslationMatrix = XMMatrixTranslation(0.0f, 2.0f, 0.0f);
+    XMStoreFloat4x4(&centerSphereWorldMatrix, centerSphereScaleMatrix * centerSphereTranslationMatrix);
+
+    for (size_t i = 0; i < cylinderWorldMatrices.size() / 2; ++i)
+    {
+        XMStoreFloat4x4(&cylinderWorldMatrices[i * 2], XMMatrixTranslation(-5.0f, 1.5f, -10.0f + i * 5.0f));
+        XMStoreFloat4x4(&cylinderWorldMatrices[i * 2 + 1], XMMatrixTranslation(5.0f, 1.5f, -10.f + i * 5.0f));
+    }
+
+    for (size_t i = 0; i < sphereWorldMatrices.size() / 2; ++i)
+    {
+        XMStoreFloat4x4(&sphereWorldMatrices[i * 2], XMMatrixTranslation(-5.0f, 3.5f, -10.f + i * 5.0f));
+        XMStoreFloat4x4(&sphereWorldMatrices[i * 2 + 1], XMMatrixTranslation(5.0f, 3.5f, -10.f + i * 5.0f));
+    }
 }
 
 bool MultiDraw::Init(HINSTANCE inInstanceHandle)
@@ -19,6 +41,10 @@ bool MultiDraw::Init(HINSTANCE inInstanceHandle)
     {
         return false;
     }
+
+    CD3D11_RASTERIZER_DESC WireframeRasterizerDesc(CD3D11_DEFAULT{});
+    WireframeRasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+    CHECK_HR(device->CreateRasterizerState(&WireframeRasterizerDesc, &wireframeRasterizerState), L"와이어프레임 RS 생성 실패", false);
 
     CreateGeometryBuffers();
     CreateShaders();
@@ -62,10 +88,10 @@ void MultiDraw::OnMouseMove(WPARAM buttonState, int x, int y)
     }
     else if (buttonState & MK_RBUTTON)
     {
-        constexpr float zoomSpeed = 0.2f; // 1픽셀당 0.2만큼 근접 or 멀어짐
+        constexpr float zoomSpeed = 0.1f; // 1픽셀당 0.1만큼 근접 or 멀어짐
         const float dx = zoomSpeed * static_cast<float>(currentMousePosition.x - lastMousePosition.x);
 
-        radius = std::clamp(radius - (dx), 100.0f, 600.0f);
+        radius = std::clamp(radius - (dx), 15.0f, 45.0f);
     }
 
     lastMousePosition = currentMousePosition;
@@ -98,73 +124,95 @@ void MultiDraw::Render()
     immediateContext->IASetInputLayout(inputLayout.Get());
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+    immediateContext->RSSetState(wireframeRasterizerState.Get());
+
     constexpr UINT stride = sizeof(Vertex);
     constexpr UINT offset = 0;
     immediateContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
     immediateContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-    // WVP 행렬
-    const XMMATRIX wvpMatrix = XMLoadFloat4x4(&worldMatrix) * XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix);
-
-    // constant buffer 업데이트
-    immediateContext->UpdateSubresource(constantBuffer.Get(), 0, nullptr, &wvpMatrix, 0, 0);
-    immediateContext->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
-
     // 셰이더 연결
     immediateContext->VSSetShader(vertexShader.Get(), nullptr, 0);
     immediateContext->PSSetShader(pixelShader.Get(), nullptr, 0);
 
-    /*Draw와 DrawIndexed의 차이
-     * Draw
-     * 버텍스버퍼 = { v0, v1, v2, v0, v2, v3}
-     *
-     * DrawIndexed
-     * 버텍스버퍼 = { v0, v1, v2, v3}
-     * 인덱스버퍼 = { 0, 1, 2, 0, 2, 3}
-     *
-     * Draw는 인덱스 버퍼없이 버텍스 버퍼만 사용하는데 버텍스를 중복정의하면서 그려야한다. (버텍스는 데이터 크기가 거대해 중복정의해서는 안된다.)
-     * DrawIndexed는 중복되지 않는 버텍스 버퍼와 단순 순서정보만 나열된 인덱스 버퍼를 통해서 그린다.
-     *
-     * 따라서 99%의 경우 DrawIndexed를 사용한다.
-     */
-    // 셰이더 호출
-    immediateContext->DrawIndexed(indexCount, 0, 0);
+    // VP 행렬
+    const XMMATRIX vpMatrix = XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix);
+    auto drawObject = [&](const XMFLOAT4X4& worldMatrix, UINT indexCount, UINT indexOffset, INT vertexOffset)
+    {
+        XMFLOAT4X4 wvpMatrix;
+        XMStoreFloat4x4(&wvpMatrix, XMLoadFloat4x4(&worldMatrix) * vpMatrix);
+
+        // constant buffer 업데이트
+        immediateContext->UpdateSubresource(constantBuffer.Get(), 0, nullptr, &wvpMatrix, 0, 0);
+        immediateContext->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
+
+        // 셰이더 호출
+        immediateContext->DrawIndexed(indexCount, indexOffset, vertexOffset);
+    };
+
+    drawObject(boxWorldMatrix, boxIndexCount, boxIndexOffset, boxVertexOffset);
+    drawObject(gridWorldMatrix, gridIndexCount, gridIndexOffset, gridVertexOffset);
+    drawObject(centerSphereWorldMatrix, sphereIndexCount, sphereIndexOffset, sphereVertexOffset);
+
+    for (const auto& sphereWorldMatrix : sphereWorldMatrices)
+    {
+        drawObject(sphereWorldMatrix, sphereIndexCount, sphereIndexOffset, sphereVertexOffset);
+    }
+
+    for (const XMFLOAT4X4& cylinderWorldMatrix : cylinderWorldMatrices)
+    {
+        drawObject(cylinderWorldMatrix, cylinderIndexCount, cylinderIndexOffset, cylinderVertexOffset);
+    }
 
     swapChain->Present(0, 0);
 }
 
 void MultiDraw::CreateGeometryBuffers()
 {
-    GeometryGenerator::MeshData grid = GeometryGenerator::CreateGrid(160.0f, 160.0f, 50, 50);
+    const GeometryGenerator::MeshData box = GeometryGenerator::CreateBox(1.0f, 1.0f, 1.0f);
+    const GeometryGenerator::MeshData grid = GeometryGenerator::CreateGrid(20.0f, 30.0f, 60, 40);
+    const GeometryGenerator::MeshData sphere = GeometryGenerator::CreateSphere(0.5f, 20, 20);
+    const GeometryGenerator::MeshData cylinder = GeometryGenerator::CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
 
-    std::vector<Vertex> vertices(grid.vertices.size());
-    for (size_t i = 0; i < grid.vertices.size(); ++i)
+    boxVertexOffset = 0;
+    gridVertexOffset = static_cast<INT>(box.vertices.size());
+    sphereVertexOffset = static_cast<INT>(gridVertexOffset + grid.vertices.size());
+    cylinderVertexOffset = static_cast<INT>(sphereVertexOffset + sphere.vertices.size());
+
+    boxIndexCount = static_cast<UINT>(box.indices.size());
+    gridIndexCount = static_cast<UINT>(grid.indices.size());
+    sphereIndexCount = static_cast<UINT>(sphere.indices.size());
+    cylinderIndexCount = static_cast<UINT>(cylinder.indices.size());
+
+    boxIndexOffset = 0;
+    gridIndexOffset = static_cast<UINT>(box.indices.size());
+    sphereIndexOffset = static_cast<UINT>(gridIndexOffset + grid.indices.size());
+    cylinderIndexOffset = static_cast<UINT>(sphereIndexOffset + sphere.indices.size());
+
+    std::vector<Vertex> vertices(box.vertices.size() + grid.vertices.size() + sphere.vertices.size() + cylinder.vertices.size());
+
+    UINT currentVertexIndex = 0;
+    const XMFLOAT4 black(Colors::Black);
+    auto appendVertex = [&](const std::vector<GeometryGenerator::Vertex>& inVertices)
     {
-        XMFLOAT3 position = grid.vertices[i].position;
-        position.y = GetHeight(position.x, position.z);
-        vertices[i].pos = position;
+        for (size_t i = 0; i < inVertices.size(); ++i, ++currentVertexIndex)
+        {
+            vertices[currentVertexIndex].pos = inVertices[i].position;
+            vertices[currentVertexIndex].color = black;
+        }
+    };
 
-        if (position.y < -10.0f)
-        {
-            vertices[i].color = XMFLOAT4(1.0f, 0.96f, 0.62f, 1.0f);
-        }
-        else if (position.y < 5.0f)
-        {
-            vertices[i].color = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
-        }
-        else if (position.y < 12.0f)
-        {
-            vertices[i].color = XMFLOAT4(0.1f, 0.48f, 0.19f, 1.0f);
-        }
-        else if (position.y < 20.0f)
-        {
-            vertices[i].color = XMFLOAT4(0.45f, 0.39f, 0.34f, 1.0f);
-        }
-        else
-        {
-            vertices[i].color = XMFLOAT4(0.48f, 0.96f, 0.62f, 1.0f);
-        }
-    }
+    appendVertex(box.vertices);
+    appendVertex(grid.vertices);
+    appendVertex(sphere.vertices);
+    appendVertex(cylinder.vertices);
+
+    std::vector<UINT> indices;
+    indices.reserve(box.indices.size() + grid.indices.size() + sphere.indices.size() + cylinder.indices.size());
+    indices.insert(indices.end(), box.indices.begin(), box.indices.end());
+    indices.insert(indices.end(), grid.indices.begin(), grid.indices.end());
+    indices.insert(indices.end(), sphere.indices.begin(), sphere.indices.end());
+    indices.insert(indices.end(), cylinder.indices.begin(), cylinder.indices.end());
 
     // 버텍스 버퍼 생성
     const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
@@ -172,12 +220,12 @@ void MultiDraw::CreateGeometryBuffers()
     CHECK_HR(device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &vertexBuffer), L"버텍스 버퍼 생성에 실패했습니다.");
 
     // 인덱스 버퍼 생성
-    const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * grid.indices.size()), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
-    const D3D11_SUBRESOURCE_DATA indexInitData{grid.indices.data()};
+    const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * indices.size()), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const D3D11_SUBRESOURCE_DATA indexInitData{indices.data()};
     CHECK_HR(device->CreateBuffer(&indexBufferDesc, &indexInitData, &indexBuffer), L"인덱스 버퍼 생성에 실패했습니다.");
 
     // 인덱스 카운트 업데이트
-    indexCount = static_cast<UINT>(grid.indices.size());
+    indexCount = static_cast<UINT>(indices.size());
 }
 
 void MultiDraw::CreateShaders()

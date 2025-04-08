@@ -13,14 +13,12 @@ public:
     {
         Vertex() = default;
 
-        Vertex(const XMFLOAT3& p, const XMFLOAT3& n, const XMFLOAT3& t, const XMFLOAT2& uv)
-            : position(p), normal(n), tangentU(t), texC(uv) {}
+        Vertex(const XMFLOAT3& p, const XMFLOAT3& n, const XMFLOAT3& t, const XMFLOAT2& uv) : position(p), normal(n), tangentU(t), texC(uv) {}
 
-        Vertex(
-            float px, float py, float pz,
-            float nx, float ny, float nz,
-            float tx, float ty, float tz,
-            float u, float v)
+        Vertex(float px, float py, float pz,
+               float nx, float ny, float nz,
+               float tx, float ty, float tz,
+               float u, float v)
             : position(px, py, pz), normal(nx, ny, nz),
               tangentU(tx, ty, tz), texC(u, v) {}
 
