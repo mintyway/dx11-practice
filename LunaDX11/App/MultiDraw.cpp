@@ -48,6 +48,7 @@ bool MultiDraw::Init(HINSTANCE inInstanceHandle)
 
     CreateGeometryBuffers();
     CreateShaders();
+    BindShader();
 
     return true;
 }
@@ -120,48 +121,34 @@ void MultiDraw::Render()
     immediateContext->ClearRenderTargetView(renderTargetView.Get(), Colors::Blue);
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    // input assembler 단계
-    immediateContext->IASetInputLayout(inputLayout.Get());
-    immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
+    // 와이어 프레임으로 보기
     immediateContext->RSSetState(wireframeRasterizerState.Get());
 
-    constexpr UINT stride = sizeof(Vertex);
-    constexpr UINT offset = 0;
-    immediateContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-    immediateContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-
-    // 셰이더 연결
-    immediateContext->VSSetShader(vertexShader.Get(), nullptr, 0);
-    immediateContext->PSSetShader(pixelShader.Get(), nullptr, 0);
-
-    // VP 행렬
+    // 각 오브젝트에 맞는 wvp행렬을 적용하여 그리기
     const XMMATRIX vpMatrix = XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix);
-    auto drawObject = [&](const XMFLOAT4X4& worldMatrix, UINT indexCount, UINT indexOffset, INT vertexOffset)
+    auto drawObject = [&](const XMFLOAT4X4& worldMatrix, UINT indexCount, UINT startIndexCount, INT baseVertexCount)
     {
+        // constant buffer 업데이트
         XMFLOAT4X4 wvpMatrix;
         XMStoreFloat4x4(&wvpMatrix, XMLoadFloat4x4(&worldMatrix) * vpMatrix);
-
-        // constant buffer 업데이트
         immediateContext->UpdateSubresource(constantBuffer.Get(), 0, nullptr, &wvpMatrix, 0, 0);
-        immediateContext->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
 
         // 셰이더 호출
-        immediateContext->DrawIndexed(indexCount, indexOffset, vertexOffset);
+        immediateContext->DrawIndexed(indexCount, startIndexCount, baseVertexCount);
     };
 
-    drawObject(boxWorldMatrix, boxIndexCount, boxIndexOffset, boxVertexOffset);
-    drawObject(gridWorldMatrix, gridIndexCount, gridIndexOffset, gridVertexOffset);
-    drawObject(centerSphereWorldMatrix, sphereIndexCount, sphereIndexOffset, sphereVertexOffset);
+    drawObject(boxWorldMatrix, boxSubmesh.indexCount, boxSubmesh.startIndexLocation, boxSubmesh.baseVertexLocation);
+    drawObject(gridWorldMatrix, gridSubmesh.indexCount, gridSubmesh.startIndexLocation, gridSubmesh.baseVertexLocation);
+    drawObject(centerSphereWorldMatrix, sphereSubmesh.indexCount, sphereSubmesh.startIndexLocation, sphereSubmesh.baseVertexLocation);
 
     for (const auto& sphereWorldMatrix : sphereWorldMatrices)
     {
-        drawObject(sphereWorldMatrix, sphereIndexCount, sphereIndexOffset, sphereVertexOffset);
+        drawObject(sphereWorldMatrix, sphereSubmesh.indexCount, sphereSubmesh.startIndexLocation, sphereSubmesh.baseVertexLocation);
     }
 
     for (const XMFLOAT4X4& cylinderWorldMatrix : cylinderWorldMatrices)
     {
-        drawObject(cylinderWorldMatrix, cylinderIndexCount, cylinderIndexOffset, cylinderVertexOffset);
+        drawObject(cylinderWorldMatrix, cylinderSubmesh.indexCount, cylinderSubmesh.startIndexLocation, cylinderSubmesh.baseVertexLocation);
     }
 
     swapChain->Present(0, 0);
@@ -171,23 +158,13 @@ void MultiDraw::CreateGeometryBuffers()
 {
     const GeometryGenerator::MeshData box = GeometryGenerator::CreateBox(1.0f, 1.0f, 1.0f);
     const GeometryGenerator::MeshData grid = GeometryGenerator::CreateGrid(20.0f, 30.0f, 60, 40);
-    const GeometryGenerator::MeshData sphere = GeometryGenerator::CreateSphere(0.5f, 20, 20);
+    const GeometryGenerator::MeshData sphere = GeometryGenerator::CreateGeodesicSphere(0.5f, 3);
     const GeometryGenerator::MeshData cylinder = GeometryGenerator::CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
 
-    boxVertexOffset = 0;
-    gridVertexOffset = static_cast<INT>(box.vertices.size());
-    sphereVertexOffset = static_cast<INT>(gridVertexOffset + grid.vertices.size());
-    cylinderVertexOffset = static_cast<INT>(sphereVertexOffset + sphere.vertices.size());
-
-    boxIndexCount = static_cast<UINT>(box.indices.size());
-    gridIndexCount = static_cast<UINT>(grid.indices.size());
-    sphereIndexCount = static_cast<UINT>(sphere.indices.size());
-    cylinderIndexCount = static_cast<UINT>(cylinder.indices.size());
-
-    boxIndexOffset = 0;
-    gridIndexOffset = static_cast<UINT>(box.indices.size());
-    sphereIndexOffset = static_cast<UINT>(gridIndexOffset + grid.indices.size());
-    cylinderIndexOffset = static_cast<UINT>(sphereIndexOffset + sphere.indices.size());
+    boxSubmesh = Submesh(box.indices.size(), 0, 0);
+    gridSubmesh = Submesh(grid.indices.size(), box.indices.size(), box.vertices.size());
+    sphereSubmesh = Submesh(sphere.indices.size(), gridSubmesh.startIndexLocation + grid.indices.size(), gridSubmesh.baseVertexLocation + grid.vertices.size());
+    cylinderSubmesh = Submesh(cylinder.indices.size(), sphereSubmesh.startIndexLocation + sphere.indices.size(), sphereSubmesh.baseVertexLocation + sphere.vertices.size());
 
     std::vector<Vertex> vertices(box.vertices.size() + grid.vertices.size() + sphere.vertices.size() + cylinder.vertices.size());
 
@@ -265,4 +242,28 @@ void MultiDraw::CreateShaders()
     // 상수버퍼 생성
     const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(XMMATRIX), D3D11_BIND_CONSTANT_BUFFER);
     device->CreateBuffer(&constantBufferDesc, nullptr, &constantBuffer);
+}
+
+void MultiDraw::BindShader()
+{
+    if (!immediateContext || !inputLayout || !vertexBuffer || !indexBuffer || !constantBuffer || !vertexShader || !pixelShader)
+    {
+        return;
+    }
+
+    // input assembler 연결
+    immediateContext->IASetInputLayout(inputLayout.Get());
+    immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    constexpr UINT stride = sizeof(Vertex);
+    constexpr UINT offset = 0;
+    immediateContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+    immediateContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+    // constant buffer 연결
+    immediateContext->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
+
+    // shader 연결
+    immediateContext->VSSetShader(vertexShader.Get(), nullptr, 0);
+    immediateContext->PSSetShader(pixelShader.Get(), nullptr, 0);
 }

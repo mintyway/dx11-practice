@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../Core/BaseEngine.h"
+#include "../Rendering/Submesh.h"
 #include "../Rendering/VertexTypes.h"
 
-#include <vector>
+#include <array>
 
 using namespace DirectX;
 
@@ -31,6 +32,7 @@ protected:
 private:
     void CreateGeometryBuffers();
     void CreateShaders();
+    void BindShader();
 
     ComPtr<ID3D11Buffer> vertexBuffer;
     ComPtr<ID3D11Buffer> indexBuffer;
@@ -59,18 +61,8 @@ private:
     XMFLOAT4X4 gridWorldMatrix;
     XMFLOAT4X4 centerSphereWorldMatrix;
 
-    INT boxVertexOffset = 0;
-    INT gridVertexOffset = 0;
-    INT sphereVertexOffset = 0;
-    INT cylinderVertexOffset = 0;
-
-    UINT boxIndexCount = 0;
-    UINT gridIndexCount = 0;
-    UINT sphereIndexCount = 0;
-    UINT cylinderIndexCount = 0;
-
-    UINT boxIndexOffset = 0;
-    UINT gridIndexOffset = 0;
-    UINT sphereIndexOffset = 0;
-    UINT cylinderIndexOffset = 0;
+    Submesh boxSubmesh{};
+    Submesh gridSubmesh{};
+    Submesh sphereSubmesh{};
+    Submesh cylinderSubmesh{};
 };
