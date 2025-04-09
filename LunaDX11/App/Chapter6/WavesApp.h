@@ -3,8 +3,7 @@
 #include "Core/BaseEngine.h"
 #include "Rendering/Submesh.h"
 #include "Rendering/VertexTypes.h"
-
-#include <array>
+#include "Utilities/Waves.h"
 
 using namespace DirectX;
 
@@ -15,54 +14,54 @@ class WavesApp : public BaseEngine
 public:
     ~WavesApp() override = default;
 
-    static float GetHeight(float x, float z) { return 0.3f * (z * std::sin(0.1f * x) + x * std::cos(0.1f * z)); }
-
     bool Init(HINSTANCE inInstanceHandle) override;
     void OnResize() override;
-    void OnMouseDown(WPARAM buttonState, int x, int y) override;
-    void OnMouseUp(WPARAM buttonState, int x, int y) override;
-    void OnMouseMove(WPARAM buttonState, int x, int y) override;
+    virtual void OnMouseDown(WPARAM buttonState, int x, int y) override;
+    virtual void OnMouseUp(WPARAM buttonState, int x, int y) override;
+    virtual void OnMouseMove(WPARAM buttonState, int x, int y) override;
 
 protected:
     WavesApp();
 
-    void Update(float deltaSeconds) override;
+    virtual void Update(float deltaSeconds) override;
     virtual void Render() override;
 
 private:
-    void CreateGeometryBuffers();
-    void CreateShaders();
-    void BindShader();
+    bool CreateShaders();
+    bool BindShader();
+    bool CreateGeometryBuffers();
 
-    ComPtr<ID3D11Buffer> vertexBuffer;
-    ComPtr<ID3D11Buffer> indexBuffer;
-    UINT indexCount = 0;
+    bool CreateLandGeometryBuffer();
+    bool CreateWaveGeometryBuffer();
 
+    static float GetHeight(float x, float z) { return 0.3f * (z * std::sin(0.1f * x) + x * std::cos(0.1f * z)); }
+
+    ComPtr<ID3D11InputLayout> inputLayout;
     ComPtr<ID3D11VertexShader> vertexShader;
     ComPtr<ID3D11PixelShader> pixelShader;
-    ComPtr<ID3D11InputLayout> inputLayout;
 
     ComPtr<ID3D11Buffer> constantBuffer;
 
-    ComPtr<ID3D11RasterizerState> wireframeRasterizerState;
+    ComPtr<ID3D11Buffer> landVertexBuffer;
+    ComPtr<ID3D11Buffer> landIndexBuffer;
+
+    ComPtr<ID3D11Buffer> wavesVertexBuffer;
+    ComPtr<ID3D11Buffer> wavesIndexBuffer;
+
+    float radius = 200.0f;
+    float theta = -XM_PIDIV4;
+    float phi = XM_PIDIV4;
+
+    POINT lastMousePosition{};
 
     XMFLOAT4X4 viewMatrix;
     XMFLOAT4X4 projectionMatrix;
 
-    float radius = 30.0f;
-    float theta = -XM_PIDIV4;
-    float phi = 0.25f * XM_PI;
+    XMFLOAT4X4 landWorldMatrix;
+    XMFLOAT4X4 wavesWorldMatrix;
 
-    POINT lastMousePosition{};
+    Waves waves;
 
-    std::array<XMFLOAT4X4, 10> sphereWorldMatrices;
-    std::array<XMFLOAT4X4, 10> cylinderWorldMatrices;
-    XMFLOAT4X4 boxWorldMatrix;
-    XMFLOAT4X4 gridWorldMatrix;
-    XMFLOAT4X4 centerSphereWorldMatrix;
-
-    Submesh boxSubmesh{};
     Submesh gridSubmesh{};
-    Submesh sphereSubmesh{};
-    Submesh cylinderSubmesh{};
+    Submesh wavesSubmesh{};
 };
