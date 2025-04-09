@@ -20,6 +20,7 @@ void Timer::Start()
     if (isReset)
     {
         baseTime = currentTime;
+        stopTime = currentTime;
         isReset = false;
     }
 
