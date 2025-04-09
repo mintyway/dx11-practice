@@ -33,4 +33,10 @@ namespace Math
 
     [[nodiscard]]
     float AngleFromXY(float x, float y);
+
+    [[nodiscard]]
+    int GetRandomInt(int min, int max);
+
+    [[nodiscard]]
+    float GetRandomFloat(float min, float max);
 }
