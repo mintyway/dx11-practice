@@ -44,8 +44,6 @@ private:
 
     ComPtr<ID3D11Buffer> constantBuffer;
 
-    ComPtr<ID3D11RasterizerState> wireframeRasterizerState;
-
     XMFLOAT4X4 viewMatrix;
     XMFLOAT4X4 projectionMatrix;
 

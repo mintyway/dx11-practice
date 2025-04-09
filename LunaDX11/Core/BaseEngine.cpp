@@ -373,6 +373,11 @@ bool BaseEngine::InitDirectX()
     hr = dxgiFactory->CreateSwapChain(device.Get(), &sd, &swapChain); // 스왑체인 생성.
     CHECK_HR(hr, L"스왑체인 생성 실패", false);
 
+    // 와이어 프레임으로 보기위한 RS 생성
+    CD3D11_RASTERIZER_DESC WireframeRasterizerDesc(CD3D11_DEFAULT{});
+    WireframeRasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+    CHECK_HR(device->CreateRasterizerState(&WireframeRasterizerDesc, &wireframeRasterizerState), L"와이어프레임 RS 생성 실패", false);
+
     OnResize();
 
     return true;

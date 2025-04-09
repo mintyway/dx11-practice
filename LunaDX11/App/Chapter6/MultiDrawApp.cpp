@@ -42,10 +42,6 @@ bool MultiDrawApp::Init(HINSTANCE inInstanceHandle)
         return false;
     }
 
-    CD3D11_RASTERIZER_DESC WireframeRasterizerDesc(CD3D11_DEFAULT{});
-    WireframeRasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
-    CHECK_HR(device->CreateRasterizerState(&WireframeRasterizerDesc, &wireframeRasterizerState), L"와이어프레임 RS 생성 실패", false);
-
     CreateGeometryBuffers();
     CreateShaders();
     BindShader();

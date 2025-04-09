@@ -106,6 +106,7 @@ protected:
     ComPtr<IDXGISwapChain> swapChain;
     ComPtr<ID3D11RenderTargetView> renderTargetView;
     ComPtr<ID3D11DepthStencilView> depthStencilView;
+    ComPtr<ID3D11RasterizerState> wireframeRasterizerState;
     UINT msaaQuality = 0;
 
     std::unique_ptr<GameInstance> gameInstance;
