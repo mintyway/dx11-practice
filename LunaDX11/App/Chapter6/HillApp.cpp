@@ -1,4 +1,4 @@
-#include "Hill.h"
+#include "HillApp.h"
 
 #include "Core/GeometryGenerator.h"
 #include "Utilities/Utility.h"

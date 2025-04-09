@@ -138,10 +138,10 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="App\BoxApp.cpp" />
-    <ClCompile Include="App\Hill.cpp" />
-    <ClCompile Include="App\MultiDraw.cpp" />
-    <ClCompile Include="App\WavesApp.cpp" />
+    <ClCompile Include="App\Chapter6\BoxApp.cpp" />
+    <ClCompile Include="App\Chapter6\HillApp.cpp" />
+    <ClCompile Include="App\Chapter6\MultiDrawApp.cpp" />
+    <ClCompile Include="App\Chapter6\WavesApp.cpp" />
     <ClCompile Include="Core\BaseEngine.cpp" />
     <ClCompile Include="Core\GameInstance.cpp" />
     <ClCompile Include="Core\GeometryGenerator.cpp" />
@@ -165,10 +165,10 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App\BoxApp.h" />
-    <ClInclude Include="App\Hill.h" />
-    <ClInclude Include="App\MultiDraw.h" />
-    <ClInclude Include="App\WavesApp.h" />
+    <ClInclude Include="App\Chapter6\BoxApp.h" />
+    <ClInclude Include="App\Chapter6\HillApp.h" />
+    <ClInclude Include="App\Chapter6\MultiDrawApp.h" />
+    <ClInclude Include="App\Chapter6\WavesApp.h" />
     <ClInclude Include="Core\BaseEngine.h" />
     <ClInclude Include="Core\GameInstance.h" />
     <ClInclude Include="Core\GeometryGenerator.h" />

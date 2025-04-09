@@ -1,11 +1,11 @@
-#include "MultiDraw.h"
+#include "MultiDrawApp.h"
 
 #include "Core/GeometryGenerator.h"
 #include "Utilities/Utility.h"
 
 #include <algorithm>
 
-MultiDraw::MultiDraw()
+MultiDrawApp::MultiDrawApp()
 {
     const XMMATRIX identityMatrix = XMMatrixIdentity();
 
@@ -35,7 +35,7 @@ MultiDraw::MultiDraw()
     }
 }
 
-bool MultiDraw::Init(HINSTANCE inInstanceHandle)
+bool MultiDrawApp::Init(HINSTANCE inInstanceHandle)
 {
     if (!Super::Init(inInstanceHandle))
     {
@@ -53,7 +53,7 @@ bool MultiDraw::Init(HINSTANCE inInstanceHandle)
     return true;
 }
 
-void MultiDraw::OnResize()
+void MultiDrawApp::OnResize()
 {
     Super::OnResize();
 
@@ -62,19 +62,19 @@ void MultiDraw::OnResize()
     XMStoreFloat4x4(&projectionMatrix, newProjectionMatrix);
 }
 
-void MultiDraw::OnMouseDown(WPARAM buttonState, int x, int y)
+void MultiDrawApp::OnMouseDown(WPARAM buttonState, int x, int y)
 {
     lastMousePosition.x = x;
     lastMousePosition.y = y;
     SetCapture(windowHandle);
 }
 
-void MultiDraw::OnMouseUp(WPARAM buttonState, int x, int y)
+void MultiDrawApp::OnMouseUp(WPARAM buttonState, int x, int y)
 {
     ReleaseCapture();
 }
 
-void MultiDraw::OnMouseMove(WPARAM buttonState, int x, int y)
+void MultiDrawApp::OnMouseMove(WPARAM buttonState, int x, int y)
 {
     const POINT currentMousePosition{x, y};
 
@@ -98,7 +98,7 @@ void MultiDraw::OnMouseMove(WPARAM buttonState, int x, int y)
     lastMousePosition = currentMousePosition;
 }
 
-void MultiDraw::Update(float deltaSeconds)
+void MultiDrawApp::Update(float deltaSeconds)
 {
     // 뷰 행렬 구축
     const XMVECTOR cameraPosition = Math::SphericalToCartesian(radius, theta, phi);
@@ -108,7 +108,7 @@ void MultiDraw::Update(float deltaSeconds)
     XMStoreFloat4x4(&viewMatrix, newViewMatrix);
 }
 
-void MultiDraw::Render()
+void MultiDrawApp::Render()
 {
     Super::Render();
 
@@ -154,7 +154,7 @@ void MultiDraw::Render()
     swapChain->Present(0, 0);
 }
 
-void MultiDraw::CreateGeometryBuffers()
+void MultiDrawApp::CreateGeometryBuffers()
 {
     const GeometryGenerator::MeshData box = GeometryGenerator::CreateBox(1.0f, 1.0f, 1.0f);
     const GeometryGenerator::MeshData grid = GeometryGenerator::CreateGrid(20.0f, 30.0f, 60, 40);
@@ -205,7 +205,7 @@ void MultiDraw::CreateGeometryBuffers()
     indexCount = static_cast<UINT>(indices.size());
 }
 
-void MultiDraw::CreateShaders()
+void MultiDrawApp::CreateShaders()
 {
     UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 #ifdef _DEBUG
@@ -244,7 +244,7 @@ void MultiDraw::CreateShaders()
     device->CreateBuffer(&constantBufferDesc, nullptr, &constantBuffer);
 }
 
-void MultiDraw::BindShader()
+void MultiDrawApp::BindShader()
 {
     if (!immediateContext || !inputLayout || !vertexBuffer || !indexBuffer || !constantBuffer || !vertexShader || !pixelShader)
     {

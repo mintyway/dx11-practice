@@ -8,12 +8,12 @@
 
 using namespace DirectX;
 
-class MultiDraw : public BaseEngine
+class MultiDrawApp : public BaseEngine
 {
-    DECLARE_ENGINE(MultiDraw, BaseEngine)
+    DECLARE_ENGINE(MultiDrawApp, BaseEngine)
 
 public:
-    ~MultiDraw() override = default;
+    ~MultiDrawApp() override = default;
 
     static float GetHeight(float x, float z) { return 0.3f * (z * std::sin(0.1f * x) + x * std::cos(0.1f * z)); }
 
@@ -24,7 +24,7 @@ public:
     void OnMouseMove(WPARAM buttonState, int x, int y) override;
 
 protected:
-    MultiDraw();
+    MultiDrawApp();
 
     void Update(float deltaSeconds) override;
     virtual void Render() override;
