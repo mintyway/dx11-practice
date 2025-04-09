@@ -141,12 +141,14 @@
     <ClCompile Include="App\BoxApp.cpp" />
     <ClCompile Include="App\Hill.cpp" />
     <ClCompile Include="App\MultiDraw.cpp" />
+    <ClCompile Include="App\WavesApp.cpp" />
     <ClCompile Include="Core\BaseEngine.cpp" />
     <ClCompile Include="Core\GameInstance.cpp" />
     <ClCompile Include="Core\GeometryGenerator.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="LunaDX11.cpp" />
     <ClCompile Include="Utilities\Utility.cpp" />
+    <ClCompile Include="Utilities\Waves.cpp" />
     <FxCompile Include="Shader\Pixel\Box_ps.hlsl">
       <FileType>Document</FileType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -166,6 +168,7 @@
     <ClInclude Include="App\BoxApp.h" />
     <ClInclude Include="App\Hill.h" />
     <ClInclude Include="App\MultiDraw.h" />
+    <ClInclude Include="App\WavesApp.h" />
     <ClInclude Include="Core\BaseEngine.h" />
     <ClInclude Include="Core\GameInstance.h" />
     <ClInclude Include="Core\GeometryGenerator.h" />
@@ -173,6 +176,7 @@
     <ClInclude Include="Rendering\Submesh.h" />
     <ClInclude Include="Rendering\VertexTypes.h" />
     <ClInclude Include="Utilities\Utility.h" />
+    <ClInclude Include="Utilities\Waves.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
