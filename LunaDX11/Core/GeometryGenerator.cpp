@@ -1,6 +1,6 @@
 #include "GeometryGenerator.h"
 
-#include "Utility.h"
+#include "Utilities/Utility.h"
 
 #include <array>
 #include <vector>
@@ -249,8 +249,6 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGeodesicSphere(float radius
         XMStoreFloat3(&meshData.vertices[i].tangentU, XMVector3Normalize(tangent));
     }
 
-    std::cout << meshData.vertices.size() << "\n";
-    std::cout << meshData.indices.size() << "\n";
     return meshData;
 }
 

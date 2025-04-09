@@ -1,7 +1,7 @@
 #include "MultiDraw.h"
 
-#include "../Core/GeometryGenerator.h"
-#include "../Core/Utility.h"
+#include "Core/GeometryGenerator.h"
+#include "Utilities/Utility.h"
 
 #include <algorithm>
 

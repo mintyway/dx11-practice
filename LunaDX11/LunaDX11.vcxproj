@@ -105,6 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -124,6 +125,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -143,8 +145,8 @@
     <ClCompile Include="Core\GameInstance.cpp" />
     <ClCompile Include="Core\GeometryGenerator.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
-    <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="LunaDX11.cpp" />
+    <ClCompile Include="Utilities\Utility.cpp" />
     <FxCompile Include="Shader\Pixel\Box_ps.hlsl">
       <FileType>Document</FileType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -168,9 +170,9 @@
     <ClInclude Include="Core\GameInstance.h" />
     <ClInclude Include="Core\GeometryGenerator.h" />
     <ClInclude Include="Core\Timer.h" />
-    <ClInclude Include="Core\Utility.h" />
     <ClInclude Include="Rendering\Submesh.h" />
     <ClInclude Include="Rendering\VertexTypes.h" />
+    <ClInclude Include="Utilities\Utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

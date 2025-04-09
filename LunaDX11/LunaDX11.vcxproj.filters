@@ -27,9 +27,6 @@
     <ClCompile Include="Core\Timer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Utility.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="App\BoxApp.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -37,6 +34,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Core\GeometryGenerator.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="App\MultiDraw.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\Utility.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,9 +53,6 @@
     <ClInclude Include="Core\Timer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Utility.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\VertexTypes.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -63,6 +63,15 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Core\GeometryGenerator.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="App\MultiDraw.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Submesh.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Utility.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
