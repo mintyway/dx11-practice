@@ -173,6 +173,7 @@
     <ClInclude Include="Core\GameInstance.h" />
     <ClInclude Include="Core\GeometryGenerator.h" />
     <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Exercise\Chapter6.hpp" />
     <ClInclude Include="Rendering\Submesh.h" />
     <ClInclude Include="Rendering\VertexTypes.h" />
     <ClInclude Include="Utilities\Utility.h" />

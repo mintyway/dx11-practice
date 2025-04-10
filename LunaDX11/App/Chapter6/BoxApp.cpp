@@ -1,6 +1,7 @@
 #include "BoxApp.h"
 
 #include "Utilities/Utility.h"
+#include "Exercise/Chapter6.hpp"
 
 #include <algorithm>
 
@@ -10,45 +11,6 @@ BoxApp::BoxApp()
     XMStoreFloat4x4(&worldMatrix, identityMatrix);
     XMStoreFloat4x4(&viewMatrix, identityMatrix);
     XMStoreFloat4x4(&projectionMatrix, identityMatrix);
-
-    boxVertices =
-    {
-        Vertex{XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::White)},
-        Vertex{XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Black)},
-        Vertex{XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Red)},
-        Vertex{XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::Green)},
-        Vertex{XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Blue)},
-        Vertex{XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Yellow)},
-        Vertex{XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Cyan)},
-        Vertex{XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta)}
-    };
-
-    boxIndices =
-    {
-        // 앞면
-        0, 1, 2,
-        0, 2, 3,
-
-        // 뒷면
-        7, 6, 5,
-        7, 5, 4,
-
-        // 좌측면
-        4, 5, 1,
-        4, 1, 0,
-
-        // 우측면
-        3, 2, 6,
-        3, 6, 7,
-
-        // 윗면
-        1, 5, 6,
-        1, 6, 2,
-
-        // 밑면
-        4, 0, 3,
-        4, 3, 7
-    };
 }
 
 bool BoxApp::Init(HINSTANCE inInstanceHandle)
@@ -123,7 +85,7 @@ void BoxApp::Render()
 {
     Super::Render();
 
-    if (!immediateContext || !renderTargetView || !depthStencilView || !inputLayout || !boxVertexBuffer || !boxIndexBuffer || !constantBuffer || !vertexShader || !pixelShader)
+    if (!immediateContext || !renderTargetView || !depthStencilView || !inputLayout || !boxIndexBuffer || !boxPositionVertexBuffer || !boxColorVertexBuffer || !constantBuffer || !vertexShader || !pixelShader)
     {
         return;
     }
@@ -136,9 +98,10 @@ void BoxApp::Render()
     immediateContext->IASetInputLayout(inputLayout.Get());
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    constexpr UINT stride = sizeof(Vertex);
-    constexpr UINT offset = 0;
-    immediateContext->IASetVertexBuffers(0, 1, boxVertexBuffer.GetAddressOf(), &stride, &offset);
+    ID3D11Buffer* const vertexBuffers[] = {boxPositionVertexBuffer.Get(), boxColorVertexBuffer.Get()};
+    constexpr UINT strides[] = {sizeof(Exercise::PositionVertex), sizeof(Exercise::ColorVertex)};
+    constexpr UINT offsets[] = {0, 0};
+    immediateContext->IASetVertexBuffers(0, 2, vertexBuffers, strides, offsets);
     immediateContext->IASetIndexBuffer(boxIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
     // WVP 행렬
@@ -159,10 +122,65 @@ void BoxApp::Render()
 
 void BoxApp::CreateGeometryBuffers()
 {
+    std::array<Exercise::PositionVertex, 8> positionVertex =
+    {
+        Exercise::PositionVertex{XMFLOAT3(-1.0f, -1.0f, -1.0f)},
+        Exercise::PositionVertex{XMFLOAT3(-1.0f, +1.0f, -1.0f)},
+        Exercise::PositionVertex{XMFLOAT3(+1.0f, +1.0f, -1.0f)},
+        Exercise::PositionVertex{XMFLOAT3(+1.0f, -1.0f, -1.0f)},
+        Exercise::PositionVertex{XMFLOAT3(-1.0f, -1.0f, +1.0f)},
+        Exercise::PositionVertex{XMFLOAT3(-1.0f, +1.0f, +1.0f)},
+        Exercise::PositionVertex{XMFLOAT3(+1.0f, +1.0f, +1.0f)},
+        Exercise::PositionVertex{XMFLOAT3(+1.0f, -1.0f, +1.0f)}
+    };
+
+    std::array<Exercise::ColorVertex, 8> colorVertex =
+    {
+        Exercise::ColorVertex{XMFLOAT4(Colors::White)},
+        Exercise::ColorVertex{XMFLOAT4(Colors::Black)},
+        Exercise::ColorVertex{XMFLOAT4(Colors::Red)},
+        Exercise::ColorVertex{XMFLOAT4(Colors::Green)},
+        Exercise::ColorVertex{XMFLOAT4(Colors::Blue)},
+        Exercise::ColorVertex{XMFLOAT4(Colors::Yellow)},
+        Exercise::ColorVertex{XMFLOAT4(Colors::Cyan)},
+        Exercise::ColorVertex{XMFLOAT4(Colors::Magenta)}
+    };
+
+    boxIndices =
+    {
+        // 앞면
+        0, 1, 2,
+        0, 2, 3,
+
+        // 뒷면
+        7, 6, 5,
+        7, 5, 4,
+
+        // 좌측면
+        4, 5, 1,
+        4, 1, 0,
+
+        // 우측면
+        3, 2, 6,
+        3, 6, 7,
+
+        // 윗면
+        1, 5, 6,
+        1, 6, 2,
+
+        // 밑면
+        4, 0, 3,
+        4, 3, 7
+    };
+
     // 버텍스 버퍼 생성
-    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex) * boxVertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
-    const D3D11_SUBRESOURCE_DATA vertexInitData{boxVertices.data()};
-    CHECK_HR(device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &boxVertexBuffer), L"버텍스 버퍼 생성에 실패했습니다.");
+    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Exercise::PositionVertex) * positionVertex.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const D3D11_SUBRESOURCE_DATA positionVertexInitData{positionVertex.data()};
+    CHECK_HR(device->CreateBuffer(&vertexBufferDesc, &positionVertexInitData, &boxPositionVertexBuffer), L"위치 버텍스 버퍼 생성에 실패했습니다.");
+
+    const CD3D11_BUFFER_DESC colorBufferDesc(static_cast<UINT>(sizeof(Exercise::ColorVertex) * colorVertex.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const D3D11_SUBRESOURCE_DATA colorVertexInitData{colorVertex.data()};
+    CHECK_HR(device->CreateBuffer(&colorBufferDesc, &colorVertexInitData, &boxColorVertexBuffer), L"색상 버텍스 버퍼 생성에 실패했습니다.");
 
     // 인덱스 버퍼 생성
     const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * boxIndices.size()), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
@@ -202,7 +220,7 @@ void BoxApp::CreateShaders()
     CHECK_HR(device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader), L"픽셀 셰이더 생성 실패");
 
     // 인풋 레이아웃 생성
-    CHECK_HR(device->CreateInputLayout(vertexDesc.data(), static_cast<UINT>(vertexDesc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"인풋 레이아웃 생성 실패");
+    CHECK_HR(device->CreateInputLayout(Exercise::BoxVertexDesc.data(), static_cast<UINT>(Exercise::BoxVertexDesc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"인풋 레이아웃 생성 실패");
 
     // 상수버퍼 생성
     const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(XMMATRIX), D3D11_BIND_CONSTANT_BUFFER);

@@ -30,7 +30,8 @@ private:
     void CreateGeometryBuffers();
     void CreateShaders();
 
-    ComPtr<ID3D11Buffer> boxVertexBuffer;
+    ComPtr<ID3D11Buffer> boxPositionVertexBuffer;
+    ComPtr<ID3D11Buffer> boxColorVertexBuffer;
     ComPtr<ID3D11Buffer> boxIndexBuffer;
 
     ComPtr<ID3D11VertexShader> vertexShader;
@@ -49,6 +50,5 @@ private:
 
     POINT lastMousePosition{};
 
-    std::vector<Vertex> boxVertices;
     std::vector<UINT> boxIndices;
 };
