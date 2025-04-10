@@ -49,7 +49,7 @@ private:
 
     float radius = 30.0f;
     float theta = -XM_PIDIV4;
-    float phi = 0.25f * XM_PI;
+    float phi = XM_PIDIV4;
 
     POINT lastMousePosition{};
 

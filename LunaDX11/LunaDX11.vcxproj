@@ -139,6 +139,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App\Chapter6\BoxApp.cpp" />
+    <ClCompile Include="App\Chapter6\Exercise.cpp" />
     <ClCompile Include="App\Chapter6\HillApp.cpp" />
     <ClCompile Include="App\Chapter6\MultiDrawApp.cpp" />
     <ClCompile Include="App\Chapter6\WavesApp.cpp" />
@@ -166,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App\Chapter6\BoxApp.h" />
+    <ClInclude Include="App\Chapter6\Exercise.h" />
     <ClInclude Include="App\Chapter6\HillApp.h" />
     <ClInclude Include="App\Chapter6\MultiDrawApp.h" />
     <ClInclude Include="App\Chapter6\WavesApp.h" />

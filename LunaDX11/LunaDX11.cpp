@@ -1,4 +1,5 @@
 #include "App/Chapter6/BoxApp.h"
+#include "App/Chapter6/Exercise.h"
 
 #include <Windows.h>
 
@@ -20,7 +21,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     CreateDebugConsole();
 
     // 엔진 등록
-    BaseEngine::Register<BoxApp>();
+    BaseEngine::Register<Exercise>();
 
     // 게임 엔진 초기화
     if (!BaseEngine::Get()->Init(hInstance))
