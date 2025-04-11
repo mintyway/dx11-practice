@@ -55,7 +55,7 @@ void Exercise::Render()
     immediateContext->ClearRenderTargetView(renderTargetView.Get(), Colors::White);
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+    immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
     D3D11_MAPPED_SUBRESOURCE mapped;
     CHECK_HR(immediateContext->Map(wvpMatrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped), L"");
@@ -65,6 +65,8 @@ void Exercise::Render()
     constexpr UINT strid = sizeof(Vertex);
     constexpr UINT offset = 0;
     immediateContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &strid, &offset);
+
+    immediateContext->RSSetState(wireframeRasterizerState.Get());
 
     immediateContext->Draw(vertexCount, 0);
 
