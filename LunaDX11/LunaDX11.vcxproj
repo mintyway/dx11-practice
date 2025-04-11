@@ -187,6 +187,7 @@
     <ClInclude Include="Exercise\Chapter6.hpp" />
     <ClInclude Include="Rendering\Submesh.h" />
     <ClInclude Include="Rendering\VertexTypes.h" />
+    <ClInclude Include="Utilities\Color.h" />
     <ClInclude Include="Utilities\Utility.h" />
     <ClInclude Include="Utilities\Waves.h" />
   </ItemGroup>

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Utilities/Color.h"
+
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <array>
@@ -13,7 +15,7 @@ struct Vertex
         os << vertex.pos.x << ' ' << vertex.pos.y << ' ' << vertex.pos.z;
         return os;
     }
-    
+
     XMFLOAT3 pos;
     XMFLOAT4 color;
 };
@@ -22,4 +24,16 @@ constexpr std::array<D3D11_INPUT_ELEMENT_DESC, 2> VertexDesc =
 {
     D3D11_INPUT_ELEMENT_DESC{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
     D3D11_INPUT_ELEMENT_DESC{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0}
+};
+
+struct VertexColor32
+{
+    static constexpr std::array<D3D11_INPUT_ELEMENT_DESC, 2> Desc =
+    {
+        D3D11_INPUT_ELEMENT_DESC{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA},
+        D3D11_INPUT_ELEMENT_DESC{"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA}
+    };
+
+    XMFLOAT3 position;
+    Color color;
 };

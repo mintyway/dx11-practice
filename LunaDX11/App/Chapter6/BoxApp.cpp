@@ -99,7 +99,7 @@ void BoxApp::Render()
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     ID3D11Buffer* const vertexBuffers[] = {boxPositionVertexBuffer.Get(), boxColorVertexBuffer.Get()};
-    constexpr UINT strides[] = {sizeof(Exercise::PositionVertex), sizeof(Exercise::ColorVertex)};
+    constexpr UINT strides[] = {sizeof(Chapter6::PositionVertex), sizeof(Chapter6::ColorVertex)};
     constexpr UINT offsets[] = {0, 0};
     immediateContext->IASetVertexBuffers(0, 2, vertexBuffers, strides, offsets);
     immediateContext->IASetIndexBuffer(boxIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
@@ -128,28 +128,28 @@ void BoxApp::Render()
 
 void BoxApp::CreateGeometryBuffers()
 {
-    std::array<Exercise::PositionVertex, 8> positionVertex =
+    std::array<Chapter6::PositionVertex, 8> positionVertex =
     {
-        Exercise::PositionVertex{XMFLOAT3(-1.0f, -1.0f, -1.0f)},
-        Exercise::PositionVertex{XMFLOAT3(-1.0f, +1.0f, -1.0f)},
-        Exercise::PositionVertex{XMFLOAT3(+1.0f, +1.0f, -1.0f)},
-        Exercise::PositionVertex{XMFLOAT3(+1.0f, -1.0f, -1.0f)},
-        Exercise::PositionVertex{XMFLOAT3(-1.0f, -1.0f, +1.0f)},
-        Exercise::PositionVertex{XMFLOAT3(-1.0f, +1.0f, +1.0f)},
-        Exercise::PositionVertex{XMFLOAT3(+1.0f, +1.0f, +1.0f)},
-        Exercise::PositionVertex{XMFLOAT3(+1.0f, -1.0f, +1.0f)}
+        Chapter6::PositionVertex{XMFLOAT3(-1.0f, -1.0f, -1.0f)},
+        Chapter6::PositionVertex{XMFLOAT3(-1.0f, +1.0f, -1.0f)},
+        Chapter6::PositionVertex{XMFLOAT3(+1.0f, +1.0f, -1.0f)},
+        Chapter6::PositionVertex{XMFLOAT3(+1.0f, -1.0f, -1.0f)},
+        Chapter6::PositionVertex{XMFLOAT3(-1.0f, -1.0f, +1.0f)},
+        Chapter6::PositionVertex{XMFLOAT3(-1.0f, +1.0f, +1.0f)},
+        Chapter6::PositionVertex{XMFLOAT3(+1.0f, +1.0f, +1.0f)},
+        Chapter6::PositionVertex{XMFLOAT3(+1.0f, -1.0f, +1.0f)}
     };
 
-    std::array<Exercise::ColorVertex, 8> colorVertex =
+    std::array<Chapter6::ColorVertex, 8> colorVertex =
     {
-        Exercise::ColorVertex{XMFLOAT4(Colors::White)},
-        Exercise::ColorVertex{XMFLOAT4(Colors::Black)},
-        Exercise::ColorVertex{XMFLOAT4(Colors::Red)},
-        Exercise::ColorVertex{XMFLOAT4(Colors::Green)},
-        Exercise::ColorVertex{XMFLOAT4(Colors::Blue)},
-        Exercise::ColorVertex{XMFLOAT4(Colors::Yellow)},
-        Exercise::ColorVertex{XMFLOAT4(Colors::Cyan)},
-        Exercise::ColorVertex{XMFLOAT4(Colors::Magenta)}
+        Chapter6::ColorVertex{XMFLOAT4(Colors::White)},
+        Chapter6::ColorVertex{XMFLOAT4(Colors::Black)},
+        Chapter6::ColorVertex{XMFLOAT4(Colors::Red)},
+        Chapter6::ColorVertex{XMFLOAT4(Colors::Green)},
+        Chapter6::ColorVertex{XMFLOAT4(Colors::Blue)},
+        Chapter6::ColorVertex{XMFLOAT4(Colors::Yellow)},
+        Chapter6::ColorVertex{XMFLOAT4(Colors::Cyan)},
+        Chapter6::ColorVertex{XMFLOAT4(Colors::Magenta)}
     };
 
     boxIndices =
@@ -180,11 +180,11 @@ void BoxApp::CreateGeometryBuffers()
     };
 
     // 버텍스 버퍼 생성
-    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Exercise::PositionVertex) * positionVertex.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Chapter6::PositionVertex) * positionVertex.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA positionVertexInitData{positionVertex.data()};
     CHECK_HR(device->CreateBuffer(&vertexBufferDesc, &positionVertexInitData, &boxPositionVertexBuffer), L"위치 버텍스 버퍼 생성에 실패했습니다.");
 
-    const CD3D11_BUFFER_DESC colorBufferDesc(static_cast<UINT>(sizeof(Exercise::ColorVertex) * colorVertex.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const CD3D11_BUFFER_DESC colorBufferDesc(static_cast<UINT>(sizeof(Chapter6::ColorVertex) * colorVertex.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA colorVertexInitData{colorVertex.data()};
     CHECK_HR(device->CreateBuffer(&colorBufferDesc, &colorVertexInitData, &boxColorVertexBuffer), L"색상 버텍스 버퍼 생성에 실패했습니다.");
 
@@ -226,7 +226,7 @@ void BoxApp::CreateShaders()
     CHECK_HR(device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader), L"픽셀 셰이더 생성 실패");
 
     // 인풋 레이아웃 생성
-    CHECK_HR(device->CreateInputLayout(Exercise::BoxVertexDesc.data(), static_cast<UINT>(Exercise::BoxVertexDesc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"인풋 레이아웃 생성 실패");
+    CHECK_HR(device->CreateInputLayout(Chapter6::BoxVertexDesc.data(), static_cast<UINT>(Chapter6::BoxVertexDesc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"인풋 레이아웃 생성 실패");
 
     // 상수버퍼 생성
     const CD3D11_BUFFER_DESC wvpMatrixBufferDesc(sizeof(XMMATRIX), D3D11_BIND_CONSTANT_BUFFER);

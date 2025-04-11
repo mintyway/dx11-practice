@@ -6,7 +6,7 @@
 
 using namespace DirectX;
 
-namespace Exercise
+namespace Chapter6
 {
     struct Vertex
     {
