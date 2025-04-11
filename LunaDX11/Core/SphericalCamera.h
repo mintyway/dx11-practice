@@ -34,7 +34,7 @@ private:
     float cameraRadius = 200.0f;
     float cameraTheta = -XM_PIDIV4;
     float cameraPhi = XM_PIDIV4;
-    float minCameraRadius = 0.0f;
+    float minCameraRadius = 1.001f;
 
     float maxCameraRadius;
 

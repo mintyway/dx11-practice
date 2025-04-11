@@ -34,7 +34,7 @@ void SphericalCamera::OnMouseMove(WPARAM buttonState, int x, int y)
         constexpr float zoomSpeed = 0.1f; // 1픽셀당 0.1만큼 근접 or 멀어짐
         const float dx = zoomSpeed * static_cast<float>(currentMousePosition.x - lastMousePosition.x);
 
-        cameraRadius = std::clamp(cameraRadius - (dx), 50.0f, 300.0f);
+        cameraRadius = std::clamp(cameraRadius - (dx), minCameraRadius, maxCameraRadius);
     }
 
     lastMousePosition = currentMousePosition;
