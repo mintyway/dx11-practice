@@ -85,7 +85,7 @@ void BoxApp::Render()
 {
     Super::Render();
 
-    if (!immediateContext || !renderTargetView || !depthStencilView || !inputLayout || !boxIndexBuffer || !boxPositionVertexBuffer || !boxColorVertexBuffer || !constantBuffer || !vertexShader || !pixelShader)
+    if (!immediateContext || !renderTargetView || !depthStencilView || !inputLayout || !boxIndexBuffer || !boxPositionVertexBuffer || !boxColorVertexBuffer || !wvpMatrixBuffer || !vertexShader || !pixelShader)
     {
         return;
     }
@@ -105,11 +105,17 @@ void BoxApp::Render()
     immediateContext->IASetIndexBuffer(boxIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
     // WVP 행렬
-    const XMMATRIX wvpMatrix = XMLoadFloat4x4(&worldMatrix) * XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix);
-
     // constant buffer 업데이트
-    immediateContext->UpdateSubresource(constantBuffer.Get(), 0, nullptr, &wvpMatrix, 0, 0);
-    immediateContext->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
+    const XMMATRIX wvpMatrix = XMLoadFloat4x4(&worldMatrix) * XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix);
+    immediateContext->UpdateSubresource(wvpMatrixBuffer.Get(), 0, nullptr, &wvpMatrix, 0, 0);
+
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    immediateContext->Map(timeBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+    *static_cast<float*>(mapped.pData) = static_cast<float>(timer.GetTotalSeconds());
+    immediateContext->Unmap(timeBuffer.Get(), 0);
+
+    ID3D11Buffer* constantBuffers[] = {wvpMatrixBuffer.Get(), timeBuffer.Get()};
+    immediateContext->VSSetConstantBuffers(0, 2, constantBuffers);
 
     // 셰이더 연결
     immediateContext->VSSetShader(vertexShader.Get(), nullptr, 0);
@@ -208,7 +214,7 @@ void BoxApp::CreateShaders()
     };
 
     // 버텍스 셰이더 컴파일 및 생성
-    HRESULT hr = D3DCompileFromFile(L"Shader/Vertex/Box_vs.hlsl", nullptr, nullptr, "VS_Main", "vs_5_0", shaderFlags, 0, &vertexShaderBlob, &errorBlob);
+    HRESULT hr = D3DCompileFromFile(L"Shader/Vertex/6-6_vs.hlsl", nullptr, nullptr, "VS_Main", "vs_5_0", shaderFlags, 0, &vertexShaderBlob, &errorBlob);
     checkShaderCompile();
     CHECK_HR(hr, L"버텍스 셰이더 컴파일 실패");
     CHECK_HR(device->CreateVertexShader(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), nullptr, &vertexShader), L"버텍스 셰이더 생성 실패");
@@ -223,6 +229,10 @@ void BoxApp::CreateShaders()
     CHECK_HR(device->CreateInputLayout(Exercise::BoxVertexDesc.data(), static_cast<UINT>(Exercise::BoxVertexDesc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"인풋 레이아웃 생성 실패");
 
     // 상수버퍼 생성
-    const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(XMMATRIX), D3D11_BIND_CONSTANT_BUFFER);
-    device->CreateBuffer(&constantBufferDesc, nullptr, &constantBuffer);
+    const CD3D11_BUFFER_DESC wvpMatrixBufferDesc(sizeof(XMMATRIX), D3D11_BIND_CONSTANT_BUFFER);
+    device->CreateBuffer(&wvpMatrixBufferDesc, nullptr, &wvpMatrixBuffer);
+
+    // 시간 상수 버퍼 생성
+    const CD3D11_BUFFER_DESC timeBufferDesc(16, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    device->CreateBuffer(&timeBufferDesc, nullptr, &timeBuffer);
 }

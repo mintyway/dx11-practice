@@ -38,7 +38,8 @@ private:
     ComPtr<ID3D11PixelShader> pixelShader;
     ComPtr<ID3D11InputLayout> inputLayout;
 
-    ComPtr<ID3D11Buffer> constantBuffer;
+    ComPtr<ID3D11Buffer> wvpMatrixBuffer;
+    ComPtr<ID3D11Buffer> timeBuffer;
 
     XMFLOAT4X4 worldMatrix;
     XMFLOAT4X4 viewMatrix;
