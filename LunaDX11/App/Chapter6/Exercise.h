@@ -26,8 +26,6 @@ protected:
 private:
     void InitShader();
     void CreateGeometry();
-    void CreateGeodesicSphere();
-    void DrawObject(ID3D11Buffer* inVertexBuffer, ID3D11Buffer* inIndexBuffer, const XMFLOAT4X4& inWorldMatrix, UINT inIndexCount);
 
     ComPtr<ID3D11VertexShader> vertexShader;
     ComPtr<ID3D11PixelShader> pixelShader;
@@ -39,7 +37,7 @@ private:
     ComPtr<ID3D11Buffer> vertexBuffer;
     ComPtr<ID3D11Buffer> indexBuffer;
 
-    UINT vertexCount = 0;
+    UINT indexCount = 0;
 
     XMFLOAT4X4 worldMatrix;
     XMFLOAT4X4 viewMatrix;
