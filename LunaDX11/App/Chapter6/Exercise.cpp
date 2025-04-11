@@ -55,7 +55,7 @@ void Exercise::Render()
     immediateContext->ClearRenderTargetView(renderTargetView.Get(), Colors::White);
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     D3D11_MAPPED_SUBRESOURCE mapped;
     CHECK_HR(immediateContext->Map(wvpMatrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped), L"");
@@ -112,15 +112,16 @@ void Exercise::InitShader()
 
 void Exercise::CreateGeometry()
 {
-    const std::array<Vertex, 8> vertices = {
+    const std::array<Vertex, 9> vertices = {
         Vertex{XMFLOAT3(-3.0f, -2.0f, 0.0f), XMFLOAT4(Colors::Black)},
         Vertex{XMFLOAT3(-2.0f, 1.0f, 0.0f), XMFLOAT4(Colors::Black)},
         Vertex{XMFLOAT3(-1.0f, -1.5f, 0.0f), XMFLOAT4(Colors::Black)},
         Vertex{XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(Colors::Black)},
-        Vertex{XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT4(Colors::Black)},
         Vertex{XMFLOAT3(2.0f, 0.5f, 0.0f), XMFLOAT4(Colors::Black)},
+        Vertex{XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT4(Colors::Black)},
         Vertex{XMFLOAT3(3.0f, -0.5f, 0.0f), XMFLOAT4(Colors::Black)},
         Vertex{XMFLOAT3(4.0f, 1.0f, 0.0f), XMFLOAT4(Colors::Black)},
+        Vertex{XMFLOAT3(5.0f, 0.0f, 0.0f), XMFLOAT4(Colors::Black)}
     };
     vertexCount = static_cast<UINT>(vertices.size());
 
