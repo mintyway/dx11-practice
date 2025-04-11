@@ -14,6 +14,12 @@ public:
     virtual void OnMouseUp(WPARAM buttonState, int x, int y) override;
     virtual void OnMouseMove(WPARAM buttonState, int x, int y) override;
 
+    inline float GetCameraRadius() const { return cameraRadius; }
+    inline float GetCameraTheta() const { return cameraTheta; }
+    inline float GetCameraPhi() const { return cameraPhi; }
+    inline float GetMinCameraRadius() const { return minCameraRadius; }
+    inline float GetMaxCameraRadius() const { return maxCameraRadius; }
+
     inline void SetCameraSphericalCoord(float newRadius, float newTheta, float newPhi)
     {
         cameraRadius = newRadius;
@@ -21,22 +27,20 @@ public:
         cameraPhi = newPhi;
     }
 
-    inline float GetCameraRadius() const { return cameraRadius; }
-    inline float GetCameraTheta() const { return cameraTheta; }
-    inline float GetCameraPhi() const { return cameraPhi; }
-    inline float GetMinCameraRadius() const { return minCameraRadius; }
-    inline float GetMaxCameraRadius() const { return maxCameraRadius; }
+    inline void SetZoomSpeed(float zoomSpeedPerPixel) { zoomSpeed = zoomSpeedPerPixel; }
 
 protected:
     SphericalCamera();
 
 private:
-    float cameraRadius = 200.0f;
+    float cameraRadius = 100.0f;
     float cameraTheta = -XM_PIDIV4;
     float cameraPhi = XM_PIDIV4;
-    float minCameraRadius = 1.001f;
 
+    float minCameraRadius = 1.001f;
     float maxCameraRadius;
+
+    float zoomSpeed = 0.1f;
 
     POINT lastMousePosition{};
 };
