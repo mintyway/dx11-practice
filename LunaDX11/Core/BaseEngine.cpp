@@ -376,6 +376,7 @@ bool BaseEngine::InitDirectX()
     // 와이어 프레임으로 보기위한 RS 생성
     CD3D11_RASTERIZER_DESC WireframeRasterizerDesc(CD3D11_DEFAULT{});
     WireframeRasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+    WireframeRasterizerDesc.CullMode = D3D11_CULL_NONE;
     CHECK_HR(device->CreateRasterizerState(&WireframeRasterizerDesc, &wireframeRasterizerState), L"와이어프레임 RS 생성 실패", false);
 
     OnResize();
