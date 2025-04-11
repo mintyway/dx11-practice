@@ -162,7 +162,7 @@ void MultiDrawApp::CreateGeometryBuffers()
     sphereSubmesh = Submesh(sphere.indices.size(), gridSubmesh.startIndexLocation + grid.indices.size(), gridSubmesh.baseVertexLocation + grid.vertices.size());
     cylinderSubmesh = Submesh(cylinder.indices.size(), sphereSubmesh.startIndexLocation + sphere.indices.size(), sphereSubmesh.baseVertexLocation + sphere.vertices.size());
 
-    std::vector<Vertex> vertices(box.vertices.size() + grid.vertices.size() + sphere.vertices.size() + cylinder.vertices.size());
+    std::vector<VertexWithLinearColor> vertices(box.vertices.size() + grid.vertices.size() + sphere.vertices.size() + cylinder.vertices.size());
 
     UINT currentVertexIndex = 0;
     const XMFLOAT4 black(Colors::Black);
@@ -170,8 +170,8 @@ void MultiDrawApp::CreateGeometryBuffers()
     {
         for (size_t i = 0; i < inVertices.size(); ++i, ++currentVertexIndex)
         {
-            vertices[currentVertexIndex].pos = inVertices[i].position;
-            vertices[currentVertexIndex].color = black;
+            vertices[currentVertexIndex].position = inVertices[i].position;
+            vertices[currentVertexIndex].linearColor = black;
         }
     };
 
@@ -188,7 +188,7 @@ void MultiDrawApp::CreateGeometryBuffers()
     indices.insert(indices.end(), cylinder.indices.begin(), cylinder.indices.end());
 
     // 버텍스 버퍼 생성
-    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(VertexWithLinearColor) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA vertexInitData{vertices.data()};
     CHECK_HR(device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &vertexBuffer), L"버텍스 버퍼 생성에 실패했습니다.");
 
@@ -233,7 +233,7 @@ void MultiDrawApp::CreateShaders()
     CHECK_HR(device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader), L"픽셀 셰이더 생성 실패");
 
     // 인풋 레이아웃 생성
-    CHECK_HR(device->CreateInputLayout(VertexDesc.data(), static_cast<UINT>(VertexDesc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"인풋 레이아웃 생성 실패");
+    CHECK_HR(device->CreateInputLayout(VertexWithLinearColor::Desc.data(), static_cast<UINT>(VertexWithLinearColor::Desc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"인풋 레이아웃 생성 실패");
 
     // 상수버퍼 생성
     const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(XMMATRIX), D3D11_BIND_CONSTANT_BUFFER);
@@ -251,7 +251,7 @@ void MultiDrawApp::BindShader()
     immediateContext->IASetInputLayout(inputLayout.Get());
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    constexpr UINT stride = sizeof(Vertex);
+    constexpr UINT stride = sizeof(VertexWithLinearColor);
     constexpr UINT offset = 0;
     immediateContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
     immediateContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);

@@ -110,11 +110,11 @@ void WavesApp::Update(float deltaSeconds)
     D3D11_MAPPED_SUBRESOURCE mappedData;
     CHECK_HR(immediateContext->Map(wavesVertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData), L"Failed to get wave vertex buffer map");
 
-    Vertex* vertices = static_cast<Vertex*>(mappedData.pData);
+    VertexWithLinearColor* vertices = static_cast<VertexWithLinearColor*>(mappedData.pData);
     for (UINT i = 0; i < waves.VertexCount(); ++i)
     {
-        vertices[i].pos = waves[static_cast<int>(i)];
-        vertices[i].color = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+        vertices[i].position = waves[static_cast<int>(i)];
+        vertices[i].linearColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
     immediateContext->Unmap(wavesVertexBuffer.Get(), 0);
@@ -138,7 +138,7 @@ void WavesApp::Render()
         *static_cast<XMFLOAT4X4*>(mappedResource.pData) = wvpMatrix;
         immediateContext->Unmap(constantBuffer.Get(), 0);
 
-        constexpr UINT stride = sizeof(Vertex);
+        constexpr UINT stride = sizeof(VertexWithLinearColor);
         constexpr UINT offset = 0;
         immediateContext->IASetVertexBuffers(0, 1, &vertexBufferPtr, &stride, &offset);
         immediateContext->IASetIndexBuffer(indexBufferPtr, DXGI_FORMAT_R32_UINT, 0);
@@ -177,7 +177,7 @@ bool WavesApp::CreateShaders()
     checkShaderCompile(D3DCompileFromFile(L"Shader/Pixel/Box_ps.hlsl", nullptr, nullptr, "PS_Main", "ps_5_0", shaderFlags, 0, &pixelShaderBlob, &pixelShaderErrorBlob), pixelShaderErrorBlob.Get());
     CHECK_HR(device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader), L"Failed to create pixel shader", false);
 
-    CHECK_HR(device->CreateInputLayout(VertexDesc.data(), static_cast<UINT>(VertexDesc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"Failed to create input layout", false);
+    CHECK_HR(device->CreateInputLayout(VertexWithLinearColor::Desc.data(), static_cast<UINT>(VertexWithLinearColor::Desc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"Failed to create input layout", false);
 
     const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(XMFLOAT4X4), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
     CHECK_HR(device->CreateBuffer(&constantBufferDesc, nullptr, &constantBuffer), L"Failed to create constant buffer", false);
@@ -220,36 +220,36 @@ bool WavesApp::CreateLandGeometryBuffer()
     const GeometryGenerator::MeshData grid = GeometryGenerator::CreateGrid(160.0f, 160.0f, 50, 50);
     gridSubmesh = Submesh(grid.indices.size(), 0, 0);
 
-    std::vector<Vertex> vertices(grid.vertices.size());
+    std::vector<VertexWithLinearColor> vertices(grid.vertices.size());
     for (size_t i = 0; i < vertices.size(); ++i)
     {
         XMFLOAT3 position = grid.vertices[i].position;
         position.y = GetHeight(position.x, position.z);
-        vertices[i].pos = position;
+        vertices[i].position = position;
 
         if (position.y < -10.0f) // 모래 사장(밝은 노란색)
         {
-            vertices[i].color = XMFLOAT4(1.0f, 0.96f, 0.62f, 1.0f);
+            vertices[i].linearColor = XMFLOAT4(1.0f, 0.96f, 0.62f, 1.0f);
         }
         else if (position.y < 5.0f) // 저지대(밝은 녹색)
         {
-            vertices[i].color = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
+            vertices[i].linearColor = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
         }
         else if (position.y < 12.0f) // 중지대(어두운 녹색)
         {
-            vertices[i].color = XMFLOAT4(0.1f, 0.48f, 0.19f, 1.0f);
+            vertices[i].linearColor = XMFLOAT4(0.1f, 0.48f, 0.19f, 1.0f);
         }
         else if (position.y < 20.0f) // 고지대(갈색)
         {
-            vertices[i].color = XMFLOAT4(0.45f, 0.39f, 0.34f, 1.0f);
+            vertices[i].linearColor = XMFLOAT4(0.45f, 0.39f, 0.34f, 1.0f);
         }
         else // 눈(흰색)
         {
-            vertices[i].color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+            vertices[i].linearColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
         }
     }
 
-    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(VertexWithLinearColor) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA vertexInitData{vertices.data()};
     CHECK_HR(device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &landVertexBuffer), L"Failed to create land vertext buffer", false);
 
@@ -289,7 +289,7 @@ bool WavesApp::CreateWaveGeometryBuffer()
         }
     }
 
-    const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(Vertex) * waves.VertexCount(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(VertexWithLinearColor) * waves.VertexCount(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
     CHECK_HR(device->CreateBuffer(&vertexBufferDesc, nullptr, &wavesVertexBuffer), L"Failed to create wave vertex buffer", false);
 
     const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * indices.size()), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);

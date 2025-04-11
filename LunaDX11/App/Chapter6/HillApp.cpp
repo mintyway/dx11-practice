@@ -98,7 +98,7 @@ void HillApp::Render()
     immediateContext->IASetInputLayout(inputLayout.Get());
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    constexpr UINT stride = sizeof(Vertex);
+    constexpr UINT stride = sizeof(VertexWithLinearColor);
     constexpr UINT offset = 0;
     immediateContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
     immediateContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
@@ -137,37 +137,37 @@ void HillApp::CreateGeometryBuffers()
 {
     GeometryGenerator::MeshData grid = GeometryGenerator::CreateGrid(160.0f, 160.0f, 50, 50);
 
-    std::vector<Vertex> vertices(grid.vertices.size());
+    std::vector<VertexWithLinearColor> vertices(grid.vertices.size());
     for (size_t i = 0; i < grid.vertices.size(); ++i)
     {
         XMFLOAT3 position = grid.vertices[i].position;
         position.y = GetHeight(position.x, position.z);
-        vertices[i].pos = position;
+        vertices[i].position = position;
 
         if (position.y < -10.0f)
         {
-            vertices[i].color = XMFLOAT4(1.0f, 0.96f, 0.62f, 1.0f);
+            vertices[i].linearColor = XMFLOAT4(1.0f, 0.96f, 0.62f, 1.0f);
         }
         else if (position.y < 5.0f)
         {
-            vertices[i].color = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
+            vertices[i].linearColor = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
         }
         else if (position.y < 12.0f)
         {
-            vertices[i].color = XMFLOAT4(0.1f, 0.48f, 0.19f, 1.0f);
+            vertices[i].linearColor = XMFLOAT4(0.1f, 0.48f, 0.19f, 1.0f);
         }
         else if (position.y < 20.0f)
         {
-            vertices[i].color = XMFLOAT4(0.45f, 0.39f, 0.34f, 1.0f);
+            vertices[i].linearColor = XMFLOAT4(0.45f, 0.39f, 0.34f, 1.0f);
         }
         else
         {
-            vertices[i].color = XMFLOAT4(0.48f, 0.96f, 0.62f, 1.0f);
+            vertices[i].linearColor = XMFLOAT4(0.48f, 0.96f, 0.62f, 1.0f);
         }
     }
 
     // 버텍스 버퍼 생성
-    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(VertexWithLinearColor) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA vertexInitData{vertices.data()};
     CHECK_HR(device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &vertexBuffer), L"버텍스 버퍼 생성에 실패했습니다.");
 
@@ -212,7 +212,7 @@ void HillApp::CreateShaders()
     CHECK_HR(device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader), L"픽셀 셰이더 생성 실패");
 
     // 인풋 레이아웃 생성
-    CHECK_HR(device->CreateInputLayout(VertexDesc.data(), static_cast<UINT>(VertexDesc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"인풋 레이아웃 생성 실패");
+    CHECK_HR(device->CreateInputLayout(VertexWithLinearColor::Desc.data(), static_cast<UINT>(VertexWithLinearColor::Desc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"인풋 레이아웃 생성 실패");
 
     // 상수버퍼 생성
     const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(XMMATRIX), D3D11_BIND_CONSTANT_BUFFER);
