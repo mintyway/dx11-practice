@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/SphericalCamera.h"
+#include "Rendering/Submesh.h"
 
 #include <array>
 
@@ -37,15 +38,14 @@ private:
     ComPtr<ID3D11Buffer> vertexBuffer;
     ComPtr<ID3D11Buffer> indexBuffer;
 
-    UINT indexCount = 0;
-
-    XMFLOAT4X4 worldMatrix;
     XMFLOAT4X4 viewMatrix;
     XMFLOAT4X4 projectionMatrix;
 
     std::array<XMFLOAT3, 8> pointPositions{};
-    ComPtr<ID3D11Buffer> geodesicSphereVertexBuffer;
-    ComPtr<ID3D11Buffer> geodesicSphereIndexBuffer;
-    XMFLOAT4X4 boxWolrdMatrix;
-    UINT geodesicSphereIndexCount = 0;
+
+    XMFLOAT4X4 boxWorldMatrix{};
+    Submesh boxSubmesh{};
+
+    XMFLOAT4X4 pyramidWorldMatrix{};
+    Submesh pyramidSubmesh{};
 };

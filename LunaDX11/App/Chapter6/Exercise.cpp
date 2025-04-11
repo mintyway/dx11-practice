@@ -6,14 +6,13 @@
 
 Exercise::Exercise()
 {
-    SetCameraSphericalCoord(7.5f, -XM_PIDIV4, XM_PIDIV4);
+    SetCameraSphericalCoord(7.5f, -XM_PIDIV2, XM_PIDIV4);
     SetZoomSpeed(0.01f);
 
     const XMMATRIX identityMatrix = XMMatrixIdentity();
-    XMStoreFloat4x4(&worldMatrix, identityMatrix);
+    XMStoreFloat4x4(&pyramidWorldMatrix, identityMatrix);
     XMStoreFloat4x4(&viewMatrix, identityMatrix);
     XMStoreFloat4x4(&projectionMatrix, identityMatrix);
-    XMStoreFloat4x4(&boxWolrdMatrix, identityMatrix);
 }
 
 
@@ -58,19 +57,23 @@ void Exercise::Render()
 
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    D3D11_MAPPED_SUBRESOURCE mapped;
-    CHECK_HR(immediateContext->Map(wvpMatrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped), L"");
-    XMStoreFloat4x4(static_cast<XMFLOAT4X4*>(mapped.pData), XMLoadFloat4x4(&worldMatrix) * XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix));
-    immediateContext->Unmap(wvpMatrixBuffer.Get(), 0);
-
     constexpr UINT strid = sizeof(Vertex);
     constexpr UINT offset = 0;
     immediateContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &strid, &offset);
     immediateContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-    // immediateContext->RSSetState(wireframeRasterizerState.Get());
+    auto drawObject = [&](const XMFLOAT4X4& inWorldMatrix, const Submesh& inSubmesh)
+    {
+        D3D11_MAPPED_SUBRESOURCE mapped;
+        CHECK_HR(immediateContext->Map(wvpMatrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped), L"");
+        XMStoreFloat4x4(static_cast<XMFLOAT4X4*>(mapped.pData), XMLoadFloat4x4(&inWorldMatrix) * XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix));
+        immediateContext->Unmap(wvpMatrixBuffer.Get(), 0);
 
-    immediateContext->DrawIndexed(indexCount, 0, 0);
+        immediateContext->DrawIndexed(inSubmesh.indexCount, inSubmesh.startIndexLocation, inSubmesh.baseVertexLocation);
+    };
+
+    drawObject(pyramidWorldMatrix, pyramidSubmesh);
+    drawObject(boxWorldMatrix, boxSubmesh);
 
     swapChain->Present(0, 0);
 }
@@ -107,7 +110,7 @@ void Exercise::InitShader()
 
 void Exercise::CreateGeometry()
 {
-    const std::vector<Vertex> vertices = {
+    const std::vector<Vertex> pyramidVertices = {
         Vertex{XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::Green)},
         Vertex{XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(Colors::Green)},
         Vertex{XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(Colors::Green)},
@@ -115,7 +118,7 @@ void Exercise::CreateGeometry()
         Vertex{XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(Colors::Red)},
     };
 
-    const std::vector<UINT> indices = {
+    const std::vector<UINT> pyramidIndices = {
         0, 3, 1,
         3, 2, 1,
         0, 1, 4,
@@ -123,7 +126,28 @@ void Exercise::CreateGeometry()
         1, 2, 4,
         0, 4, 3
     };
-    indexCount = static_cast<UINT>(indices.size());
+
+    const GeometryGenerator::MeshData boxMesh = GeometryGenerator::CreateBox(2.0f, 2.0f, 2.0f);
+    std::vector<Vertex> boxVertices(boxMesh.vertices.size());
+    for (size_t i = 0; i < boxVertices.size(); ++i)
+    {
+        boxVertices[i].pos = boxMesh.vertices[i].position;
+        boxVertices[i].color = XMFLOAT4(Colors::Magenta);
+    }
+
+    std::vector<Vertex> vertices;
+    vertices.insert(vertices.end(), pyramidVertices.begin(), pyramidVertices.end());
+    vertices.insert(vertices.end(), boxVertices.begin(), boxVertices.end());
+
+    std::vector<UINT> indices;
+    indices.insert(indices.end(), pyramidIndices.begin(), pyramidIndices.end());
+    indices.insert(indices.end(), boxMesh.indices.begin(), boxMesh.indices.end());
+
+    pyramidSubmesh = Submesh{pyramidIndices.size(), 0, 0};
+    boxSubmesh = Submesh{boxMesh.indices.size(), pyramidSubmesh.startIndexLocation + pyramidIndices.size(), pyramidSubmesh.baseVertexLocation + pyramidVertices.size()};
+
+    XMStoreFloat4x4(&pyramidWorldMatrix, XMMatrixTranslation(-1.5f, 0.0f, 0.0f));
+    XMStoreFloat4x4(&boxWorldMatrix, XMMatrixTranslation(1.5f, 0.0f, 0.0f));
 
     const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA vertexBufferInitData{vertices.data()};
