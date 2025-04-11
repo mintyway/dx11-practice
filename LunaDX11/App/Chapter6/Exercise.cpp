@@ -4,10 +4,10 @@
 #include "Rendering/VertexTypes.h"
 #include "Utilities/Utility.h"
 
-#include <algorithm>
-
 Exercise::Exercise()
 {
+    SetCameraSphericalCoord(10.0f, -XM_PIDIV2, XM_PIDIV2);
+
     const XMMATRIX identityMatrix = XMMatrixIdentity();
     XMStoreFloat4x4(&worldMatrix, identityMatrix);
     XMStoreFloat4x4(&viewMatrix, identityMatrix);
@@ -40,45 +40,9 @@ void Exercise::OnResize()
     XMStoreFloat4x4(&projectionMatrix, XMMatrixPerspectiveFovLH(XM_PIDIV4, GetAspectRatio(), 1.0f, 1000.0f));
 }
 
-void Exercise::OnMouseDown(WPARAM buttonState, int x, int y)
-{
-    lastMousePosition.x = x;
-    lastMousePosition.y = y;
-    SetCapture(windowHandle);
-}
-
-void Exercise::OnMouseUp(WPARAM buttonState, int x, int y)
-{
-    ReleaseCapture();
-}
-
-void Exercise::OnMouseMove(WPARAM buttonState, int x, int y)
-{
-    const POINT currentMousePosition{x, y};
-
-    if (buttonState & MK_LBUTTON)
-    {
-        constexpr float rotationSpeed = XMConvertToRadians(0.25f); // 한 픽셀당 1/4도 회전
-        const float dx = rotationSpeed * static_cast<float>(currentMousePosition.x - lastMousePosition.x);
-        const float dy = rotationSpeed * -static_cast<float>(currentMousePosition.y - lastMousePosition.y); // 스크린 좌표는 위로갈수록 수가 작이지므로 -로 반전
-
-        theta -= dx;
-        phi = std::clamp(phi + dy, 0.1f, XM_PI - 0.1f);
-    }
-    else if (buttonState & MK_RBUTTON)
-    {
-        constexpr float zoomSpeed = 0.1f; // 1픽셀당 0.1만큼 근접 or 멀어짐
-        const float dx = zoomSpeed * static_cast<float>(currentMousePosition.x - lastMousePosition.x);
-
-        radius = std::clamp(radius - (dx), 5.0f, 15.0f);
-    }
-
-    lastMousePosition = currentMousePosition;
-}
-
 void Exercise::Update(float deltaSeconds)
 {
-    const XMVECTOR eyePosition = Math::SphericalToCartesian(radius, theta, phi);
+    const XMVECTOR eyePosition = Math::SphericalToCartesian(GetCameraRadius(), GetCameraTheta(), GetCameraPhi());
     const XMVECTOR focusPosition = XMVectorZero();
     const XMVECTOR upDirection = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     XMStoreFloat4x4(&viewMatrix, XMMatrixLookAtLH(eyePosition, focusPosition, upDirection));
@@ -91,25 +55,25 @@ void Exercise::Render()
     immediateContext->ClearRenderTargetView(renderTargetView.Get(), Colors::White);
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    // immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-    //
-    // D3D11_MAPPED_SUBRESOURCE mapped;
-    // CHECK_HR(immediateContext->Map(wvpMatrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped), L"");
-    // XMStoreFloat4x4(static_cast<XMFLOAT4X4*>(mapped.pData), XMLoadFloat4x4(&worldMatrix) * XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix));
-    // immediateContext->Unmap(wvpMatrixBuffer.Get(), 0);
-    //
-    // constexpr UINT strid = sizeof(Vertex);
-    // constexpr UINT offset = 0;
-    // immediateContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &strid, &offset);
-    //
-    // immediateContext->Draw(vertexCount, 0);
+    immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 
-    for (const XMFLOAT3& pointPosition : pointPositions)
-    {
-        XMFLOAT4X4 pointWorldMatrix;
-        XMStoreFloat4x4(&pointWorldMatrix, XMMatrixTranslationFromVector(XMLoadFloat3(&pointPosition)));
-        DrawObject(geodesicSphereVertexBuffer.Get(), geodesicSphereIndexBuffer.Get(), pointWorldMatrix, geodesicSphereIndexCount);
-    }
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    CHECK_HR(immediateContext->Map(wvpMatrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped), L"");
+    XMStoreFloat4x4(static_cast<XMFLOAT4X4*>(mapped.pData), XMLoadFloat4x4(&worldMatrix) * XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix));
+    immediateContext->Unmap(wvpMatrixBuffer.Get(), 0);
+
+    constexpr UINT strid = sizeof(Vertex);
+    constexpr UINT offset = 0;
+    immediateContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &strid, &offset);
+
+    immediateContext->Draw(vertexCount, 0);
+
+    // for (const XMFLOAT3& pointPosition : pointPositions)
+    // {
+    //     XMFLOAT4X4 pointWorldMatrix;
+    //     XMStoreFloat4x4(&pointWorldMatrix, XMMatrixTranslationFromVector(XMLoadFloat3(&pointPosition)));
+    //     DrawObject(geodesicSphereVertexBuffer.Get(), geodesicSphereIndexBuffer.Get(), pointWorldMatrix, geodesicSphereIndexCount);
+    // }
 
     swapChain->Present(0, 0);
 }
