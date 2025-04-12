@@ -186,6 +186,7 @@
     <ClInclude Include="Core\GeometryGenerator.h" />
     <ClInclude Include="Core\SphericalCamera.h" />
     <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Data\Path.h" />
     <ClInclude Include="Data\SphericalCoord.h" />
     <ClInclude Include="Exercise\Chapter6.hpp" />
     <ClInclude Include="Rendering\Submesh.h" />
