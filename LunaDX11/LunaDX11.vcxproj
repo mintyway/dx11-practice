@@ -142,6 +142,7 @@
     <ClCompile Include="App\Chapter6\Exercise.cpp" />
     <ClCompile Include="App\Chapter6\HillApp.cpp" />
     <ClCompile Include="App\Chapter6\MultiDrawApp.cpp" />
+    <ClCompile Include="App\Chapter6\SkullApp.cpp" />
     <ClCompile Include="App\Chapter6\WavesApp.cpp" />
     <ClCompile Include="Core\BaseEngine.cpp" />
     <ClCompile Include="Core\GameInstance.cpp" />
@@ -178,12 +179,14 @@
     <ClInclude Include="App\Chapter6\Exercise.h" />
     <ClInclude Include="App\Chapter6\HillApp.h" />
     <ClInclude Include="App\Chapter6\MultiDrawApp.h" />
+    <ClInclude Include="App\Chapter6\SkullApp.h" />
     <ClInclude Include="App\Chapter6\WavesApp.h" />
     <ClInclude Include="Core\BaseEngine.h" />
     <ClInclude Include="Core\GameInstance.h" />
     <ClInclude Include="Core\GeometryGenerator.h" />
     <ClInclude Include="Core\SphericalCamera.h" />
     <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Data\SphericalCoord.h" />
     <ClInclude Include="Exercise\Chapter6.hpp" />
     <ClInclude Include="Rendering\Submesh.h" />
     <ClInclude Include="Rendering\VertexTypes.h" />

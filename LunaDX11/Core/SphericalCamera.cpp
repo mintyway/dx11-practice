@@ -26,14 +26,14 @@ void SphericalCamera::OnMouseMove(WPARAM buttonState, int x, int y)
         const float dx = rotationSpeed * static_cast<float>(currentMousePosition.x - lastMousePosition.x);
         const float dy = rotationSpeed * static_cast<float>(currentMousePosition.y - lastMousePosition.y);
 
-        cameraTheta -= dx;
-        cameraPhi = std::clamp(cameraPhi - dy, XMConvertToRadians(0.1f), XM_PI - XMConvertToRadians(0.1f));
+        cameraSphericalCoord.theta -= dx;
+        cameraSphericalCoord.phi = std::clamp(cameraSphericalCoord.phi - dy, XMConvertToRadians(0.1f), XM_PI - XMConvertToRadians(0.1f));
     }
     else if (buttonState & MK_RBUTTON)
     {
         const float dx = zoomSpeed * static_cast<float>(currentMousePosition.x - lastMousePosition.x);
 
-        cameraRadius = std::clamp(cameraRadius - (dx), minCameraRadius, maxCameraRadius);
+        cameraSphericalCoord.radius = std::clamp(cameraSphericalCoord.radius - (dx), minCameraRadius, maxCameraRadius);
     }
 
     lastMousePosition = currentMousePosition;

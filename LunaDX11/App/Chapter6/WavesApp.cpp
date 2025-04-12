@@ -1,6 +1,7 @@
 #include "WavesApp.h"
 
 #include "Core/GeometryGenerator.h"
+#include "Data/SphericalCoord.h"
 #include "Utilities/Utility.h"
 
 #include <algorithm>
@@ -88,7 +89,7 @@ void WavesApp::OnMouseMove(WPARAM buttonState, int x, int y)
 void WavesApp::Update(float deltaSeconds)
 {
     // 뷰 행렬을 구축한다.
-    const XMVECTOR eyePosition = Math::SphericalToCartesian(radius, theta, phi);
+    const XMVECTOR eyePosition = SphericalCoord::SphericalToCartesian(SphericalCoord{radius, theta, phi});
     const XMVECTOR focusPosition = XMVectorZero();
     const XMVECTOR upDirection = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     XMStoreFloat4x4(&viewMatrix, XMMatrixLookAtLH(eyePosition, focusPosition, upDirection));

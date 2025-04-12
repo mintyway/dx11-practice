@@ -43,7 +43,7 @@ void Exercise::OnResize()
 
 void Exercise::Update(float deltaSeconds)
 {
-    const XMVECTOR eyePosition = Math::SphericalToCartesian(GetCameraRadius(), GetCameraTheta(), GetCameraPhi());
+    const XMVECTOR eyePosition = SphericalCoord::SphericalToCartesian(GetCameraSphericalCoord());
     const XMVECTOR focusPosition = XMVectorZero();
     const XMVECTOR upDirection = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     XMStoreFloat4x4(&viewMatrix, XMMatrixLookAtLH(eyePosition, focusPosition, upDirection));

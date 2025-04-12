@@ -1,6 +1,7 @@
 #include "HillApp.h"
 
 #include "Core/GeometryGenerator.h"
+#include "Data/SphericalCoord.h"
 #include "Utilities/Utility.h"
 
 #include <algorithm>
@@ -74,7 +75,7 @@ void HillApp::OnMouseMove(WPARAM buttonState, int x, int y)
 void HillApp::Update(float deltaSeconds)
 {
     // 뷰 행렬 구축
-    const XMVECTOR cameraPosition = Math::SphericalToCartesian(radius, theta, phi);
+    const XMVECTOR cameraPosition = SphericalCoord::SphericalToCartesian(SphericalCoord{radius, theta, phi});
     const XMVECTOR targetPosition = XMVectorZero();
     const XMVECTOR upDirection = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     const XMMATRIX newViewMatrix = XMMatrixLookAtLH(cameraPosition, targetPosition, upDirection);

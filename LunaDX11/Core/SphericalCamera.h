@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BaseEngine.h"
+#include "Data/SphericalCoord.h"
+
 #include <DirectXMath.h>
 
 using namespace DirectX;
@@ -14,18 +16,11 @@ public:
     virtual void OnMouseUp(WPARAM buttonState, int x, int y) override;
     virtual void OnMouseMove(WPARAM buttonState, int x, int y) override;
 
-    inline float GetCameraRadius() const { return cameraRadius; }
-    inline float GetCameraTheta() const { return cameraTheta; }
-    inline float GetCameraPhi() const { return cameraPhi; }
+    inline SphericalCoord GetCameraSphericalCoord() { return cameraSphericalCoord; }
+    inline void SetCameraSphericalCoord(float newRadius, float newTheta, float newPhi) { cameraSphericalCoord = SphericalCoord{newRadius, newTheta, newPhi}; }
+
     inline float GetMinCameraRadius() const { return minCameraRadius; }
     inline float GetMaxCameraRadius() const { return maxCameraRadius; }
-
-    inline void SetCameraSphericalCoord(float newRadius, float newTheta, float newPhi)
-    {
-        cameraRadius = newRadius;
-        cameraTheta = newTheta;
-        cameraPhi = newPhi;
-    }
 
     inline void SetZoomSpeed(float zoomSpeedPerPixel) { zoomSpeed = zoomSpeedPerPixel; }
 
@@ -33,9 +28,7 @@ protected:
     SphericalCamera();
 
 private:
-    float cameraRadius = 100.0f;
-    float cameraTheta = -XM_PIDIV4;
-    float cameraPhi = XM_PIDIV4;
+    SphericalCoord cameraSphericalCoord = SphericalCoord{100.0f, -XM_PIDIV4, XM_PIDIV4};
 
     float minCameraRadius = 1.001f;
     float maxCameraRadius;
