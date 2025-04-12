@@ -156,6 +156,16 @@ LRESULT BaseEngine::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 
             return 0;
         }
+        case WM_SYSKEYDOWN:
+        {
+            if (wParam == '4')
+            {
+                bUseWireframeView = !bUseWireframeView;
+                immediateContext->RSSetState(bUseWireframeView ? wireframeRasterizerState.Get() : nullptr);
+            }
+
+            return 0;
+        }
         case WM_LBUTTONDOWN:
             [[fallthrough]];
         case WM_MBUTTONDOWN:

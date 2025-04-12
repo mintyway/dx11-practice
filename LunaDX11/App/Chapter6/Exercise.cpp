@@ -63,8 +63,6 @@ void Exercise::Render()
     immediateContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &strid, &offset);
     immediateContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-    immediateContext->RSSetState(wireframeRasterizerState.Get());
-
     auto drawObject = [&](const XMFLOAT4X4& inWorldMatrix, const Submesh& inSubmesh)
     {
         D3D11_MAPPED_SUBRESOURCE mapped;

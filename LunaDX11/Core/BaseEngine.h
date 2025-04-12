@@ -113,4 +113,5 @@ protected:
 
 private:
     static std::unique_ptr<BaseEngine> engineInstance;
+    bool bUseWireframeView = false;
 };
