@@ -191,6 +191,10 @@
     <ClInclude Include="Utilities\Utility.h" />
     <ClInclude Include="Utilities\Waves.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Models\car.txt" />
+    <Content Include="Models\skull.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
