@@ -149,7 +149,7 @@
     <ClCompile Include="Core\GeometryGenerator.cpp" />
     <ClCompile Include="Core\SphericalCamera.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
-    <ClCompile Include="LunaDX11.cpp" />
+    <ClCompile Include="core.cpp" />
     <ClCompile Include="Utilities\Utility.cpp" />
     <ClCompile Include="Utilities\Waves.cpp" />
     <FxCompile Include="Shader\Pixel\Box_ps.hlsl">
