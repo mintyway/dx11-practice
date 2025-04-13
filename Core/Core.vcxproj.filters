@@ -42,9 +42,6 @@
     <ClCompile Include="App\Chapter6\MultiDrawApp.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="App\Chapter6\SkullApp.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="App\Chapter6\WavesApp.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -55,6 +52,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Utilities\Waves.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Path.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -90,9 +90,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="App\Chapter6\MultiDrawApp.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="App\Chapter6\SkullApp.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="App\Chapter6\WavesApp.h">

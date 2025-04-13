@@ -19,7 +19,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -70,7 +70,6 @@
     <ClCompile Include="App\Chapter6\Exercise.cpp" />
     <ClCompile Include="App\Chapter6\HillApp.cpp" />
     <ClCompile Include="App\Chapter6\MultiDrawApp.cpp" />
-    <ClCompile Include="App\Chapter6\SkullApp.cpp" />
     <ClCompile Include="App\Chapter6\WavesApp.cpp" />
     <ClCompile Include="Core\BaseEngine.cpp" />
     <ClCompile Include="Core\GameInstance.cpp" />
@@ -102,7 +101,6 @@
     <ClInclude Include="App\Chapter6\Exercise.h" />
     <ClInclude Include="App\Chapter6\HillApp.h" />
     <ClInclude Include="App\Chapter6\MultiDrawApp.h" />
-    <ClInclude Include="App\Chapter6\SkullApp.h" />
     <ClInclude Include="App\Chapter6\WavesApp.h" />
     <ClInclude Include="Core\BaseEngine.h" />
     <ClInclude Include="Core\GameInstance.h" />

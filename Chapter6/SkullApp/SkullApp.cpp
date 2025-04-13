@@ -4,9 +4,22 @@
 #include "Rendering/VertexTypes.h"
 #include "Utilities/Utility.h"
 
-#include <filesystem>
 #include <fstream>
 #include <vector>
+
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
+{
+    BaseEngine::Register<SkullApp>();
+
+    if (!BaseEngine::Get()->Init(hInstance))
+    {
+        return 0;
+    }
+
+    BaseEngine::Get()->Run();
+
+    return 0;
+}
 
 bool SkullApp::Init(HINSTANCE inInstanceHandle)
 {
