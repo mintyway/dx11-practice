@@ -5,13 +5,11 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -19,75 +17,54 @@
     <RootNamespace>LunaDX11</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
-
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-
   <ImportGroup Label="ExtensionSettings" />
-
   <ImportGroup Label="Shared" />
-
   <ImportGroup Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
-      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
-      Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\common.props" />
   </ImportGroup>
-
   <PropertyGroup Label="UserMacros" />
-
-
   <ItemDefinitionGroup>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
-
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
-
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-
-
   <ItemGroup>
     <ClCompile Include="App\Chapter6\BoxApp.cpp" />
     <ClCompile Include="App\Chapter6\Exercise.cpp" />
@@ -101,28 +78,25 @@
     <ClCompile Include="Core\SphericalCamera.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="core.cpp" />
+    <ClCompile Include="Data\Path.cpp" />
     <ClCompile Include="Utilities\Utility.cpp" />
     <ClCompile Include="Utilities\Waves.cpp" />
-
     <FxCompile Include="Shader\Pixel\Box_ps.hlsl">
       <FileType>Document</FileType>
       <ShaderType>Pixel</ShaderType>
       <EntryPointName>PS_Main</EntryPointName>
     </FxCompile>
-
     <FxCompile Include="Shader\Vertex\Box_vs.hlsl">
       <FileType>Document</FileType>
       <ShaderType>Vertex</ShaderType>
       <EntryPointName>VS_Main</EntryPointName>
     </FxCompile>
-
     <FxCompile Include="Shader\Vertex\6-6_vs.hlsl">
       <FileType>Document</FileType>
       <ShaderType>Vertex</ShaderType>
       <EntryPointName>VS_Main</EntryPointName>
     </FxCompile>
   </ItemGroup>
-
   <ItemGroup>
     <ClInclude Include="App\Chapter6\BoxApp.h" />
     <ClInclude Include="App\Chapter6\Exercise.h" />
@@ -144,14 +118,14 @@
     <ClInclude Include="Utilities\Utility.h" />
     <ClInclude Include="Utilities\Waves.h" />
   </ItemGroup>
-
   <ItemGroup>
-    <Content Include="Models\car.txt" />
-    <Content Include="Models\skull.txt" />
+    <Content Include="Models\car.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Models\skull.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
-
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-
   <ImportGroup Label="ExtensionTargets" />
 </Project>

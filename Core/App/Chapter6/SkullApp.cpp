@@ -4,6 +4,7 @@
 #include "Rendering/VertexTypes.h"
 #include "Utilities/Utility.h"
 
+#include <filesystem>
 #include <fstream>
 #include <vector>
 
@@ -56,7 +57,7 @@ void SkullApp::Render()
 
 void SkullApp::LoadSkullMesh()
 {
-    std::ifstream ifs(MeshPath::SkullPath);
+    std::ifstream ifs(Path::GetModelPath(L"skull.txt").c_str());
 
     UINT vertexCount = 0;
     UINT triangleCount = 0;
@@ -107,14 +108,12 @@ void SkullApp::LoadSkullMesh()
 void SkullApp::InitShaderResource()
 {
     ComPtr<ID3DBlob> vertexShaderBlob;
-    ComPtr<ID3DBlob> vertexShaderErrorBlob;
-    D3DCompileFromFile(ShaderPath::Chapter6VertexShader, nullptr, nullptr, "VS_Main", "vs_5_0", 0, 0, &vertexShaderBlob, &vertexShaderErrorBlob);
+    D3DReadFileToBlob(Path::GetShaderPath(L"Box_vs.cso").c_str(), &vertexShaderBlob);
     device->CreateVertexShader(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), nullptr, &vertexShader);
     immediateContext->VSSetShader(vertexShader.Get(), nullptr, 0);
 
     ComPtr<ID3DBlob> pixelShaderBlob;
-    ComPtr<ID3DBlob> pixelShaderErrorBlob;
-    D3DCompileFromFile(ShaderPath::Chapter6PixelShader, nullptr, nullptr, "PS_Main", "ps_5_0", 0, 0, &pixelShaderBlob, &pixelShaderErrorBlob);
+    D3DReadFileToBlob(Path::GetShaderPath(L"Box_ps.cso").c_str(), &pixelShaderBlob);
     device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader);
     immediateContext->PSSetShader(pixelShader.Get(), nullptr, 0);
 

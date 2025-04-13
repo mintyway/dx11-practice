@@ -1,12 +1,12 @@
 #pragma once
 
-namespace ShaderPath
-{
-    constexpr const wchar_t* Chapter6VertexShader = L"../Core/Shader/Vertex/Box_vs.hlsl";
-    constexpr const wchar_t* Chapter6PixelShader = L"../Core/Shader/Pixel/Box_ps.hlsl";
-}
+#include <filesystem>
 
-namespace MeshPath
+namespace Path
 {
-    constexpr const char* SkullPath = "../Core/Models/skull.txt";
+    [[nodiscard]]
+    std::filesystem::path GetShaderPath(const wchar_t* fileName);
+
+    [[nodiscard]]
+    std::filesystem::path GetModelPath(const wchar_t* fileName);
 }
