@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BaseEngine.h"
-#include "Data/SphericalCoord.h"
+#include "Core/Data/SphericalCoord.h"
 
 #include <DirectXMath.h>
 

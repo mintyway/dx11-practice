@@ -113,10 +113,16 @@
     <ClInclude Include="Utilities\Waves.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Light\Light.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\Pixel\Box_ps.hlsl" />
     <FxCompile Include="Shader\Vertex\Box_vs.hlsl" />
     <FxCompile Include="Shader\Vertex\6-6_vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\Light\LightingCommon.hlsli" />
   </ItemGroup>
 </Project>

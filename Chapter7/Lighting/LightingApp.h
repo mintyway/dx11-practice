@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/SphericalCamera.h"
+#include "Core/Core/SphericalCamera.h"
 
 class LightingApp : public SphericalCamera
 {

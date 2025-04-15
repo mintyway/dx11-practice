@@ -80,17 +80,17 @@
     <ClCompile Include="Data\Path.cpp" />
     <ClCompile Include="Utilities\Utility.cpp" />
     <ClCompile Include="Utilities\Waves.cpp" />
-    <FxCompile Include="Shader\Pixel\Box_ps.hlsl">
+    <FxCompile Include="Shaders\Pixel\Box_ps.hlsl">
       <FileType>Document</FileType>
       <ShaderType>Pixel</ShaderType>
       <EntryPointName>PS_Main</EntryPointName>
     </FxCompile>
-    <FxCompile Include="Shader\Vertex\Box_vs.hlsl">
+    <FxCompile Include="Shaders\Vertex\Box_vs.hlsl">
       <FileType>Document</FileType>
       <ShaderType>Vertex</ShaderType>
       <EntryPointName>VS_Main</EntryPointName>
     </FxCompile>
-    <FxCompile Include="Shader\Vertex\6-6_vs.hlsl">
+    <FxCompile Include="Shaders\Vertex\6-6_vs.hlsl">
       <FileType>Document</FileType>
       <ShaderType>Vertex</ShaderType>
       <EntryPointName>VS_Main</EntryPointName>
@@ -110,11 +110,14 @@
     <ClInclude Include="Data\Path.h" />
     <ClInclude Include="Data\SphericalCoord.h" />
     <ClInclude Include="Exercise\Chapter6.hpp" />
+    <ClInclude Include="Light\Light.h" />
     <ClInclude Include="Rendering\Submesh.h" />
     <ClInclude Include="Rendering\VertexTypes.h" />
     <ClInclude Include="Utilities\Color.h" />
     <ClInclude Include="Utilities\Utility.h" />
     <ClInclude Include="Utilities\Waves.h" />
+    <None Include="Shaders\Light\LightingCommon.hlsli" />
+    <None Include="Shaders\Light\LightingFunction.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Models\car.txt">

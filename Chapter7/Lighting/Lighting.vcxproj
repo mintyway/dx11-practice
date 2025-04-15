@@ -76,6 +76,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LightingApp.cpp" />
+    <FxCompile Include="Shaders\Light_ps.hlsl">
+      <FileType>Document</FileType>
+      <EntryPointName>PS_Main</EntryPointName>
+      <ShaderType>Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\Light_vs.hlsl">
+      <EntryPointName>VS_Main</EntryPointName>
+      <ShaderType>Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.vcxproj">
