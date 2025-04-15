@@ -5,7 +5,7 @@ VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core.vcxproj", "{6817540C-5AC0-4792-B19E-F5BE11B51FE0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SkullApp", "Chapter6\SkullApp\SkullApp.vcxproj", "{8F022880-76A7-492F-A0DD-75CCF055292F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lighting", "Chapter7\Lighting\Lighting.vcxproj", "{4075BFC4-29F9-4751-A4F8-9BF8F927B6C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{6817540C-5AC0-4792-B19E-F5BE11B51FE0}.Debug|x64.Build.0 = Debug|x64
 		{6817540C-5AC0-4792-B19E-F5BE11B51FE0}.Release|x64.ActiveCfg = Release|x64
 		{6817540C-5AC0-4792-B19E-F5BE11B51FE0}.Release|x64.Build.0 = Release|x64
-		{8F022880-76A7-492F-A0DD-75CCF055292F}.Debug|x64.ActiveCfg = Debug|x64
-		{8F022880-76A7-492F-A0DD-75CCF055292F}.Debug|x64.Build.0 = Debug|x64
-		{8F022880-76A7-492F-A0DD-75CCF055292F}.Release|x64.ActiveCfg = Release|x64
-		{8F022880-76A7-492F-A0DD-75CCF055292F}.Release|x64.Build.0 = Release|x64
+		{4075BFC4-29F9-4751-A4F8-9BF8F927B6C4}.Debug|x64.ActiveCfg = Debug|x64
+		{4075BFC4-29F9-4751-A4F8-9BF8F927B6C4}.Debug|x64.Build.0 = Debug|x64
+		{4075BFC4-29F9-4751-A4F8-9BF8F927B6C4}.Release|x64.ActiveCfg = Release|x64
+		{4075BFC4-29F9-4751-A4F8-9BF8F927B6C4}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
