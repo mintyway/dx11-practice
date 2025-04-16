@@ -28,4 +28,7 @@
     <FxCompile Include="Shaders\Light_vs.hlsl" />
     <FxCompile Include="Shaders\Light_ps.hlsl" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\VertexType.hlsli" />
+  </ItemGroup>
 </Project>

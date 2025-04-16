@@ -1,14 +1,19 @@
 #include "Core/Shaders/Light/LightingCommon.hlsli"
+#include "VertexType.hlsli"
 
-cbuffer ConstantBufferPerObject
+cbuffer ConstantBufferPerObject : register(b0)
 {
-    float4x4 worldMatrix;
-    float4x4 worldInverseTransposeMatrix;
-    float4x4 wvpMatrix;
+    row_major float4x4 worldMatrix;
+    row_major float4x4 worldInverseTransposeMatrix;
+    row_major float4x4 wvpMatrix;
     Material material;
 };
 
-void VS_Main()
+VertexOut VS_Main(VertexIn input)
 {
-    
+    VertexOut output;
+    output.positionWS = mul(float4(input.positionOS, 1.0f), worldMatrix).xyz;
+    output.normalWS = mul(input.normalOS, (float3x3)worldInverseTransposeMatrix);
+    output.positionCS = mul(float4(input.positionOS, 1.0f), wvpMatrix);
+    return output;
 }

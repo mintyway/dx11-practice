@@ -58,7 +58,7 @@ void Exercise::Render()
 
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    constexpr UINT strid = sizeof(Vertex);
+    constexpr UINT strid = sizeof(VertexWithColor);
     constexpr UINT offset = 0;
     immediateContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &strid, &offset);
     immediateContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
@@ -96,7 +96,7 @@ void Exercise::InitShader()
     CHECK_HR(D3DCompileFromFile(L"Shader/Pixel/Box_ps.hlsl", nullptr, nullptr, "PS_Main", "ps_5_0", shaderFlags, 0, &pixelShaderBlob, &pixelShaderErrorBlob), L"");
     CHECK_HR(device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader), L"");
 
-    CHECK_HR(device->CreateInputLayout(Vertex::Desc.data(), static_cast<UINT>(Vertex::Desc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"");
+    CHECK_HR(device->CreateInputLayout(VertexWithColor::Desc.data(), static_cast<UINT>(VertexWithColor::Desc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout), L"");
 
     const CD3D11_BUFFER_DESC wvpMatrixBufferDesc(sizeof(XMFLOAT4X4), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
     device->CreateBuffer(&wvpMatrixBufferDesc, nullptr, &wvpMatrixBuffer);
@@ -110,12 +110,12 @@ void Exercise::InitShader()
 
 void Exercise::CreateGeometry()
 {
-    const std::vector<Vertex> pyramidVertices = {
-        Vertex{XMFLOAT3(-1.0f, -1.0f, -1.0f), Color(0, 255, 0)},
-        Vertex{XMFLOAT3(-1.0f, -1.0f, 1.0f), Color(0, 255, 0)},
-        Vertex{XMFLOAT3(1.0f, -1.0f, 1.0f), Color(0, 255, 0)},
-        Vertex{XMFLOAT3(1.0f, -1.0f, -1.0f), Color(0, 255, 0)},
-        Vertex{XMFLOAT3(0.0f, 1.0f, 0.0f), Color(255, 0, 0)},
+    const std::vector<VertexWithColor> pyramidVertices = {
+        VertexWithColor{XMFLOAT3(-1.0f, -1.0f, -1.0f), Color(0, 255, 0)},
+        VertexWithColor{XMFLOAT3(-1.0f, -1.0f, 1.0f), Color(0, 255, 0)},
+        VertexWithColor{XMFLOAT3(1.0f, -1.0f, 1.0f), Color(0, 255, 0)},
+        VertexWithColor{XMFLOAT3(1.0f, -1.0f, -1.0f), Color(0, 255, 0)},
+        VertexWithColor{XMFLOAT3(0.0f, 1.0f, 0.0f), Color(255, 0, 0)},
     };
 
     const std::vector<UINT> pyramidIndices = {
@@ -128,14 +128,14 @@ void Exercise::CreateGeometry()
     };
 
     const GeometryGenerator::MeshData boxMesh = GeometryGenerator::CreateBox(2.0f, 2.0f, 2.0f);
-    std::vector<Vertex> boxVertices(boxMesh.vertices.size());
+    std::vector<VertexWithColor> boxVertices(boxMesh.vertices.size());
     for (size_t i = 0; i < boxVertices.size(); ++i)
     {
         boxVertices[i].position = boxMesh.vertices[i].position;
         boxVertices[i].color = Color(255, 0, 255);
     }
 
-    std::vector<Vertex> vertices;
+    std::vector<VertexWithColor> vertices;
     vertices.insert(vertices.end(), pyramidVertices.begin(), pyramidVertices.end());
     vertices.insert(vertices.end(), boxVertices.begin(), boxVertices.end());
 
@@ -149,7 +149,7 @@ void Exercise::CreateGeometry()
     XMStoreFloat4x4(&pyramidWorldMatrix, XMMatrixTranslation(-1.5f, 0.0f, 0.0f));
     XMStoreFloat4x4(&boxWorldMatrix, XMMatrixTranslation(1.5f, 0.0f, 0.0f));
 
-    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(VertexWithColor) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA vertexBufferInitData{vertices.data()};
     CHECK_HR(device->CreateBuffer(&vertexBufferDesc, &vertexBufferInitData, &vertexBuffer), L"");
 

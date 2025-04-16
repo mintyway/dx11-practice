@@ -73,6 +73,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="LightingApp.h" />
+    <None Include="Shaders\VertexType.hlsli">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LightingApp.cpp" />
