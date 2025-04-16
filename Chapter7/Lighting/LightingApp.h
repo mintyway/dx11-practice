@@ -3,6 +3,7 @@
 #include "Core/Core/SphericalCamera.h"
 #include "Core/Rendering/Submesh.h"
 #include "Core/Utilities/Waves.h"
+#include "Core/Light/Light.h"
 
 using namespace DirectX;
 
@@ -22,7 +23,7 @@ protected:
     virtual void Update(float deltaSeconds) override;
     virtual void Render() override;
 
-    void RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr, const XMFLOAT4X4& worldMatrix, XMMATRIX viewProjectionMatrix, UINT indexCount, bool bUseWireframe = false);
+    void RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr, XMMATRIX worldMatrix, CXMMATRIX viewProjectionMatrix, const Material& material, UINT indexCount);
 
 private:
     bool CreateGeometry();
@@ -33,11 +34,19 @@ private:
 
     static float GetHeight(float x, float z) { return 0.3f * (z * std::sin(0.1f * x) + x * std::cos(0.1f * z)); }
 
+    static XMFLOAT3 GetHillNormal(float x, float z)
+    {
+        XMFLOAT3 n(-0.03f * z * std::cos(0.1f * x) - 0.3f * std::cos(0.1f * z), 1.0f, -0.3f * std::sin(0.1f * x) + 0.03f * x * std::sin(0.1f * z));
+        XMStoreFloat3(&n, XMVector3Normalize(XMLoadFloat3(&n)));
+        return n;
+    }
+
     ComPtr<ID3D11InputLayout> inputLayout;
     ComPtr<ID3D11VertexShader> vertexShader;
     ComPtr<ID3D11PixelShader> pixelShader;
 
-    ComPtr<ID3D11Buffer> objectConstantBuffer;
+    ComPtr<ID3D11Buffer> cbPerObject;
+    ComPtr<ID3D11Buffer> cbPerFrame;
 
     ComPtr<ID3D11Buffer> landVertexBuffer;
     ComPtr<ID3D11Buffer> landIndexBuffer;
@@ -50,6 +59,14 @@ private:
 
     XMFLOAT4X4 landWorldMatrix;
     XMFLOAT4X4 wavesWorldMatrix;
+
+    XMFLOAT3 eyePosition;
+
+    DirectionalLight directionalLight;
+    PointLight pointLight;
+    SpotLight spotLight;
+    Material landMaterial;
+    Material wavesMaterial;
 
     Waves waves;
 

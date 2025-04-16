@@ -5,6 +5,7 @@
 #include "Core/Data/SphericalCoord.h"
 #include "Core/Rendering/VertexTypes.h"
 #include "Core/Utilities/Utility.h"
+#include "Type/ConstantBufferData.h"
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
@@ -28,6 +29,32 @@ LightingApp::LightingApp()
     const XMMATRIX identityMatrix = XMMatrixIdentity();
     XMStoreFloat4x4(&landWorldMatrix, identityMatrix);
     XMStoreFloat4x4(&wavesWorldMatrix, identityMatrix);
+
+    directionalLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+    directionalLight.diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+    directionalLight.specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+    directionalLight.direction = XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
+
+    pointLight.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+    pointLight.diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+    pointLight.specular = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+    pointLight.attenuation = XMFLOAT3(0.0f, 0.1f, 0.0f);
+    pointLight.range = 25.0f;
+
+    spotLight.ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+    spotLight.diffuse = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+    spotLight.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    spotLight.attenuation = XMFLOAT3(1.0f, 0.0f, 0.0f);
+    spotLight.spot = 96.0f;
+    spotLight.range = 10000.0f;
+
+    landMaterial.ambient = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
+    landMaterial.diffuse = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
+    landMaterial.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
+
+    wavesMaterial.ambient = XMFLOAT4(0.137f, 0.42f, 0.556f, 1.0f);
+    wavesMaterial.diffuse = XMFLOAT4(0.137f, 0.42f, 0.556f, 1.0f);
+    wavesMaterial.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 96.0f);
 }
 
 bool LightingApp::Init(HINSTANCE inInstanceHandle)
@@ -59,10 +86,11 @@ void LightingApp::OnResize()
 
 void LightingApp::Update(float deltaSeconds)
 {
-    const XMVECTOR eyePosition = SphericalCoord::SphericalToCartesian(GetCameraSphericalCoord());
+    const XMVECTOR cameraPosition = SphericalCoord::SphericalToCartesian(GetCameraSphericalCoord());
     const XMVECTOR focusPosition = XMVectorZero();
     const XMVECTOR upDirection = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-    XMStoreFloat4x4(&viewMatrix, XMMatrixLookAtLH(eyePosition, focusPosition, upDirection));
+    XMStoreFloat4x4(&viewMatrix, XMMatrixLookAtLH(cameraPosition, focusPosition, upDirection));
+    XMStoreFloat3(&eyePosition, cameraPosition);
 
     static float elapsedTime = 0.0f;
     if (timer.GetTotalSeconds() - elapsedTime >= 0.1f)
@@ -85,10 +113,17 @@ void LightingApp::Update(float deltaSeconds)
     for (UINT i = 0; i < waves.VertexCount(); ++i)
     {
         vertices[i].position = waves[static_cast<int>(i)];
-        // vertices[i].color = Color(0, 0, 0, 255);
+        vertices[i].normal = waves.Normal(static_cast<int>(i));
     }
 
     immediateContext->Unmap(wavesVertexBuffer.Get(), 0);
+
+    pointLight.position.x = 70.0f * std::cos(0.2f * static_cast<float>(timer.GetTotalSeconds()));
+    pointLight.position.z = 70.0f * std::sin(0.2f * static_cast<float>(timer.GetTotalSeconds()));
+    pointLight.position.y = std::max(GetHeight(pointLight.position.x, pointLight.position.z), -3.0f) + 10.0f;
+
+    spotLight.position = eyePosition;
+    XMStoreFloat3(&spotLight.direction, XMVector3Normalize(focusPosition - cameraPosition));
 }
 
 void LightingApp::Render()
@@ -97,23 +132,33 @@ void LightingApp::Render()
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     const XMMATRIX viewProjectionMatrix = XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix);
-    RenderObject(landVertexBuffer.Get(), landIndexBuffer.Get(), landWorldMatrix, viewProjectionMatrix, gridSubmesh.indexCount);
-    RenderObject(wavesVertexBuffer.Get(), wavesIndexBuffer.Get(), wavesWorldMatrix, viewProjectionMatrix, wavesSubmesh.indexCount, true);
+    RenderObject(landVertexBuffer.Get(), landIndexBuffer.Get(), XMLoadFloat4x4(&landWorldMatrix), viewProjectionMatrix, landMaterial, gridSubmesh.indexCount);
+    RenderObject(wavesVertexBuffer.Get(), wavesIndexBuffer.Get(), XMLoadFloat4x4(&wavesWorldMatrix), viewProjectionMatrix, wavesMaterial, wavesSubmesh.indexCount);
 
     swapChain->Present(0, 0);
 }
 
-void LightingApp::RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr, const XMFLOAT4X4& worldMatrix, FXMMATRIX viewProjectionMatrix, UINT indexCount, bool bUseWireframe)
+void LightingApp::RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr, FXMMATRIX worldMatrix, CXMMATRIX viewProjectionMatrix, const Material& material, UINT indexCount)
 {
-    immediateContext->RSSetState(bUseWireframe ? wireframeRasterizerState.Get() : nullptr);
+    D3D11_MAPPED_SUBRESOURCE mappedDataPerObject;
+    immediateContext->Map(cbPerObject.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedDataPerObject);
+    ConstantBufferPerObjecteData* dataPerObjecte = static_cast<ConstantBufferPerObjecteData*>(mappedDataPerObject.pData);
+    XMStoreFloat4x4(&dataPerObjecte->worldMatrix, worldMatrix);
+    XMStoreFloat4x4(&dataPerObjecte->worldInverseTransposeMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)));
+    XMStoreFloat4x4(&dataPerObjecte->wvpMatrix, worldMatrix * viewProjectionMatrix);
+    dataPerObjecte->material.ambient = material.ambient;
+    dataPerObjecte->material.diffuse = material.diffuse;
+    dataPerObjecte->material.specular = material.specular;
+    immediateContext->Unmap(cbPerObject.Get(), 0);
 
-    XMFLOAT4X4 wvpMatrix;
-    XMStoreFloat4x4(&wvpMatrix, XMLoadFloat4x4(&worldMatrix) * viewProjectionMatrix);
-
-    D3D11_MAPPED_SUBRESOURCE mappedResource;
-    CHECK_HR(immediateContext->Map(objectConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource), L"Failed to get mappedResource");
-    *static_cast<XMFLOAT4X4*>(mappedResource.pData) = wvpMatrix;
-    immediateContext->Unmap(objectConstantBuffer.Get(), 0);
+    D3D11_MAPPED_SUBRESOURCE mappedDataPerFrame;
+    immediateContext->Map(cbPerFrame.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedDataPerFrame);
+    ConstantBufferPerFrameData* dataPerFrame = static_cast<ConstantBufferPerFrameData*>(mappedDataPerFrame.pData);
+    dataPerFrame->directionalLight = directionalLight;
+    dataPerFrame->pointLight = pointLight;
+    dataPerFrame->spotLight = spotLight;
+    dataPerFrame->eyeWorldPosition = eyePosition;
+    immediateContext->Unmap(cbPerFrame.Get(), 0);
 
     constexpr UINT stride = sizeof(Vertex);
     constexpr UINT offset = 0;
@@ -139,9 +184,15 @@ bool LightingApp::InitShaderResource()
     immediateContext->IASetInputLayout(inputLayout.Get());
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    const CD3D11_BUFFER_DESC objectCBDesc(sizeof(XMFLOAT4X4), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-    device->CreateBuffer(&objectCBDesc, nullptr, &objectConstantBuffer);
-    immediateContext->VSSetConstantBuffers(0, 1, objectConstantBuffer.GetAddressOf());
+    const CD3D11_BUFFER_DESC cbPerObjectDesc(sizeof(ConstantBufferPerObjecteData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    device->CreateBuffer(&cbPerObjectDesc, nullptr, &cbPerObject);
+
+    const CD3D11_BUFFER_DESC cbPerFrameDesc(sizeof(ConstantBufferPerFrameData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    device->CreateBuffer(&cbPerFrameDesc, nullptr, &cbPerFrame);
+
+    ID3D11Buffer* const cbs[] = {cbPerObject.Get(), cbPerFrame.Get()};
+    immediateContext->VSSetConstantBuffers(0, 2, cbs);
+    immediateContext->PSSetConstantBuffers(0, 2, cbs);
 
     return true;
 }
@@ -172,27 +223,7 @@ bool LightingApp::CreateLandGeometry()
         XMFLOAT3 position = grid.vertices[i].position;
         position.y = GetHeight(position.x, position.z);
         vertices[i].position = position;
-
-        // if (position.y < -10.0f) // 모래 사장(밝은 노란색)
-        // {
-        //     vertices[i].color = Color::LinearColorToColor(XMVECTORF32{1.0f, 0.96f, 0.62f, 1.0f});
-        // }
-        // else if (position.y < 5.0f) // 저지대(밝은 녹색)
-        // {
-        //     vertices[i].color = Color::LinearColorToColor(XMVECTORF32{0.48f, 0.77f, 0.46f, 1.0f});
-        // }
-        // else if (position.y < 12.0f) // 중지대(어두운 녹색)
-        // {
-        //     vertices[i].color = Color::LinearColorToColor(XMVECTORF32{0.1f, 0.48f, 0.19f, 1.0f});
-        // }
-        // else if (position.y < 20.0f) // 고지대(갈색)
-        // {
-        //     vertices[i].color = Color::LinearColorToColor(XMVECTORF32{0.45f, 0.39f, 0.34f, 1.0f});
-        // }
-        // else // 눈(흰색)
-        // {
-        //     vertices[i].color = Color::LinearColorToColor(XMVECTORF32{1.0f, 1.0f, 1.0f, 1.0f});
-        // }
+        vertices[i].normal = GetHillNormal(position.x, position.z);
     }
 
     const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);

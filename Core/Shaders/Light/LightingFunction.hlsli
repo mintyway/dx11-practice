@@ -34,11 +34,11 @@ void ComputePointLight(Material material, PointLight light, float3 position, flo
     const float toLightDistance = length(toLightVector); // 빛을 향하는 길이를 구한다.
     if (toLightDistance > light.range) return; // 범위 밖에 있다면 빛을 아예 받지 않는다고 가정하기에 조기 리턴한다.
 
-    ambient = material.ambient * light.ambient; // 앰비언트 값을 구한다.
-
     const float3 lightDirection = -(toLightVector / toLightDistance); // 미리 구해둔 거리를 재활용해 노멀라이즈하고 방향을 바꿔 빛을 향하는 방향에서 빛이 나아가는 방향으로 바꾼다.
     const float diffuseFactor = dot(-lightDirection, normal); // 편의를 위해 빛 방향의 반대 방향 벡터를 사용한다.
     if (diffuseFactor <= 0.0f) return; // 빛을 받지 않는 각도면 조기 리턴한다.
+
+    ambient = material.ambient * light.ambient; // 앰비언트 값을 구한다.
 
     diffuse = diffuseFactor * material.diffuse * light.diffuse; // 디퓨즈 값을 구한다.
 
@@ -48,7 +48,8 @@ void ComputePointLight(Material material, PointLight light, float3 position, flo
 
     const float attenuation = 1.0f / dot(light.attenuation, float3(1.0f, toLightDistance, toLightDistance * toLightDistance)); // 어뉴테이션 값을 구한다.
 
-    // 어뉴테이션이 적용된 최종 디퓨즈, 스페큘러을 구한다.
+    // 어뉴테이션을 적용한다.
+    ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
 }

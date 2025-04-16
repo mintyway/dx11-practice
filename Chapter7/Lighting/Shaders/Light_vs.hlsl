@@ -1,13 +1,4 @@
-#include "Core/Shaders/Light/LightingCommon.hlsli"
-#include "VertexType.hlsli"
-
-cbuffer ConstantBufferPerObject : register(b0)
-{
-    row_major float4x4 worldMatrix;
-    row_major float4x4 worldInverseTransposeMatrix;
-    row_major float4x4 wvpMatrix;
-    Material material;
-};
+#include "SharedTypes.hlsli"
 
 VertexOut VS_Main(VertexIn input)
 {

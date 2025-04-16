@@ -73,7 +73,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="LightingApp.h" />
-    <None Include="Shaders\VertexType.hlsli">
+    <ClInclude Include="Type\ConstantBufferData.h" />
+    <None Include="Shaders\SharedTypes.hlsli">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
