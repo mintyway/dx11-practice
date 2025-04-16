@@ -1,4 +1,5 @@
 #include "Core/Shaders/Light/LightingCommon.hlsli"
+#include "Core/Shaders/Light/LightingFunction.hlsli"
 
 cbuffer ConstantBufferPerFrame : register(b0)
 {
