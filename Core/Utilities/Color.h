@@ -11,8 +11,9 @@ struct Color
     static Color LinearColorToColor(FXMVECTOR inLinearColor)
     {
         const XMVECTOR clamped = XMVectorClamp(inLinearColor, XMVectorZero(), XMVectorReplicate(1.0f));
+        const XMVECTOR scaled =  clamped * 255.0f;
         XMUINT4 color;
-        XMStoreUInt4(&color, XMConvertVectorFloatToUInt(clamped, 8));
+        XMStoreUInt4(&color, XMVectorRound(scaled));
         return {static_cast<uint8_t>(color.x), static_cast<uint8_t>(color.y), static_cast<uint8_t>(color.z), static_cast<uint8_t>(color.w)};
     }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utilities/Color.h"
+#include "Core/Utilities/Color.h"
 
 #include <d3d11.h>
 #include <DirectXMath.h>
