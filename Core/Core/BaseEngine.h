@@ -27,6 +27,8 @@ using namespace Microsoft::WRL;
     public:\
     ClassName(const ClassName&) = delete;\
     ClassName& operator=(const ClassName&) = delete; /*NOLINT(bugprone-macro-parentheses)*/\
+    ClassName(ClassName&&) = delete; /*NOLINT(bugprone-macro-parentheses)*/\
+    ClassName& operator=(ClassName&&) = delete; /*NOLINT(bugprone-macro-parentheses)*/\
     private:
 
 enum class WindowState : uint8_t
@@ -42,6 +44,8 @@ public:
     virtual ~BaseEngine() = default;
     BaseEngine(const BaseEngine&) = delete;
     BaseEngine& operator=(const BaseEngine&) = delete;
+    BaseEngine(BaseEngine&&) noexcept = delete;
+    BaseEngine& operator=(BaseEngine&&) noexcept = delete;
 
     template <typename T, typename = std::enable_if_t<std::is_base_of_v<BaseEngine, T>>>
     static void Register()
@@ -57,7 +61,7 @@ public:
     template <typename T>
     static T* Get() { return dynamic_cast<T*>(Get()); }
 
-    float GetAspectRatio() const { return static_cast<float>(clientWidth) / static_cast<float>(clientHeight); }
+    [[nodiscard]] float GetAspectRatio() const { return static_cast<float>(clientWidth) / static_cast<float>(clientHeight); }
 
     virtual bool Init(HINSTANCE inInstanceHandle);
 

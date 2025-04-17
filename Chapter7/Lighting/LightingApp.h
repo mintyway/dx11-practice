@@ -7,7 +7,7 @@
 
 using namespace DirectX;
 
-class LightingApp : public SphericalCamera
+class LightingApp final : public SphericalCamera
 {
     DECLARE_ENGINE(LightingApp, SphericalCamera)
 

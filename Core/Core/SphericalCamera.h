@@ -12,17 +12,19 @@ class SphericalCamera : public BaseEngine
     DECLARE_ENGINE(SphericalCamera, BaseEngine)
 
 public:
+    virtual ~SphericalCamera() = default;
+
     virtual void OnMouseDown(WPARAM buttonState, int x, int y) override;
     virtual void OnMouseUp(WPARAM buttonState, int x, int y) override;
     virtual void OnMouseMove(WPARAM buttonState, int x, int y) override;
 
-    inline SphericalCoord GetCameraSphericalCoord() { return cameraSphericalCoord; }
-    inline void SetCameraSphericalCoord(float newRadius, float newTheta, float newPhi) { cameraSphericalCoord = SphericalCoord{newRadius, newTheta, newPhi}; }
+    SphericalCoord GetCameraSphericalCoord() { return cameraSphericalCoord; }
+    void SetCameraSphericalCoord(float newRadius, float newTheta, float newPhi) { cameraSphericalCoord = SphericalCoord{newRadius, newTheta, newPhi}; }
 
-    inline float GetMinCameraRadius() const { return minCameraRadius; }
-    inline float GetMaxCameraRadius() const { return maxCameraRadius; }
+    float GetMinCameraRadius() const { return minCameraRadius; }
+    float GetMaxCameraRadius() const { return maxCameraRadius; }
 
-    inline void SetZoomSpeed(float zoomSpeedPerPixel) { zoomSpeed = zoomSpeedPerPixel; }
+    void SetZoomSpeed(float zoomSpeedPerPixel) { zoomSpeed = zoomSpeedPerPixel; }
 
 protected:
     SphericalCamera();
