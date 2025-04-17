@@ -5,7 +5,7 @@
 
 using namespace DirectX;
 
-struct ConstantBufferPerObjecteData
+struct RenderData
 {
     XMFLOAT4X4 worldMatrix;
     XMFLOAT4X4 worldInverseTransposeMatrix;
@@ -13,7 +13,7 @@ struct ConstantBufferPerObjecteData
     Material material;
 };
 
-struct ConstantBufferPerFrameData
+struct SceneLighting
 {
     DirectionalLight directionalLight;
     PointLight pointLight;

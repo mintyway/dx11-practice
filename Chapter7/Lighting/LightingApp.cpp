@@ -142,18 +142,18 @@ void LightingApp::RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* inde
 {
     D3D11_MAPPED_SUBRESOURCE mappedDataPerObject;
     immediateContext->Map(cbPerObject.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedDataPerObject);
-    ConstantBufferPerObjecteData* dataPerObjecte = static_cast<ConstantBufferPerObjecteData*>(mappedDataPerObject.pData);
-    XMStoreFloat4x4(&dataPerObjecte->worldMatrix, worldMatrix);
-    XMStoreFloat4x4(&dataPerObjecte->worldInverseTransposeMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)));
-    XMStoreFloat4x4(&dataPerObjecte->wvpMatrix, worldMatrix * viewProjectionMatrix);
-    dataPerObjecte->material.ambient = material.ambient;
-    dataPerObjecte->material.diffuse = material.diffuse;
-    dataPerObjecte->material.specular = material.specular;
+    RenderData* dataPerObject = static_cast<RenderData*>(mappedDataPerObject.pData);
+    XMStoreFloat4x4(&dataPerObject->worldMatrix, worldMatrix);
+    XMStoreFloat4x4(&dataPerObject->worldInverseTransposeMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)));
+    XMStoreFloat4x4(&dataPerObject->wvpMatrix, worldMatrix * viewProjectionMatrix);
+    dataPerObject->material.ambient = material.ambient;
+    dataPerObject->material.diffuse = material.diffuse;
+    dataPerObject->material.specular = material.specular;
     immediateContext->Unmap(cbPerObject.Get(), 0);
 
     D3D11_MAPPED_SUBRESOURCE mappedDataPerFrame;
     immediateContext->Map(cbPerFrame.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedDataPerFrame);
-    ConstantBufferPerFrameData* dataPerFrame = static_cast<ConstantBufferPerFrameData*>(mappedDataPerFrame.pData);
+    SceneLighting* dataPerFrame = static_cast<SceneLighting*>(mappedDataPerFrame.pData);
     dataPerFrame->directionalLight = directionalLight;
     dataPerFrame->pointLight = pointLight;
     dataPerFrame->spotLight = spotLight;
@@ -184,10 +184,10 @@ bool LightingApp::InitShaderResource()
     immediateContext->IASetInputLayout(inputLayout.Get());
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    const CD3D11_BUFFER_DESC cbPerObjectDesc(sizeof(ConstantBufferPerObjecteData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    const CD3D11_BUFFER_DESC cbPerObjectDesc(sizeof(RenderData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
     device->CreateBuffer(&cbPerObjectDesc, nullptr, &cbPerObject);
 
-    const CD3D11_BUFFER_DESC cbPerFrameDesc(sizeof(ConstantBufferPerFrameData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    const CD3D11_BUFFER_DESC cbPerFrameDesc(sizeof(SceneLighting), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
     device->CreateBuffer(&cbPerFrameDesc, nullptr, &cbPerFrame);
 
     ID3D11Buffer* const cbs[] = {cbPerObject.Get(), cbPerFrame.Get()};
@@ -228,7 +228,7 @@ bool LightingApp::CreateLandGeometry()
 
     const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA vertexInitData{vertices.data()};
-    CHECK_HR(device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &landVertexBuffer), L"Failed to create land vertext buffer", false);
+    CHECK_HR(device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &landVertexBuffer), L"Failed to create land vertex buffer", false);
 
     const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * gridSubmesh.indexCount), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA indexInitData{grid.indices.data()};
@@ -271,7 +271,7 @@ bool LightingApp::CreateWaveGeometry()
 
     const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * indices.size()), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA indexInitData{indices.data()};
-    CHECK_HR(device->CreateBuffer(&indexBufferDesc, &indexInitData, &wavesIndexBuffer), L"Falied to create wave index buffer", false);
+    CHECK_HR(device->CreateBuffer(&indexBufferDesc, &indexInitData, &wavesIndexBuffer), L"Failed to create wave index buffer", false);
 
     return true;
 }

@@ -1,5 +1,5 @@
-#ifndef LIGHTING_SHAREDTYPES_HLSLI
-#define LIGHTING_SHAREDTYPES_HLSLI
+#ifndef LIGHTING_SHARED_TYPES_HLSLI
+#define LIGHTING_SHARED_TYPES_HLSLI
 
 #include "Core/Shaders/Light/LightingCommon.hlsli"
 #include "Core/Shaders/Light/LightingFunction.hlsli"
@@ -33,4 +33,4 @@ struct VertexOut
     float3 normalWS : NORMAL;
 };
 
-#endif // LIGHTING_SHAREDTYPES_HLSLI
+#endif // LIGHTING_SHARED_TYPES_HLSLI
