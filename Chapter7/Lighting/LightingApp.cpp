@@ -7,6 +7,8 @@
 #include "Core/Utilities/Utility.h"
 #include "Type/ConstantBufferData.h"
 
+#include <numbers>
+
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
     BaseEngine::Register<LightingApp>();
@@ -33,7 +35,7 @@ LightingApp::LightingApp()
     directionalLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
     directionalLight.diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
     directionalLight.specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-    directionalLight.direction = XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
+    directionalLight.direction = XMFLOAT3(std::numbers::inv_sqrt3_v<float>, -std::numbers::inv_sqrt3_v<float>, std::numbers::inv_sqrt3_v<float>);
 
     pointLight.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
     pointLight.diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
@@ -142,7 +144,7 @@ void LightingApp::RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* inde
 {
     D3D11_MAPPED_SUBRESOURCE mappedDataPerObject;
     immediateContext->Map(cbPerObject.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedDataPerObject);
-    ObjectRenderData* dataPerObject = static_cast<ObjectRenderData*>(mappedDataPerObject.pData);
+    RenderData* dataPerObject = static_cast<RenderData*>(mappedDataPerObject.pData);
     XMStoreFloat4x4(&dataPerObject->worldMatrix, worldMatrix);
     XMStoreFloat4x4(&dataPerObject->worldInverseTransposeMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)));
     XMStoreFloat4x4(&dataPerObject->wvpMatrix, worldMatrix * viewProjectionMatrix);
@@ -153,7 +155,7 @@ void LightingApp::RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* inde
 
     D3D11_MAPPED_SUBRESOURCE mappedDataPerFrame;
     immediateContext->Map(cbPerFrame.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedDataPerFrame);
-    SceneLightData* dataPerFrame = static_cast<SceneLightData*>(mappedDataPerFrame.pData);
+    LightData* dataPerFrame = static_cast<LightData*>(mappedDataPerFrame.pData);
     dataPerFrame->directionalLight = directionalLight;
     dataPerFrame->pointLight = pointLight;
     dataPerFrame->spotLight = spotLight;
@@ -184,10 +186,10 @@ bool LightingApp::InitShaderResource()
     immediateContext->IASetInputLayout(inputLayout.Get());
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    const CD3D11_BUFFER_DESC cbPerObjectDesc(sizeof(ObjectRenderData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    const CD3D11_BUFFER_DESC cbPerObjectDesc(sizeof(RenderData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
     device->CreateBuffer(&cbPerObjectDesc, nullptr, &cbPerObject);
 
-    const CD3D11_BUFFER_DESC cbPerFrameDesc(sizeof(SceneLightData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    const CD3D11_BUFFER_DESC cbPerFrameDesc(sizeof(LightData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
     device->CreateBuffer(&cbPerFrameDesc, nullptr, &cbPerFrame);
 
     ID3D11Buffer* const cbs[] = {cbPerObject.Get(), cbPerFrame.Get()};

@@ -5,7 +5,7 @@
 
 using namespace DirectX;
 
-struct ObjectRenderData
+struct RenderData
 {
     XMFLOAT4X4 worldMatrix;
     XMFLOAT4X4 worldInverseTransposeMatrix;
@@ -13,7 +13,7 @@ struct ObjectRenderData
     Material material;
 };
 
-struct SceneLightData
+struct LightData
 {
     DirectionalLight directionalLight;
     PointLight pointLight;
