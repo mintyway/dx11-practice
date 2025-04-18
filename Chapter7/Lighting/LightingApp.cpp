@@ -5,6 +5,7 @@
 #include "Core/Data/SphericalCoord.h"
 #include "Core/Rendering/VertexTypes.h"
 #include "Core/Utilities/Utility.h"
+#include "Shaders/BasicShader.h"
 #include "Type/ConstantBufferData.h"
 
 #include <numbers>
@@ -66,10 +67,8 @@ bool LightingApp::Init(HINSTANCE inInstanceHandle)
         return false;
     }
 
-    if (!InitShaderResource())
-    {
-        return false;
-    }
+    basicShader = std::make_unique<BasicShader>(device.Get());
+    basicShader->Bind(immediateContext.Get());
 
     if (!CreateGeometry())
     {
@@ -142,25 +141,11 @@ void LightingApp::Render()
 
 void LightingApp::RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr, FXMMATRIX worldMatrix, CXMMATRIX viewProjectionMatrix, const Material& material, UINT indexCount)
 {
-    D3D11_MAPPED_SUBRESOURCE mappedDataPerObject;
-    immediateContext->Map(cbPerObject.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedDataPerObject);
-    RenderData* dataPerObject = static_cast<RenderData*>(mappedDataPerObject.pData);
-    XMStoreFloat4x4(&dataPerObject->worldMatrix, worldMatrix);
-    XMStoreFloat4x4(&dataPerObject->worldInverseTransposeMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)));
-    XMStoreFloat4x4(&dataPerObject->wvpMatrix, worldMatrix * viewProjectionMatrix);
-    dataPerObject->material.ambient = material.ambient;
-    dataPerObject->material.diffuse = material.diffuse;
-    dataPerObject->material.specular = material.specular;
-    immediateContext->Unmap(cbPerObject.Get(), 0);
-
-    D3D11_MAPPED_SUBRESOURCE mappedDataPerFrame;
-    immediateContext->Map(cbPerFrame.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedDataPerFrame);
-    LightData* dataPerFrame = static_cast<LightData*>(mappedDataPerFrame.pData);
-    dataPerFrame->directionalLight = directionalLight;
-    dataPerFrame->pointLight = pointLight;
-    dataPerFrame->spotLight = spotLight;
-    dataPerFrame->eyeWorldPosition = eyePosition;
-    immediateContext->Unmap(cbPerFrame.Get(), 0);
+    basicShader->SetMatrix(worldMatrix, viewProjectionMatrix);
+    basicShader->SetMaterial(material);
+    basicShader->SetLights(directionalLight, pointLight, spotLight);
+    basicShader->SetEyePosition(eyePosition);
+    basicShader->UpdateCBuffer(immediateContext.Get());
 
     constexpr UINT stride = sizeof(Vertex);
     constexpr UINT offset = 0;
@@ -168,35 +153,6 @@ void LightingApp::RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* inde
     immediateContext->IASetIndexBuffer(indexBufferPtr, DXGI_FORMAT_R32_UINT, 0);
 
     immediateContext->DrawIndexed(indexCount, 0, 0);
-}
-
-bool LightingApp::InitShaderResource()
-{
-    ComPtr<ID3DBlob> vertexShaderBlob;
-    D3DReadFileToBlob(Path::GetShaderPath(L"Light_vs.cso").c_str(), &vertexShaderBlob);
-    device->CreateVertexShader(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), nullptr, &vertexShader);
-    immediateContext->VSSetShader(vertexShader.Get(), nullptr, 0);
-
-    ComPtr<ID3DBlob> pixelShaderBlob;
-    D3DReadFileToBlob(Path::GetShaderPath(L"Light_ps.cso").c_str(), &pixelShaderBlob);
-    device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader);
-    immediateContext->PSSetShader(pixelShader.Get(), nullptr, 0);
-
-    device->CreateInputLayout(Vertex::Desc.data(), static_cast<UINT>(Vertex::Desc.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout);
-    immediateContext->IASetInputLayout(inputLayout.Get());
-    immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    const CD3D11_BUFFER_DESC cbPerObjectDesc(sizeof(RenderData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-    device->CreateBuffer(&cbPerObjectDesc, nullptr, &cbPerObject);
-
-    const CD3D11_BUFFER_DESC cbPerFrameDesc(sizeof(LightData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-    device->CreateBuffer(&cbPerFrameDesc, nullptr, &cbPerFrame);
-
-    ID3D11Buffer* const cbs[] = {cbPerObject.Get(), cbPerFrame.Get()};
-    immediateContext->VSSetConstantBuffers(0, 2, cbs);
-    immediateContext->PSSetConstantBuffers(0, 2, cbs);
-
-    return true;
 }
 
 bool LightingApp::CreateGeometry()

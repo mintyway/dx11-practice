@@ -79,8 +79,6 @@
     <ClCompile Include="core.cpp" />
     <ClCompile Include="Data\Path.cpp" />
     <ClCompile Include="Rendering\Vertex.cpp" />
-    <ClCompile Include="Shaders\Library\ShaderLibrary.cpp" />
-    <ClCompile Include="Shaders\ShaderType\BasicShader.cpp" />
     <ClCompile Include="Shaders\ShaderType\ShaderBase.cpp" />
     <ClCompile Include="Utilities\Utility.cpp" />
     <ClCompile Include="Utilities\Waves.cpp" />
@@ -136,7 +134,6 @@
     <ClInclude Include="Core\GeometryGenerator.h" />
     <ClInclude Include="Core\SphericalCamera.h" />
     <ClInclude Include="Core\Timer.h" />
-    <ClInclude Include="Data\CBufferData.h" />
     <ClInclude Include="Data\Path.h" />
     <ClInclude Include="Data\SphericalCoord.h" />
     <ClInclude Include="Exercise\Chapter6.hpp" />
@@ -144,8 +141,6 @@
     <ClInclude Include="Rendering\Submesh.h" />
     <ClInclude Include="Rendering\Vertex.h" />
     <ClInclude Include="Rendering\VertexTypes.h" />
-    <ClInclude Include="Shaders\Library\ShaderLibrary.h" />
-    <ClInclude Include="Shaders\ShaderType\BasicShader.h" />
     <ClInclude Include="Shaders\ShaderType\ShaderBase.h" />
     <ClInclude Include="Utilities\Color.h" />
     <ClInclude Include="Utilities\Utility.h" />

@@ -7,6 +7,8 @@
 
 using namespace DirectX;
 
+class BasicShader;
+
 class LightingApp final : public SphericalCamera
 {
     DECLARE_ENGINE(LightingApp, SphericalCamera)
@@ -23,11 +25,10 @@ protected:
     virtual void Update(float deltaSeconds) override;
     virtual void Render() override;
 
-    void RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr, XMMATRIX worldMatrix, CXMMATRIX viewProjectionMatrix, const Material& material, UINT indexCount);
+    void RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr, FXMMATRIX worldMatrix, CXMMATRIX viewProjectionMatrix, const Material& material, UINT indexCount);
 
 private:
     bool CreateGeometry();
-    bool InitShaderResource();
 
     bool CreateLandGeometry();
     bool CreateWaveGeometry();
@@ -41,12 +42,7 @@ private:
         return n;
     }
 
-    ComPtr<ID3D11InputLayout> inputLayout;
-    ComPtr<ID3D11VertexShader> vertexShader;
-    ComPtr<ID3D11PixelShader> pixelShader;
-
-    ComPtr<ID3D11Buffer> cbPerObject;
-    ComPtr<ID3D11Buffer> cbPerFrame;
+    std::unique_ptr<BasicShader> basicShader;
 
     ComPtr<ID3D11Buffer> landVertexBuffer;
     ComPtr<ID3D11Buffer> landIndexBuffer;
