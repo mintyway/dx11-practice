@@ -1,5 +1,7 @@
 #include "LitSkullApp.h"
 
+#include "Core/Data/Path.h"
+
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
     BaseEngine::Register<LitSkullApp>();
@@ -15,6 +17,53 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 }
 
 LitSkullApp::LitSkullApp()
+    : DirectionalLights({
+          DirectionalLight{
+              .ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f),
+              .diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),
+              .specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),
+              .direction = XMFLOAT3(std::numbers::inv_sqrt3_v<float>, -std::numbers::inv_sqrt3_v<float>, std::numbers::inv_sqrt3_v<float>)
+          },
+          DirectionalLight{
+              .ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f),
+              .diffuse = XMFLOAT4(0.20f, 0.20f, 0.20f, 1.0f),
+              .specular = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f),
+              .direction = XMFLOAT3(-std::numbers::inv_sqrt3_v<float>, -std::numbers::inv_sqrt3_v<float>, std::numbers::inv_sqrt3_v<float>)
+          },
+          DirectionalLight{
+              .ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f),
+              .diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f),
+              .specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f),
+              .direction = XMFLOAT3(0.0f, 1.0f / -std::numbers::sqrt2_v<float>, 1.0f / -std::numbers::sqrt2_v<float>)
+          }
+      }),
+      MaterialMap({
+          {"Grid", Material{
+              .ambient = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f),
+              .diffuse = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f),
+              .specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f)
+          }},
+          {"Cylinder", Material{
+              .ambient = XMFLOAT4(0.7f, 0.85f, 0.7f, 1.0f),
+              .diffuse = XMFLOAT4(0.7f, 0.85f, 0.7f, 1.0f),
+              .specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 16.0f)
+          }},
+          {"Sphere", Material{
+              .ambient = XMFLOAT4(0.1f, 0.2f, 0.3f, 1.0f),
+              .diffuse = XMFLOAT4(0.2f, 0.4f, 0.6f, 1.0f),
+              .specular = XMFLOAT4(0.9f, 0.9f, 0.9f, 16.0f)
+          }},
+          {"Box", Material{
+              .ambient = XMFLOAT4(0.651f, 0.5f, 0.392f, 1.0f),
+              .diffuse = XMFLOAT4(0.651f, 0.5f, 0.392f, 1.0f),
+              .specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f)
+          }},
+          {"Skull", Material{
+              .ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f),
+              .diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f),
+              .specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 16.0f)
+          }}
+      })
 {
     // SetCameraSphericalCoord();
 
@@ -41,7 +90,12 @@ LitSkullApp::LitSkullApp()
 
 bool LitSkullApp::Init(HINSTANCE inInstanceHandle)
 {
-    return SphericalCamera::Init(inInstanceHandle);
+    if (!SphericalCamera::Init(inInstanceHandle))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 LRESULT LitSkullApp::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -63,3 +117,26 @@ void LitSkullApp::Render()
 {
     SphericalCamera::Render();
 }
+
+void LitSkullApp::InitShaderResource()
+{
+    ComPtr<ID3DBlob> vertexShaderBlob;
+    D3DReadFileToBlob(Path::GetShaderPath(L"Light_vs.cso").c_str(), &vertexShaderBlob);
+    device->CreateVertexShader(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), nullptr, &vertexShader);
+
+    ComPtr<ID3DBlob> pixelShaderBlob;
+    D3DReadFileToBlob(Path::GetShaderPath(L"Light_ps.cso").c_str(), &pixelShaderBlob);
+    device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader);
+    
+    device->CreateInputLayout()
+}
+
+void LitSkullApp::InitGeometryBuffer()
+{
+    InitSkullBuffer();
+    InitShapeBuffer();
+}
+
+void LitSkullApp::InitSkullBuffer() {}
+
+void LitSkullApp::InitShapeBuffer() {}

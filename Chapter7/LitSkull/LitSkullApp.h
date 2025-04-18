@@ -5,6 +5,8 @@
 #include "Core/Rendering/Submesh.h"
 
 #include <array>
+#include <numbers>
+#include <unordered_map>
 
 class LitSkullApp final : public SphericalCamera
 {
@@ -24,6 +26,11 @@ protected:
     void Render() override;
 
 private:
+    void InitShaderResource();
+    void InitGeometryBuffer();
+    void InitSkullBuffer();
+    void InitShapeBuffer();
+
     ComPtr<ID3D11InputLayout> inputLayout;
     ComPtr<ID3D11VertexShader> vertexShader;
     ComPtr<ID3D11PixelShader> pixelShader;
@@ -33,7 +40,7 @@ private:
 
     XMFLOAT4X4 viewProjectionMatrix{};
 
-    std::array<DirectionalLight, 3> directionalLights{};
+    const std::array<DirectionalLight, 3> DirectionalLights;
 
     ComPtr<ID3D11Buffer> skullVertexBuffer;
     ComPtr<ID3D11Buffer> skullIndexBuffer;
@@ -51,6 +58,8 @@ private:
     XMFLOAT4X4 gridWorldMatrix{};
     std::array<XMFLOAT4X4, 10> sphereWorldMatrices{};
     std::array<XMFLOAT4X4, 10> cylinderMatrices{};
+
+    const std::unordered_map<std::string, Material> MaterialMap;
 
     Material skullMaterial{};
     Material BoxMaterial{};

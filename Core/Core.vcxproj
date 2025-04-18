@@ -78,8 +78,37 @@
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="core.cpp" />
     <ClCompile Include="Data\Path.cpp" />
+    <ClCompile Include="Rendering\Vertex.cpp" />
+    <ClCompile Include="Shaders\Library\ShaderLibrary.cpp" />
+    <ClCompile Include="Shaders\ShaderType\BasicShader.cpp" />
+    <ClCompile Include="Shaders\ShaderType\ShaderBase.cpp" />
     <ClCompile Include="Utilities\Utility.cpp" />
     <ClCompile Include="Utilities\Waves.cpp" />
+    <FxCompile Include="Shaders\HLSL\basic_ps.hlsl">
+      <ObjectFileOutput>E:\Programming\DirectX\11\dx11-practice\x64\Debug\Shaders\%(Filename).cso</ObjectFileOutput>
+      <TrackerLogDirectory>x64\Debug\Lighting.tlog\</TrackerLogDirectory>
+      <EntryPointName>PS_Main</EntryPointName>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ShaderModel>5.0</ShaderModel>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <DisableOptimizations>true</DisableOptimizations>
+      <EnableDebuggingInformation>true</EnableDebuggingInformation>
+      <AdditionalIncludeDirectories>E:\Programming\DirectX\11\dx11-practice\;</AdditionalIncludeDirectories>
+      <FileType>Document</FileType>
+      <ShaderType>Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\HLSL\basic_vs.hlsl">
+      <ObjectFileOutput>E:\Programming\DirectX\11\dx11-practice\x64\Debug\Shaders\%(Filename).cso</ObjectFileOutput>
+      <TrackerLogDirectory>x64\Debug\Lighting.tlog\</TrackerLogDirectory>
+      <EntryPointName>VS_Main</EntryPointName>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ShaderModel>5.0</ShaderModel>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <DisableOptimizations>true</DisableOptimizations>
+      <EnableDebuggingInformation>true</EnableDebuggingInformation>
+      <AdditionalIncludeDirectories>E:\Programming\DirectX\11\dx11-practice\;</AdditionalIncludeDirectories>
+      <ShaderType>Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shaders\Pixel\Box_ps.hlsl">
       <FileType>Document</FileType>
       <ShaderType>Pixel</ShaderType>
@@ -107,17 +136,25 @@
     <ClInclude Include="Core\GeometryGenerator.h" />
     <ClInclude Include="Core\SphericalCamera.h" />
     <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Data\CBufferData.h" />
     <ClInclude Include="Data\Path.h" />
     <ClInclude Include="Data\SphericalCoord.h" />
     <ClInclude Include="Exercise\Chapter6.hpp" />
     <ClInclude Include="Light\Light.h" />
     <ClInclude Include="Rendering\Submesh.h" />
+    <ClInclude Include="Rendering\Vertex.h" />
     <ClInclude Include="Rendering\VertexTypes.h" />
+    <ClInclude Include="Shaders\Library\ShaderLibrary.h" />
+    <ClInclude Include="Shaders\ShaderType\BasicShader.h" />
+    <ClInclude Include="Shaders\ShaderType\ShaderBase.h" />
     <ClInclude Include="Utilities\Color.h" />
     <ClInclude Include="Utilities\Utility.h" />
     <ClInclude Include="Utilities\Waves.h" />
-    <None Include="Shaders\Light\LightingCommon.hlsli" />
-    <None Include="Shaders\Light\LightingFunction.hlsli" />
+    <None Include="Shaders\HLSL\LightingCommon.hlsli" />
+    <None Include="Shaders\HLSL\LightingFunction.hlsli" />
+    <None Include="Shaders\HLSL\SharedTypes.hlsli">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Models\car.txt">
@@ -126,6 +163,9 @@
     <Content Include="Models\skull.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Shaders\Light\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

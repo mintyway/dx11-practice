@@ -12,12 +12,12 @@ namespace
     }
 }
 
-std::filesystem::path Path::GetShaderPath(const wchar_t* fileName)
+std::filesystem::path Path::GetShaderPath(const std::wstring& fileName)
 {
     return GetExePath().parent_path() / L"Shaders" / fileName;
 }
 
-std::filesystem::path Path::GetModelPath(const wchar_t* fileName)
+std::filesystem::path Path::GetModelPath(const std::wstring& fileName)
 {
     return GetExePath().parent_path() / L"Models" / fileName;
 }

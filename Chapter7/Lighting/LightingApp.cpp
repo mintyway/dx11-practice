@@ -142,7 +142,7 @@ void LightingApp::RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* inde
 {
     D3D11_MAPPED_SUBRESOURCE mappedDataPerObject;
     immediateContext->Map(cbPerObject.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedDataPerObject);
-    RenderData* dataPerObject = static_cast<RenderData*>(mappedDataPerObject.pData);
+    ObjectRenderData* dataPerObject = static_cast<ObjectRenderData*>(mappedDataPerObject.pData);
     XMStoreFloat4x4(&dataPerObject->worldMatrix, worldMatrix);
     XMStoreFloat4x4(&dataPerObject->worldInverseTransposeMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)));
     XMStoreFloat4x4(&dataPerObject->wvpMatrix, worldMatrix * viewProjectionMatrix);
@@ -153,7 +153,7 @@ void LightingApp::RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* inde
 
     D3D11_MAPPED_SUBRESOURCE mappedDataPerFrame;
     immediateContext->Map(cbPerFrame.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedDataPerFrame);
-    SceneLighting* dataPerFrame = static_cast<SceneLighting*>(mappedDataPerFrame.pData);
+    SceneLightData* dataPerFrame = static_cast<SceneLightData*>(mappedDataPerFrame.pData);
     dataPerFrame->directionalLight = directionalLight;
     dataPerFrame->pointLight = pointLight;
     dataPerFrame->spotLight = spotLight;
@@ -184,10 +184,10 @@ bool LightingApp::InitShaderResource()
     immediateContext->IASetInputLayout(inputLayout.Get());
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    const CD3D11_BUFFER_DESC cbPerObjectDesc(sizeof(RenderData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    const CD3D11_BUFFER_DESC cbPerObjectDesc(sizeof(ObjectRenderData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
     device->CreateBuffer(&cbPerObjectDesc, nullptr, &cbPerObject);
 
-    const CD3D11_BUFFER_DESC cbPerFrameDesc(sizeof(SceneLighting), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    const CD3D11_BUFFER_DESC cbPerFrameDesc(sizeof(SceneLightData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
     device->CreateBuffer(&cbPerFrameDesc, nullptr, &cbPerFrame);
 
     ID3D11Buffer* const cbs[] = {cbPerObject.Get(), cbPerFrame.Get()};

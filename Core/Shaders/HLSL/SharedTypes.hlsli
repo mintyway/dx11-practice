@@ -4,7 +4,7 @@
 #include "Core/Shaders/HLSL/LightingCommon.hlsli"
 #include "Core/Shaders/HLSL/LightingFunction.hlsli"
 
-cbuffer ConstantBufferPerObject : register(b0)
+cbuffer ObjectRenderCBuffer : register(b0)
 {
     row_major float4x4 worldMatrix;
     row_major float4x4 worldInverseTransposeMatrix;
@@ -12,7 +12,7 @@ cbuffer ConstantBufferPerObject : register(b0)
     Material material;
 };
 
-cbuffer ConstantBufferPerFrame : register(b1)
+cbuffer SceneLightCBuffer : register(b1)
 {
     DirectionalLight directionalLight;
     PointLight pointLight;
