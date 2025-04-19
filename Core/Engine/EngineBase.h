@@ -64,8 +64,8 @@ protected:
 
     void UpdateFrameInfo(float deltaSeconds);
 
-    virtual void Update(float deltaSeconds);
-    virtual void Render();
+    virtual void Update(float deltaSeconds) = 0;
+    virtual void Render() = 0;
 
     HINSTANCE instanceHandle = nullptr;
     HWND windowHandle = nullptr;

@@ -440,7 +440,3 @@ void EngineBase::UpdateFrameInfo(float deltaSeconds)
         elapsedTime = 0.0f;
     }
 }
-
-void EngineBase::Update(float deltaSeconds) {}
-
-void EngineBase::Render() {}
