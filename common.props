@@ -19,4 +19,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />
+
+<!-- vs와 ps를 하나의 hlsl에서 사용하기 위한 커스텀 빌드 옵션입니다. -->
+  <ItemGroup>
+    <HLSLFile Include="Shaders\**\*Pass.hlsl" />
+  </ItemGroup>
+  <Target Name="ShaderCompile" BeforeTargets="Build" Condition="'@(HLSLFile)' != ''">
+    <Exec Command='fxc -T vs_5_0 -E VS_Main -Fo "$(OutDir)Shaders\%(HLSLFile.Filename)_vs.cso" %(HLSLFile.FullPath)' />
+    <Exec Command='fxc -T ps_5_0 -E PS_Main -Fo "$(OutDir)Shaders\%(HLSLFile.Filename)_ps.cso" %(HLSLFile.FullPath)' />
+  </Target>
 </Project>
