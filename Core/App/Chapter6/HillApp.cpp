@@ -95,7 +95,7 @@ void HillApp::Render()
     }
 
     // 클리어
-    immediateContext->ClearRenderTargetView(renderTargetView.Get(), Colors::Blue);
+    immediateContext->ClearRenderTargetView(renderTargetView.Get(), LinearColors::Blue);
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     // input assembler 단계

@@ -55,7 +55,7 @@ void Exercise::Render()
 {
     EngineBase::Render();
 
-    immediateContext->ClearRenderTargetView(renderTargetView.Get(), Colors::White);
+    immediateContext->ClearRenderTargetView(renderTargetView.Get(), LinearColors::White);
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

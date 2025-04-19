@@ -130,7 +130,7 @@ void LightingApp::Update(float deltaSeconds)
 
 void LightingApp::Render()
 {
-    immediateContext->ClearRenderTargetView(renderTargetView.Get(), Colors::LightSteelBlue);
+    immediateContext->ClearRenderTargetView(renderTargetView.Get(), LinearColors::LightSteelBlue);
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     const XMMATRIX viewProjectionMatrix = XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix);

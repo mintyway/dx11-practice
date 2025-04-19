@@ -94,7 +94,7 @@ void BoxApp::Render()
     }
 
     // 클리어
-    immediateContext->ClearRenderTargetView(renderTargetView.Get(), Colors::Blue);
+    immediateContext->ClearRenderTargetView(renderTargetView.Get(), LinearColors::Blue);
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     // input assembler 단계
@@ -145,14 +145,14 @@ void BoxApp::CreateGeometryBuffers()
 
     std::array<Chapter6::ColorVertex, 8> colorVertex =
     {
-        Chapter6::ColorVertex{XMFLOAT4(Colors::White)},
-        Chapter6::ColorVertex{XMFLOAT4(Colors::Black)},
-        Chapter6::ColorVertex{XMFLOAT4(Colors::Red)},
-        Chapter6::ColorVertex{XMFLOAT4(Colors::Green)},
-        Chapter6::ColorVertex{XMFLOAT4(Colors::Blue)},
-        Chapter6::ColorVertex{XMFLOAT4(Colors::Yellow)},
-        Chapter6::ColorVertex{XMFLOAT4(Colors::Cyan)},
-        Chapter6::ColorVertex{XMFLOAT4(Colors::Magenta)}
+        Chapter6::ColorVertex{XMFLOAT4(LinearColors::White)},
+        Chapter6::ColorVertex{XMFLOAT4(LinearColors::Black)},
+        Chapter6::ColorVertex{XMFLOAT4(LinearColors::Red)},
+        Chapter6::ColorVertex{XMFLOAT4(LinearColors::Green)},
+        Chapter6::ColorVertex{XMFLOAT4(LinearColors::Blue)},
+        Chapter6::ColorVertex{XMFLOAT4(LinearColors::Yellow)},
+        Chapter6::ColorVertex{XMFLOAT4(LinearColors::Cyan)},
+        Chapter6::ColorVertex{XMFLOAT4(LinearColors::Magenta)}
     };
 
     boxIndices =

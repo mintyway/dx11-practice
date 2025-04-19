@@ -119,7 +119,7 @@ void MultiDrawApp::Render()
     }
 
     // 클리어
-    immediateContext->ClearRenderTargetView(renderTargetView.Get(), Colors::Blue);
+    immediateContext->ClearRenderTargetView(renderTargetView.Get(), LinearColors::Blue);
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     // 와이어 프레임으로 보기
@@ -170,7 +170,7 @@ void MultiDrawApp::CreateGeometryBuffers()
     std::vector<VertexWithLinearColor> vertices(box.vertices.size() + grid.vertices.size() + sphere.vertices.size() + cylinder.vertices.size());
 
     UINT currentVertexIndex = 0;
-    const XMFLOAT4 black(Colors::Black);
+    const XMFLOAT4 black(LinearColors::Black);
     auto appendVertex = [&](const std::vector<GeometryGenerator::Vertex>& inVertices)
     {
         for (size_t i = 0; i < inVertices.size(); ++i, ++currentVertexIndex)
