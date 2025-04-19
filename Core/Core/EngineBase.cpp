@@ -1,4 +1,4 @@
-#include "BaseEngine.h"
+#include "EngineBase.h"
 
 #include "Utilities/Utility.h"
 
@@ -7,7 +7,20 @@
 
 namespace
 {
-    LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) { return BaseEngine::Get()->HandleMessage(hWnd, message, wParam, lParam); }
+    LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+        if (message == WM_CREATE)
+        {
+            SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(std::bit_cast<CREATESTRUCT*>(lParam)->lpCreateParams));
+        }
+
+        if (EngineBase* engineInstance = std::bit_cast<EngineBase*>(GetWindowLongPtr(hWnd, GWLP_USERDATA)))
+        {
+            return engineInstance->HandleMessage(hWnd, message, wParam, lParam);
+        }
+
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
 
     void CreateDebugConsole()
     {
@@ -21,9 +34,7 @@ namespace
     }
 }
 
-std::unique_ptr<BaseEngine> BaseEngine::engineInstance;
-
-bool BaseEngine::Init(HINSTANCE inInstanceHandle)
+bool EngineBase::Init(HINSTANCE inInstanceHandle)
 {
     CreateDebugConsole();
 
@@ -46,7 +57,7 @@ bool BaseEngine::Init(HINSTANCE inInstanceHandle)
     return true;
 }
 
-void BaseEngine::Run()
+void EngineBase::Run()
 {
     timer.Start();
 
@@ -63,153 +74,148 @@ void BaseEngine::Run()
     }
 }
 
-LRESULT BaseEngine::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT EngineBase::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
-        case WM_ACTIVATE:
-        {
-            if (LOWORD(wParam) == WA_INACTIVE)
-            {
-                isPaused = true;
-                timer.Stop();
-            }
-            else
-            {
-                isPaused = false;
-                timer.Start();
-            }
-
-            return 0;
-        }
-        case WM_SIZE:
-        {
-            clientWidth = LOWORD(lParam);
-            clientHeight = HIWORD(lParam);
-
-            switch (wParam)
-            {
-                case SIZE_MINIMIZED:
-                {
-                    OutputDebugString(L"최소화\n");
-                    isPaused = true;
-                    windowState = WindowState::Minimized;
-                    break;
-                }
-                case SIZE_MAXIMIZED:
-                {
-                    OutputDebugString(L"최대화\n");
-                    isPaused = false;
-                    windowState = WindowState::Maximized;
-                    OnResize();
-                    break;
-                }
-                case SIZE_RESTORED:
-                {
-                    if (windowState == WindowState::Minimized || windowState == WindowState::Maximized)
-                    {
-                        OutputDebugString(L"창모드\n");
-                        isPaused = false;
-                        windowState = WindowState::Window;
-                        OnResize();
-                    }
-                    else if (isResizing) {}
-                    else
-                    {
-                        OutputDebugString(L"전체화면\n");
-                        OnResize();
-                    }
-
-                    break;
-                }
-                default:
-                    break;
-            }
-
-            return 0;
-        }
-        case WM_ENTERSIZEMOVE:
+    case WM_ACTIVATE:
+    {
+        if (LOWORD(wParam) == WA_INACTIVE)
         {
             isPaused = true;
-            isResizing = true;
             timer.Stop();
-            return 0;
         }
-        case WM_EXITSIZEMOVE:
+        else
         {
             isPaused = false;
-            isResizing = false;
             timer.Start();
+        }
+
+        return 0;
+    }
+    case WM_SIZE:
+    {
+        clientWidth = LOWORD(lParam);
+        clientHeight = HIWORD(lParam);
+
+        switch (wParam)
+        {
+        case SIZE_MINIMIZED:
+        {
+            OutputDebugString(L"최소화\n");
+            isPaused = true;
+            windowState = WindowState::Minimized;
+            break;
+        }
+        case SIZE_MAXIMIZED:
+        {
+            OutputDebugString(L"최대화\n");
+            isPaused = false;
+            windowState = WindowState::Maximized;
             OnResize();
-            return 0;
+            break;
         }
-        case WM_DESTROY:
+        case SIZE_RESTORED:
         {
-            PostQuitMessage(0);
-            return 0;
-        }
-        case WM_MENUCHAR: // Alt + Enter 전체화면 비프음 제거
-        {
-            return MAKELRESULT(0, MNC_CLOSE);
-        }
-        case WM_GETMINMAXINFO: // 최소 앱 크기 제한
-        {
-            MINMAXINFO* minMax = reinterpret_cast<MINMAXINFO*>(lParam); // NOLINT(performance-no-int-to-ptr)
-            minMax->ptMinTrackSize.x = 200;
-            minMax->ptMinTrackSize.y = 200;
-            return 0;
-        }
-        case WM_KEYDOWN:
-        {
-            if (wParam == VK_ESCAPE)
+            if (windowState == WindowState::Minimized || windowState == WindowState::Maximized)
             {
-                OutputDebugString(L"ESC");
-                PostQuitMessage(0);
+                OutputDebugString(L"창모드\n");
+                isPaused = false;
+                windowState = WindowState::Window;
+                OnResize();
             }
-
-            return 0;
-        }
-        case WM_SYSKEYDOWN:
-        {
-            if (wParam == '4')
+            else if (isResizing) {}
+            else
             {
-                bUseWireframeView = !bUseWireframeView;
-                immediateContext->RSSetState(bUseWireframeView ? wireframeRasterizerState.Get() : nullptr);
+                OutputDebugString(L"전체화면\n");
+                OnResize();
             }
-
-            return 0;
-        }
-        case WM_LBUTTONDOWN:
-            [[fallthrough]];
-        case WM_MBUTTONDOWN:
-            [[fallthrough]];
-        case WM_RBUTTONDOWN:
-        {
-            OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-            return 0;
-        }
-        case WM_LBUTTONUP:
-            [[fallthrough]];
-        case WM_MBUTTONUP:
-            [[fallthrough]];
-        case WM_RBUTTONUP:
-        {
-            OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-            return 0;
-        }
-        case WM_MOUSEMOVE:
-        {
-            OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-            return 0;
+            break;
         }
         default:
+            break;
+        }
+
+        return 0;
+    }
+    case WM_ENTERSIZEMOVE:
+    {
+        isPaused = true;
+        isResizing = true;
+        timer.Stop();
+        return 0;
+    }
+    case WM_EXITSIZEMOVE:
+    {
+        isPaused = false;
+        isResizing = false;
+        timer.Start();
+        OnResize();
+        return 0;
+    }
+    case WM_DESTROY:
+    {
+        PostQuitMessage(0);
+        return 0;
+    }
+    case WM_MENUCHAR: // Alt + Enter 전체화면 비프음 제거
+    {
+        return MAKELRESULT(0, MNC_CLOSE);
+    }
+    case WM_GETMINMAXINFO: // 최소 앱 크기 제한
+    {
+        MINMAXINFO* minMaxInfo = reinterpret_cast<MINMAXINFO*>(lParam); // NOLINT(performance-no-int-to-ptr)
+        minMaxInfo->ptMinTrackSize.x = 200;
+        minMaxInfo->ptMinTrackSize.y = 200;
+        return 0;
+    }
+    case WM_KEYDOWN:
+    {
+        if (wParam == VK_ESCAPE)
         {
-            return DefWindowProc(hWnd, message, wParam, lParam);
-        };
+            OutputDebugString(L"ESC");
+            PostQuitMessage(0);
+        }
+
+        return 0;
+    }
+    case WM_SYSKEYDOWN:
+    {
+        if (wParam == '4')
+        {
+            bUseWireframeView = !bUseWireframeView;
+            immediateContext->RSSetState(bUseWireframeView ? wireframeRasterizerState.Get() : nullptr);
+        }
+
+        return 0;
+    }
+    case WM_LBUTTONDOWN: [[fallthrough]];
+    case WM_MBUTTONDOWN: [[fallthrough]];
+    case WM_RBUTTONDOWN:
+    {
+        OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        return 0;
+    }
+    case WM_LBUTTONUP: [[fallthrough]];
+    case WM_MBUTTONUP: [[fallthrough]];
+    case WM_RBUTTONUP:
+    {
+        OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        return 0;
+    }
+    case WM_MOUSEMOVE:
+    {
+        OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        return 0;
+    }
+    default:
+    {
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
     }
 }
 
-void BaseEngine::Tick()
+void EngineBase::Tick()
 {
     timer.Tick();
 
@@ -226,7 +232,7 @@ void BaseEngine::Tick()
     }
 }
 
-void BaseEngine::OnResize()
+void EngineBase::OnResize()
 {
     if (!device || !immediateContext || !swapChain) // dx가 초기화 되기 전이라면 아무것도 수행하지 않습니다.
     {
@@ -287,7 +293,7 @@ void BaseEngine::OnResize()
     immediateContext->RSSetViewports(1, &viewport);
 }
 
-bool BaseEngine::InitWindow()
+bool EngineBase::InitWindow()
 {
     // 윈도우 클래스 정의 및 등록
     WNDCLASSEX wc{};
@@ -314,7 +320,7 @@ bool BaseEngine::InitWindow()
     const int centerY = (GetSystemMetrics(SM_CYSCREEN) - height) / 2;
 
     // 윈도우 생성
-    windowHandle = CreateWindowEx(WS_EX_APPWINDOW, className.c_str(), windowName.c_str(), WS_OVERLAPPEDWINDOW, centerX, centerY, width, height, nullptr, nullptr, instanceHandle, nullptr);
+    windowHandle = CreateWindowEx(WS_EX_APPWINDOW, className.c_str(), windowName.c_str(), WS_OVERLAPPEDWINDOW, centerX, centerY, width, height, nullptr, nullptr, instanceHandle, this);
     if (!windowHandle)
     {
         MessageBox(nullptr, L"윈도우 생성 실패", L"Error", MB_OK | MB_ICONERROR);
@@ -328,7 +334,7 @@ bool BaseEngine::InitWindow()
     return true;
 }
 
-bool BaseEngine::InitDirectX()
+bool EngineBase::InitDirectX()
 {
     UINT createDeviceFlags = 0;
 #ifdef _DEBUG
@@ -407,15 +413,15 @@ bool BaseEngine::InitDirectX()
     return true;
 }
 
-void BaseEngine::UpdateFrameInfo(float deltaSeconds)
+void EngineBase::UpdateFrameInfo(float deltaSeconds)
 {
     static int frameCount = 0;
-    static float elpasedTime = 0.0f;
+    static float elapsedTime = 0.0f;
 
     ++frameCount;
-    elpasedTime += deltaSeconds;
+    elapsedTime += deltaSeconds;
 
-    if (elpasedTime >= 1.0f)
+    if (elapsedTime >= 1.0f)
     {
         const float msPerFrame = 1000.0f / static_cast<float>(frameCount);
 
@@ -425,10 +431,10 @@ void BaseEngine::UpdateFrameInfo(float deltaSeconds)
         SetWindowText(windowHandle, frameInfoStream.str().c_str());
 
         frameCount = 0;
-        elpasedTime = 0.0f;
+        elapsedTime = 0.0f;
     }
 }
 
-void BaseEngine::Update(float deltaSeconds) {}
+void EngineBase::Update(float deltaSeconds) {}
 
-void BaseEngine::Render() {}
+void EngineBase::Render() {}

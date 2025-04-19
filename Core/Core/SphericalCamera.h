@@ -1,15 +1,15 @@
 #pragma once
 
-#include "BaseEngine.h"
+#include "EngineBase.h"
 #include "Core/Data/SphericalCoord.h"
 
 #include <DirectXMath.h>
 
 using namespace DirectX;
 
-class SphericalCamera : public BaseEngine
+class SphericalCamera : public EngineBase
 {
-    DECLARE_ENGINE(SphericalCamera, BaseEngine)
+    DECLARE_ENGINE(SphericalCamera, EngineBase)
 
 public:
     virtual ~SphericalCamera() = default;

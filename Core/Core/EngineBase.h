@@ -21,7 +21,7 @@
 using namespace Microsoft::WRL;
 
 #define DECLARE_ENGINE(ClassName, ParentClassName)\
-    friend class BaseEngine;\
+    friend class EngineBase;\
     using Super = ParentClassName;\
     using ThisClass = ClassName;\
     public:\
@@ -38,28 +38,16 @@ enum class WindowState : uint8_t
     Maximized
 };
 
-class BaseEngine
+class EngineBase
 {
 public:
-    virtual ~BaseEngine() = default;
-    BaseEngine(const BaseEngine&) = delete;
-    BaseEngine& operator=(const BaseEngine&) = delete;
-    BaseEngine(BaseEngine&&) noexcept = delete;
-    BaseEngine& operator=(BaseEngine&&) noexcept = delete;
+    EngineBase() = default;
+    virtual ~EngineBase() = default;
 
-    template <typename T, typename = std::enable_if_t<std::is_base_of_v<BaseEngine, T>>>
-    static void Register()
-    {
-        if (!engineInstance) // 등록된 이후 바꿀 수 없음
-        {
-            engineInstance.reset(new T);
-        }
-    }
-
-    static BaseEngine* Get() { return engineInstance.get(); }
-
-    template <typename T>
-    static T* Get() { return dynamic_cast<T*>(Get()); }
+    EngineBase(const EngineBase&) = delete;
+    EngineBase& operator=(const EngineBase&) = delete;
+    EngineBase(EngineBase&&) noexcept = delete;
+    EngineBase& operator=(EngineBase&&) noexcept = delete;
 
     [[nodiscard]] float GetAspectRatio() const { return static_cast<float>(clientWidth) / static_cast<float>(clientHeight); }
 
@@ -76,8 +64,6 @@ public:
     virtual void OnMouseMove(WPARAM buttonState, int x, int y) = 0;
 
 protected:
-    BaseEngine() = default;
-
     bool InitWindow();
     bool InitDirectX();
 
@@ -116,6 +102,6 @@ protected:
     std::unique_ptr<GameInstance> gameInstance;
 
 private:
-    static std::unique_ptr<BaseEngine> engineInstance;
+    static std::unique_ptr<EngineBase> engineInstance;
     bool bUseWireframeView = false;
 };

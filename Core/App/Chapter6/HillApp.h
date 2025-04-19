@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Core/BaseEngine.h"
+#include "Core/EngineBase.h"
 #include "Rendering/VertexTypes.h"
 
 #include <vector>
 
 using namespace DirectX;
 
-class HillApp : public BaseEngine
+class HillApp : public EngineBase
 {
-    DECLARE_ENGINE(HillApp, BaseEngine)
+    DECLARE_ENGINE(HillApp, EngineBase)
 
 public:
     ~HillApp() override = default;

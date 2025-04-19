@@ -4,14 +4,11 @@
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
-    BaseEngine::Register<LitSkullApp>();
-
-    if (!BaseEngine::Get()->Init(hInstance))
+    const std::unique_ptr<EngineBase> engine = std::make_unique<LitSkullApp>();
+    if (engine->Init(hInstance))
     {
-        return 0;
+        engine->Run();
     }
-
-    BaseEngine::Get()->Run();
 
     return 0;
 }

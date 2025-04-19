@@ -14,14 +14,13 @@ class LightingApp final : public SphericalCamera
     DECLARE_ENGINE(LightingApp, SphericalCamera)
 
 public:
+    LightingApp();
     ~LightingApp() override = default;
 
     bool Init(HINSTANCE inInstanceHandle) override;
     void OnResize() override;
 
 protected:
-    LightingApp();
-
     virtual void Update(float deltaSeconds) override;
     virtual void Render() override;
 

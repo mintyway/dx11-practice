@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Core/BaseEngine.h"
+#include "Core/EngineBase.h"
 #include "Rendering/Submesh.h"
 #include "Rendering/VertexTypes.h"
 #include "Utilities/Waves.h"
 
 using namespace DirectX;
 
-class WavesApp : public BaseEngine
+class WavesApp : public EngineBase
 {
-    DECLARE_ENGINE(WavesApp, BaseEngine)
+    DECLARE_ENGINE(WavesApp, EngineBase)
 
 public:
     ~WavesApp() override = default;

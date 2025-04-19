@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/BaseEngine.h"
+#include "Core/EngineBase.h"
 #include "Rendering/Submesh.h"
 #include "Rendering/VertexTypes.h"
 
@@ -8,9 +8,9 @@
 
 using namespace DirectX;
 
-class MultiDrawApp : public BaseEngine
+class MultiDrawApp : public EngineBase
 {
-    DECLARE_ENGINE(MultiDrawApp, BaseEngine)
+    DECLARE_ENGINE(MultiDrawApp, EngineBase)
 
 public:
     ~MultiDrawApp() override = default;

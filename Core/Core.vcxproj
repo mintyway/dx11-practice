@@ -71,7 +71,7 @@
     <ClCompile Include="App\Chapter6\HillApp.cpp" />
     <ClCompile Include="App\Chapter6\MultiDrawApp.cpp" />
     <ClCompile Include="App\Chapter6\WavesApp.cpp" />
-    <ClCompile Include="Core\BaseEngine.cpp" />
+    <ClCompile Include="Core\EngineBase.cpp" />
     <ClCompile Include="Core\GameInstance.cpp" />
     <ClCompile Include="Core\GeometryGenerator.cpp" />
     <ClCompile Include="Core\SphericalCamera.cpp" />
@@ -129,7 +129,7 @@
     <ClInclude Include="App\Chapter6\HillApp.h" />
     <ClInclude Include="App\Chapter6\MultiDrawApp.h" />
     <ClInclude Include="App\Chapter6\WavesApp.h" />
-    <ClInclude Include="Core\BaseEngine.h" />
+    <ClInclude Include="Core\EngineBase.h" />
     <ClInclude Include="Core\GameInstance.h" />
     <ClInclude Include="Core\GeometryGenerator.h" />
     <ClInclude Include="Core\SphericalCamera.h" />

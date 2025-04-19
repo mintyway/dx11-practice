@@ -19,7 +19,7 @@ Exercise::Exercise()
 
 bool Exercise::Init(HINSTANCE inInstanceHandle)
 {
-    if (!BaseEngine::Init(inInstanceHandle))
+    if (!EngineBase::Init(inInstanceHandle))
     {
         return false;
     }
@@ -32,12 +32,12 @@ bool Exercise::Init(HINSTANCE inInstanceHandle)
 
 LRESULT Exercise::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    return BaseEngine::HandleMessage(hWnd, message, wParam, lParam);
+    return EngineBase::HandleMessage(hWnd, message, wParam, lParam);
 }
 
 void Exercise::OnResize()
 {
-    BaseEngine::OnResize();
+    EngineBase::OnResize();
     XMStoreFloat4x4(&projectionMatrix, XMMatrixPerspectiveFovLH(XM_PIDIV4, GetAspectRatio(), 1.0f, 1000.0f));
 }
 
@@ -51,7 +51,7 @@ void Exercise::Update(float deltaSeconds)
 
 void Exercise::Render()
 {
-    BaseEngine::Render();
+    EngineBase::Render();
 
     immediateContext->ClearRenderTargetView(renderTargetView.Get(), Colors::White);
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);

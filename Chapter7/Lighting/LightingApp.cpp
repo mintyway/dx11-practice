@@ -10,16 +10,13 @@
 
 #include <numbers>
 
-int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
-    BaseEngine::Register<LightingApp>();
-
-    if (!BaseEngine::Get()->Init(hInstance))
+    const std::unique_ptr<EngineBase> engine = std::make_unique<LightingApp>();
+    if (engine->Init(hInstance))
     {
-        return 0;
+        engine->Run();
     }
-
-    BaseEngine::Get()->Run();
 
     return 0;
 }
