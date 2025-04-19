@@ -1,6 +1,8 @@
 #include "Exercise.h"
 
-#include "Core/GeometryGenerator.h"
+#include <d3dcompiler.h>
+
+#include "Core/Common/GeometryGenerator.h"
 #include "Exercise/Chapter6.hpp"
 #include "Rendering/VertexTypes.h"
 #include "Utilities/Utility.h"

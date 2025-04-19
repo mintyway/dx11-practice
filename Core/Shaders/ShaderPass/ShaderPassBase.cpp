@@ -1,10 +1,10 @@
-#include "ShaderBase.h"
-
-#include "Data/Path.h"
+#include "ShaderPassBase.h"
 
 #include <d3dcompiler.h>
 
-ShaderBase::ShaderBase(ID3D11Device* device, const std::wstring& vertexShaderName, const std::wstring& pixelShaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& inputElementDescs)
+#include "Data/Path.h"
+
+ShaderPassBase::ShaderPassBase(ID3D11Device* device, const std::wstring& vertexShaderName, const std::wstring& pixelShaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& inputElementDescs)
 {
     const std::wstring extension = L".cso";
 
@@ -19,7 +19,7 @@ ShaderBase::ShaderBase(ID3D11Device* device, const std::wstring& vertexShaderNam
     device->CreateInputLayout(inputElementDescs.data(), static_cast<UINT>(inputElementDescs.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout);
 }
 
-void ShaderBase::Bind(ID3D11DeviceContext* immediateContext)
+void ShaderPassBase::Bind(ID3D11DeviceContext* immediateContext)
 {
     immediateContext->VSSetShader(vertexShader.Get(), nullptr, 0);
     immediateContext->PSSetShader(pixelShader.Get(), nullptr, 0);

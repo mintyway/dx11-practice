@@ -71,15 +71,13 @@
     <ClCompile Include="App\Chapter6\HillApp.cpp" />
     <ClCompile Include="App\Chapter6\MultiDrawApp.cpp" />
     <ClCompile Include="App\Chapter6\WavesApp.cpp" />
-    <ClCompile Include="Core\EngineBase.cpp" />
-    <ClCompile Include="Core\GameInstance.cpp" />
-    <ClCompile Include="Core\GeometryGenerator.cpp" />
-    <ClCompile Include="Core\SphericalCamera.cpp" />
-    <ClCompile Include="Core\Timer.cpp" />
+    <ClCompile Include="Common\GeometryGenerator.cpp" />
+    <ClCompile Include="Common\Timer.cpp" />
+    <ClCompile Include="Engine\EngineBase.cpp" />
+    <ClCompile Include="Engine\SphericalCamera.cpp" />
     <ClCompile Include="core.cpp" />
-    <ClCompile Include="Data\Path.cpp" />
     <ClCompile Include="Rendering\Vertex.cpp" />
-    <ClCompile Include="Shaders\ShaderType\ShaderBase.cpp" />
+    <ClCompile Include="Shaders\ShaderPass\ShaderPassBase.cpp" />
     <ClCompile Include="Utilities\Utility.cpp" />
     <ClCompile Include="Utilities\Waves.cpp" />
     <FxCompile Include="Shaders\HLSL\basic_ps.hlsl">
@@ -129,11 +127,11 @@
     <ClInclude Include="App\Chapter6\HillApp.h" />
     <ClInclude Include="App\Chapter6\MultiDrawApp.h" />
     <ClInclude Include="App\Chapter6\WavesApp.h" />
-    <ClInclude Include="Core\EngineBase.h" />
-    <ClInclude Include="Core\GameInstance.h" />
-    <ClInclude Include="Core\GeometryGenerator.h" />
-    <ClInclude Include="Core\SphericalCamera.h" />
-    <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Common\GeometryGenerator.h" />
+    <ClInclude Include="Common\Timer.h" />
+    <ClInclude Include="Data\Color.h" />
+    <ClInclude Include="Engine\EngineBase.h" />
+    <ClInclude Include="Engine\SphericalCamera.h" />
     <ClInclude Include="Data\Path.h" />
     <ClInclude Include="Data\SphericalCoord.h" />
     <ClInclude Include="Exercise\Chapter6.hpp" />
@@ -141,8 +139,7 @@
     <ClInclude Include="Rendering\Submesh.h" />
     <ClInclude Include="Rendering\Vertex.h" />
     <ClInclude Include="Rendering\VertexTypes.h" />
-    <ClInclude Include="Shaders\ShaderType\ShaderBase.h" />
-    <ClInclude Include="Utilities\Color.h" />
+    <ClInclude Include="Shaders\ShaderPass\ShaderPassBase.h" />
     <ClInclude Include="Utilities\Utility.h" />
     <ClInclude Include="Utilities\Waves.h" />
     <None Include="Shaders\HLSL\LightingCommon.hlsli" />
@@ -158,9 +155,6 @@
     <Content Include="Models\skull.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Shaders\Light\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

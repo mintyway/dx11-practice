@@ -1,14 +1,16 @@
 #include "LightingApp.h"
 
-#include "Core/Core/GeometryGenerator.h"
+#include <numbers>
+
+#include "Core/Common/GeometryGenerator.h"
+#include "Core/Common/Timer.h"
 #include "Core/Data/Path.h"
 #include "Core/Data/SphericalCoord.h"
 #include "Core/Rendering/VertexTypes.h"
 #include "Core/Utilities/Utility.h"
-#include "Shaders/BasicShader.h"
-#include "Type/ConstantBufferData.h"
+#include "Shaders/BasicShaderPass.h"
 
-#include <numbers>
+using namespace DirectX;
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
@@ -57,6 +59,8 @@ LightingApp::LightingApp()
     wavesMaterial.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 96.0f);
 }
 
+LightingApp::~LightingApp() = default;
+
 bool LightingApp::Init(HINSTANCE inInstanceHandle)
 {
     if (!Super::Init(inInstanceHandle))
@@ -64,7 +68,7 @@ bool LightingApp::Init(HINSTANCE inInstanceHandle)
         return false;
     }
 
-    basicShader = std::make_unique<BasicShader>(device.Get());
+    basicShader = std::make_unique<BasicShaderPass>(device.Get());
     basicShader->Bind(immediateContext.Get());
 
     if (!CreateGeometry())
@@ -91,7 +95,7 @@ void LightingApp::Update(float deltaSeconds)
     XMStoreFloat3(&eyePosition, cameraPosition);
 
     static float elapsedTime = 0.0f;
-    if (timer.GetTotalSeconds() - elapsedTime >= 0.1f)
+    if (timer->GetTotalSeconds() - elapsedTime >= 0.1f)
     {
         elapsedTime += 0.1f;
 
@@ -116,8 +120,8 @@ void LightingApp::Update(float deltaSeconds)
 
     immediateContext->Unmap(wavesVertexBuffer.Get(), 0);
 
-    pointLight.position.x = 70.0f * std::cos(0.2f * static_cast<float>(timer.GetTotalSeconds()));
-    pointLight.position.z = 70.0f * std::sin(0.2f * static_cast<float>(timer.GetTotalSeconds()));
+    pointLight.position.x = 70.0f * std::cos(0.2f * static_cast<float>(timer->GetTotalSeconds()));
+    pointLight.position.z = 70.0f * std::sin(0.2f * static_cast<float>(timer->GetTotalSeconds()));
     pointLight.position.y = std::max(GetHeight(pointLight.position.x, pointLight.position.z), -3.0f) + 10.0f;
 
     spotLight.position = eyePosition;

@@ -1,10 +1,14 @@
 #include "MultiDrawApp.h"
 
-#include "Core/GeometryGenerator.h"
+#include <algorithm>
+#include <d3dcompiler.h>
+
+#include "Common/GeometryGenerator.h"
 #include "Data/SphericalCoord.h"
+#include "Rendering/VertexTypes.h"
 #include "Utilities/Utility.h"
 
-#include <algorithm>
+using namespace DirectX;
 
 MultiDrawApp::MultiDrawApp()
 {

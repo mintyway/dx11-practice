@@ -1,19 +1,15 @@
 #pragma once
 
-#include <cstdint>
-
 #include <DirectXMath.h>
-
-using namespace DirectX;
 
 struct Color
 {
-    static Color LinearColorToColor(FXMVECTOR inLinearColor)
+    static Color LinearColorToColor(DirectX::FXMVECTOR inLinearColor)
     {
-        const XMVECTOR clamped = XMVectorClamp(inLinearColor, XMVectorZero(), XMVectorReplicate(1.0f));
-        const XMVECTOR scaled =  clamped * 255.0f;
-        XMUINT4 color;
-        XMStoreUInt4(&color, XMVectorRound(scaled));
+        const DirectX::XMVECTOR clamped = DirectX::XMVectorClamp(inLinearColor, DirectX::XMVectorZero(), DirectX::XMVectorReplicate(1.0f));
+        const DirectX::XMVECTOR scaled = DirectX::XMVectorScale(clamped, 255.0f);
+        DirectX::XMUINT4 color;
+        XMStoreUInt4(&color, DirectX::XMVectorRound(scaled));
         return {static_cast<uint8_t>(color.x), static_cast<uint8_t>(color.y), static_cast<uint8_t>(color.z), static_cast<uint8_t>(color.w)};
     }
 

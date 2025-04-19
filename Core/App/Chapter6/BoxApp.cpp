@@ -1,10 +1,12 @@
 #include "BoxApp.h"
 
-#include "Data/SphericalCoord.h"
-#include "Utilities/Utility.h"
-#include "Exercise/Chapter6.hpp"
-
 #include <algorithm>
+#include <d3dcompiler.h>
+
+#include "Core/Common/Timer.h"
+#include "Data/SphericalCoord.h"
+#include "Exercise/Chapter6.hpp"
+#include "Utilities/Utility.h"
 
 BoxApp::BoxApp()
 {
@@ -112,7 +114,7 @@ void BoxApp::Render()
 
     D3D11_MAPPED_SUBRESOURCE mapped;
     immediateContext->Map(timeBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    *static_cast<float*>(mapped.pData) = static_cast<float>(timer.GetTotalSeconds());
+    *static_cast<float*>(mapped.pData) = static_cast<float>(timer->GetTotalSeconds());
     immediateContext->Unmap(timeBuffer.Get(), 0);
 
     ID3D11Buffer* constantBuffers[] = {wvpMatrixBuffer.Get(), timeBuffer.Get()};

@@ -73,7 +73,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="LightingApp.h" />
-    <ClInclude Include="Shaders\BasicShader.h" />
+    <ClInclude Include="Shaders\BasicShaderPass.h" />
     <ClInclude Include="Type\ConstantBufferData.h" />
     <None Include="Shaders\SharedTypes.hlsli">
       <FileType>Document</FileType>
@@ -81,7 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LightingApp.cpp" />
-    <ClCompile Include="Shaders\BasicShader.cpp">
+    <ClCompile Include="Shaders\BasicShaderPass.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <Optimization>Disabled</Optimization>

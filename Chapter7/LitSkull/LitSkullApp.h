@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Core/SphericalCamera.h"
+#include "Core/Engine/SphericalCamera.h"
 #include "Core/Light/Light.h"
 #include "Core/Rendering/Submesh.h"
 

@@ -13,8 +13,8 @@ public:
 
     Timer();
 
-    [[nodiscard]] inline float GetDeltaSeconds() const { return deltaSeconds; }
-    [[nodiscard]] inline double GetTotalSeconds() const { return isStopped ? GetElapsedSeconds(stopTime) : GetElapsedSeconds(Clock::now()); }
+    [[nodiscard]] float GetDeltaSeconds() const { return deltaSeconds; }
+    [[nodiscard]] double GetTotalSeconds() const { return isStopped ? GetElapsedSeconds(stopTime) : GetElapsedSeconds(Clock::now()); }
 
     void Reset();
     void Start();
@@ -22,7 +22,7 @@ public:
     void Tick();
 
 private:
-    [[nodiscard]] inline double GetElapsedSeconds(const TimePoint& currentTime) const { return Duration<double>(currentTime - baseTime - pausedDuration).count(); }
+    [[nodiscard]] double GetElapsedSeconds(const TimePoint& currentTime) const { return Duration<double>(currentTime - baseTime - pausedDuration).count(); }
 
     TimePoint baseTime;
     TimePoint previousTime;

@@ -1,15 +1,16 @@
 #pragma once
 
-#include "Core/Shaders/ShaderType/ShaderBase.h"
+#include "Core/Shaders/ShaderPass/ShaderPassBase.h"
 #include "Core/Light/Light.h"
+#include "DirectXMath.h"
 
-class BasicShader final : public ShaderBase
+class BasicShaderPass final : public ShaderPassBase
 {
     struct ObjectRenderData
     {
-        XMFLOAT4X4 worldMatrix;
-        XMFLOAT4X4 worldInverseTransposeMatrix;
-        XMFLOAT4X4 wvpMatrix;
+        DirectX::XMFLOAT4X4 worldMatrix;
+        DirectX::XMFLOAT4X4 worldInverseTransposeMatrix;
+        DirectX::XMFLOAT4X4 wvpMatrix;
         Material material;
     };
 
@@ -18,24 +19,24 @@ class BasicShader final : public ShaderBase
         DirectionalLight directionalLight;
         PointLight pointLight;
         SpotLight spotLight;
-        alignas(16) XMFLOAT3 eyeWorldPosition;
+        alignas(16) DirectX::XMFLOAT3 eyeWorldPosition;
     };
 
-    DECLARE_SHADER(BasicShader, ShaderBase)
+    DECLARE_SHADER(BasicShaderPass, ShaderPassBase)
 
 public:
-    BasicShader(ID3D11Device* device);
-    ~BasicShader() override = default;
+    BasicShaderPass(ID3D11Device* device);
+    ~BasicShaderPass() override = default;
 
     void Bind(ID3D11DeviceContext* immediateContext) override;
 
     void UpdateCBuffer(ID3D11DeviceContext* immediateContext);
 
-    void SetMatrix(FXMMATRIX worldMatrix, CXMMATRIX viewProjectionMatrix);
+    void SetMatrix(DirectX::FXMMATRIX worldMatrix, DirectX::CXMMATRIX viewProjectionMatrix);
     void SetMaterial(const Material& material);
 
     void SetLights(const DirectionalLight& directionalLight, const PointLight& pointLight, const SpotLight& spotLight);
-    void SetEyePosition(const XMFLOAT3& eyeWorldPosition);
+    void SetEyePosition(const DirectX::XMFLOAT3& eyeWorldPosition);
 
 protected:
     void UpdateObjectRenderData(ID3D11DeviceContext* immediateContext);

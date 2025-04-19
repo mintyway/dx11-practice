@@ -1,11 +1,9 @@
 #pragma once
 
-#include "Core/EngineBase.h"
+#include "Core/Engine/EngineBase.h"
 #include "Rendering/Submesh.h"
 #include "Rendering/VertexTypes.h"
 #include "Utilities/Waves.h"
-
-using namespace DirectX;
 
 class WavesApp : public EngineBase
 {
@@ -49,16 +47,16 @@ private:
     ComPtr<ID3D11Buffer> wavesIndexBuffer;
 
     float radius = 200.0f;
-    float theta = -XM_PIDIV4;
-    float phi = XM_PIDIV4;
+    float theta = -DirectX::XM_PIDIV4;
+    float phi = DirectX::XM_PIDIV4;
 
     POINT lastMousePosition{};
 
-    XMFLOAT4X4 viewMatrix;
-    XMFLOAT4X4 projectionMatrix;
+    DirectX::XMFLOAT4X4 viewMatrix;
+    DirectX::XMFLOAT4X4 projectionMatrix;
 
-    XMFLOAT4X4 landWorldMatrix;
-    XMFLOAT4X4 wavesWorldMatrix;
+    DirectX::XMFLOAT4X4 landWorldMatrix;
+    DirectX::XMFLOAT4X4 wavesWorldMatrix;
 
     Waves waves;
 

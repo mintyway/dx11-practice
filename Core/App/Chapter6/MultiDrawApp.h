@@ -1,12 +1,10 @@
 #pragma once
 
-#include "Core/EngineBase.h"
-#include "Rendering/Submesh.h"
-#include "Rendering/VertexTypes.h"
-
 #include <array>
+#include <DirectXMath.h>
 
-using namespace DirectX;
+#include "Core/Engine/EngineBase.h"
+#include "Rendering/Submesh.h"
 
 class MultiDrawApp : public EngineBase
 {
@@ -44,20 +42,20 @@ private:
 
     ComPtr<ID3D11Buffer> constantBuffer;
 
-    XMFLOAT4X4 viewMatrix;
-    XMFLOAT4X4 projectionMatrix;
+    DirectX::XMFLOAT4X4 viewMatrix;
+    DirectX::XMFLOAT4X4 projectionMatrix;
 
     float radius = 30.0f;
-    float theta = -XM_PIDIV4;
-    float phi = XM_PIDIV4;
+    float theta = -DirectX::XM_PIDIV4;
+    float phi = DirectX::XM_PIDIV4;
 
     POINT lastMousePosition{};
 
-    std::array<XMFLOAT4X4, 10> sphereWorldMatrices;
-    std::array<XMFLOAT4X4, 10> cylinderWorldMatrices;
-    XMFLOAT4X4 boxWorldMatrix;
-    XMFLOAT4X4 gridWorldMatrix;
-    XMFLOAT4X4 centerSphereWorldMatrix;
+    std::array<DirectX::XMFLOAT4X4, 10> sphereWorldMatrices;
+    std::array<DirectX::XMFLOAT4X4, 10> cylinderWorldMatrices;
+    DirectX::XMFLOAT4X4 boxWorldMatrix;
+    DirectX::XMFLOAT4X4 gridWorldMatrix;
+    DirectX::XMFLOAT4X4 centerSphereWorldMatrix;
 
     Submesh boxSubmesh{};
     Submesh gridSubmesh{};

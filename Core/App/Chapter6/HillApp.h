@@ -1,11 +1,7 @@
 #pragma once
 
-#include "Core/EngineBase.h"
+#include "Core/Engine/EngineBase.h"
 #include "Rendering/VertexTypes.h"
-
-#include <vector>
-
-using namespace DirectX;
 
 class HillApp : public EngineBase
 {
@@ -42,13 +38,13 @@ private:
 
     ComPtr<ID3D11Buffer> constantBuffer;
 
-    XMFLOAT4X4 worldMatrix;
-    XMFLOAT4X4 viewMatrix;
-    XMFLOAT4X4 projectionMatrix;
+    DirectX::XMFLOAT4X4 worldMatrix;
+    DirectX::XMFLOAT4X4 viewMatrix;
+    DirectX::XMFLOAT4X4 projectionMatrix;
 
     float radius = 200.0f;
-    float theta = -XM_PIDIV4;
-    float phi = 0.25f * XM_PI;
+    float theta = -DirectX::XM_PIDIV4;
+    float phi = 0.25f * DirectX::XM_PI;
 
     POINT lastMousePosition{};
 };

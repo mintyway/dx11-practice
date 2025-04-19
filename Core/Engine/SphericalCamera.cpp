@@ -1,6 +1,9 @@
 #include "SphericalCamera.h"
 
 #include <algorithm>
+#include <limits>
+
+using namespace DirectX;
 
 SphericalCamera::SphericalCamera() : maxCameraRadius(std::numeric_limits<float>::max()) {}
 

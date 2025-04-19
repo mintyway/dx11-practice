@@ -1,10 +1,13 @@
 #include "HillApp.h"
 
-#include "Core/GeometryGenerator.h"
+#include "Common/GeometryGenerator.h"
 #include "Data/SphericalCoord.h"
 #include "Utilities/Utility.h"
 
 #include <algorithm>
+#include <d3dcompiler.h>
+
+using namespace DirectX;
 
 HillApp::HillApp()
 {

@@ -1,9 +1,11 @@
-#include "BasicShader.h"
+#include "BasicShaderPass.h"
 
 #include "Core/Data/Path.h"
 #include "Core/Rendering/Vertex.h"
 
-BasicShader::BasicShader(ID3D11Device* device)
+using namespace DirectX;
+
+BasicShaderPass::BasicShaderPass(ID3D11Device* device)
     : Super(device, L"Light_vs", L"Light_ps", Vertex::PN::Desc)
 {
     const CD3D11_BUFFER_DESC objectRenderCBufferDesc(sizeof(ObjectRenderData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
@@ -13,7 +15,7 @@ BasicShader::BasicShader(ID3D11Device* device)
     device->CreateBuffer(&sceneLightDataCBufferDesc, nullptr, &sceneLightCBuffer);
 }
 
-void BasicShader::Bind(ID3D11DeviceContext* immediateContext)
+void BasicShaderPass::Bind(ID3D11DeviceContext* immediateContext)
 {
     Super::Bind(immediateContext);
 
@@ -22,13 +24,13 @@ void BasicShader::Bind(ID3D11DeviceContext* immediateContext)
     immediateContext->PSSetConstantBuffers(0, 2, cBuffers);
 }
 
-void BasicShader::UpdateCBuffer(ID3D11DeviceContext* immediateContext)
+void BasicShaderPass::UpdateCBuffer(ID3D11DeviceContext* immediateContext)
 {
     UpdateObjectRenderData(immediateContext);
     UpdateSceneLightData(immediateContext);
 }
 
-void BasicShader::SetMatrix(FXMMATRIX worldMatrix, CXMMATRIX viewProjectionMatrix)
+void BasicShaderPass::SetMatrix(DirectX::FXMMATRIX worldMatrix, DirectX::CXMMATRIX viewProjectionMatrix)
 {
     XMStoreFloat4x4(&objectRenderData.worldMatrix, worldMatrix);
     XMStoreFloat4x4(&objectRenderData.worldInverseTransposeMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)));
@@ -36,13 +38,13 @@ void BasicShader::SetMatrix(FXMMATRIX worldMatrix, CXMMATRIX viewProjectionMatri
     objectRenderDataDirty = true;
 }
 
-void BasicShader::SetMaterial(const Material& material)
+void BasicShaderPass::SetMaterial(const Material& material)
 {
     objectRenderData.material = material;
     objectRenderDataDirty = true;
 }
 
-void BasicShader::SetLights(const DirectionalLight& directionalLight, const PointLight& pointLight, const SpotLight& spotLight)
+void BasicShaderPass::SetLights(const DirectionalLight& directionalLight, const PointLight& pointLight, const SpotLight& spotLight)
 {
     sceneLightData.directionalLight = directionalLight;
     sceneLightData.pointLight = pointLight;
@@ -50,13 +52,13 @@ void BasicShader::SetLights(const DirectionalLight& directionalLight, const Poin
     sceneLightDataDirty = true;
 }
 
-void BasicShader::SetEyePosition(const XMFLOAT3& eyeWorldPosition)
+void BasicShaderPass::SetEyePosition(const DirectX::XMFLOAT3& eyeWorldPosition)
 {
     sceneLightData.eyeWorldPosition = eyeWorldPosition;
     sceneLightDataDirty = true;
 }
 
-void BasicShader::UpdateObjectRenderData(ID3D11DeviceContext* immediateContext)
+void BasicShaderPass::UpdateObjectRenderData(ID3D11DeviceContext* immediateContext)
 {
     if (!objectRenderDataDirty)
     {
@@ -71,7 +73,7 @@ void BasicShader::UpdateObjectRenderData(ID3D11DeviceContext* immediateContext)
     objectRenderDataDirty = false;
 }
 
-void BasicShader::UpdateSceneLightData(ID3D11DeviceContext* immediateContext)
+void BasicShaderPass::UpdateSceneLightData(ID3D11DeviceContext* immediateContext)
 {
     if (!sceneLightDataDirty)
     {

@@ -4,8 +4,6 @@
 #include <DirectXMath.h>
 #include <vector>
 
-using namespace DirectX;
-
 class GeometryGenerator
 {
 public:
@@ -13,7 +11,7 @@ public:
     {
         Vertex() = default;
 
-        Vertex(const XMFLOAT3& p, const XMFLOAT3& n, const XMFLOAT3& t, const XMFLOAT2& uv) : position(p), normal(n), tangentU(t), texC(uv) {}
+        Vertex(const DirectX::XMFLOAT3& p, const DirectX::XMFLOAT3& n, const DirectX::XMFLOAT3& t, const DirectX::XMFLOAT2& uv) : position(p), normal(n), tangentU(t), texC(uv) {}
 
         Vertex(float px, float py, float pz,
                float nx, float ny, float nz,
@@ -22,10 +20,10 @@ public:
             : position(px, py, pz), normal(nx, ny, nz),
               tangentU(tx, ty, tz), texC(u, v) {}
 
-        XMFLOAT3 position;
-        XMFLOAT3 normal;
-        XMFLOAT3 tangentU;
-        XMFLOAT2 texC;
+        DirectX::XMFLOAT3 position;
+        DirectX::XMFLOAT3 normal;
+        DirectX::XMFLOAT3 tangentU;
+        DirectX::XMFLOAT2 texC;
     };
 
     struct MeshData

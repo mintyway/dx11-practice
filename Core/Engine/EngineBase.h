@@ -1,35 +1,15 @@
 #pragma once
 
-#include <Windows.h>
 #include <d3d11.h>
-#include <d3dcompiler.h>
-#include <DirectXMath.h>
+#include <iomanip>
+#include <memory>
+#include <sstream>
+#include <Windows.h>
 #include <wrl/client.h>
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
-
-#include <iostream>
-#include <memory>
-#include <iomanip>
-#include <sstream>
-
-#include "GameInstance.h"
-#include "Timer.h"
-
-using namespace Microsoft::WRL;
-
-#define DECLARE_ENGINE(ClassName, ParentClassName)\
-    friend class EngineBase;\
-    using Super = ParentClassName;\
-    using ThisClass = ClassName;\
-    public:\
-    ClassName(const ClassName&) = delete;\
-    ClassName& operator=(const ClassName&) = delete; /*NOLINT(bugprone-macro-parentheses)*/\
-    ClassName(ClassName&&) = delete; /*NOLINT(bugprone-macro-parentheses)*/\
-    ClassName& operator=(ClassName&&) = delete; /*NOLINT(bugprone-macro-parentheses)*/\
-    private:
 
 enum class WindowState : uint8_t
 {
@@ -38,11 +18,26 @@ enum class WindowState : uint8_t
     Maximized
 };
 
+#define DECLARE_ENGINE(ClassName, ParentClassName)\
+using Super = ParentClassName;\
+using ThisClass = ClassName;\
+public:\
+ClassName(const ClassName&) = delete; /*NOLINT(bugprone-macro-parentheses)*/\
+ClassName& operator=(const ClassName&) = delete; /*NOLINT(bugprone-macro-parentheses)*/\
+ClassName(ClassName&&) = delete; /*NOLINT(bugprone-macro-parentheses)*/\
+ClassName& operator=(ClassName&&) = delete; /*NOLINT(bugprone-macro-parentheses)*/\
+private:
+
+class Timer;
+
 class EngineBase
 {
+    template <typename T>
+    using ComPtr = Microsoft::WRL::ComPtr<T>;
+
 public:
-    EngineBase() = default;
-    virtual ~EngineBase() = default;
+    EngineBase();
+    virtual ~EngineBase();
 
     EngineBase(const EngineBase&) = delete;
     EngineBase& operator=(const EngineBase&) = delete;
@@ -77,13 +72,13 @@ protected:
     std::wstring className;
     std::wstring windowName;
     bool isPaused = false;
-    WindowState windowState;
+    WindowState windowState{};
     bool isResizing = false;
 
     int clientWidth = 800;
     int clientHeight = 600;
 
-    Timer timer;
+    std::unique_ptr<Timer> timer;
     std::wostringstream frameInfoStream = []
     {
         std::wostringstream oss;
@@ -98,8 +93,6 @@ protected:
     ComPtr<ID3D11DepthStencilView> depthStencilView;
     ComPtr<ID3D11RasterizerState> wireframeRasterizerState;
     UINT msaaQuality = 0;
-
-    std::unique_ptr<GameInstance> gameInstance;
 
 private:
     static std::unique_ptr<EngineBase> engineInstance;

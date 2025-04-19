@@ -10,8 +10,6 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 
-using namespace DirectX;
-
 /** 해당 클래스는 아직 분석하지 않았습니다. */
 class Waves
 {
@@ -27,13 +25,13 @@ public:
     float Depth() const { return static_cast<float>(mNumRows) * mSpatialStep; }
 
     // Returns the solution at the ith grid point.
-    const XMFLOAT3& operator[](int i) const { return mCurrSolution[i]; }
+    const DirectX::XMFLOAT3& operator[](int i) const { return mCurrSolution[i]; }
 
     // Returns the solution normal at the ith grid point.
-    const XMFLOAT3& Normal(int i) const { return mNormals[i]; }
+    const DirectX::XMFLOAT3& Normal(int i) const { return mNormals[i]; }
 
     // Returns the unit tangent vector at the ith grid point in the local x-axis direction.
-    const XMFLOAT3& TangentX(int i) const { return mTangentX[i]; }
+    const DirectX::XMFLOAT3& TangentX(int i) const { return mTangentX[i]; }
 
     void Init(UINT m, UINT n, float dx, float dt, float speed, float damping);
     void Update(float dt);
@@ -54,8 +52,8 @@ private:
     float mTimeStep = 0.0f;
     float mSpatialStep = 0.0f;
 
-    XMFLOAT3* mPrevSolution = nullptr;
-    XMFLOAT3* mCurrSolution = nullptr;
-    XMFLOAT3* mNormals = nullptr;
-    XMFLOAT3* mTangentX = nullptr;
+    DirectX::XMFLOAT3* mPrevSolution = nullptr;
+    DirectX::XMFLOAT3* mCurrSolution = nullptr;
+    DirectX::XMFLOAT3* mNormals = nullptr;
+    DirectX::XMFLOAT3* mTangentX = nullptr;
 };

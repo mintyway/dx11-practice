@@ -78,10 +78,6 @@
     <ClCompile Include="LitSkullApp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Data\" />
-    <Folder Include="Shaders\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.vcxproj">
       <Project>{6817540c-5ac0-4792-b19e-f5be11b51fe0}</Project>
       <Name>Core</Name>

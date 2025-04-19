@@ -7,6 +7,8 @@
 #include <cmath>
 #include <iostream>
 
+using namespace DirectX;
+
 GeometryGenerator::MeshData GeometryGenerator::CreateBox(float width, float height, float depth)
 {
     MeshData meshData;

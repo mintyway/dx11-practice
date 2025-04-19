@@ -7,6 +7,8 @@
 #include <vector>
 #include <cassert>
 
+using namespace DirectX;
+
 Waves::~Waves()
 {
     delete[] mPrevSolution;

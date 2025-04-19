@@ -1,11 +1,9 @@
 #pragma once
 
-#include "Core/SphericalCamera.h"
-#include "Rendering/Submesh.h"
-
 #include <array>
 
-using namespace DirectX;
+#include "Core/Engine/SphericalCamera.h"
+#include "Rendering/Submesh.h"
 
 class Exercise : public SphericalCamera
 {
@@ -38,14 +36,14 @@ private:
     ComPtr<ID3D11Buffer> vertexBuffer;
     ComPtr<ID3D11Buffer> indexBuffer;
 
-    XMFLOAT4X4 viewMatrix;
-    XMFLOAT4X4 projectionMatrix;
+    DirectX::XMFLOAT4X4 viewMatrix;
+    DirectX::XMFLOAT4X4 projectionMatrix;
 
-    std::array<XMFLOAT3, 8> pointPositions{};
+    std::array<DirectX::XMFLOAT3, 8> pointPositions{};
 
-    XMFLOAT4X4 boxWorldMatrix{};
+    DirectX::XMFLOAT4X4 boxWorldMatrix{};
     Submesh boxSubmesh{};
 
-    XMFLOAT4X4 pyramidWorldMatrix{};
+    DirectX::XMFLOAT4X4 pyramidWorldMatrix{};
     Submesh pyramidSubmesh{};
 };

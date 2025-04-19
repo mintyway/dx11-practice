@@ -1,10 +1,14 @@
 #include "WavesApp.h"
 
-#include "Core/GeometryGenerator.h"
+#include <algorithm>
+#include <d3dcompiler.h>
+
+#include "Common/GeometryGenerator.h"
+#include "Common/Timer.h"
 #include "Data/SphericalCoord.h"
 #include "Utilities/Utility.h"
 
-#include <algorithm>
+using namespace DirectX;
 
 WavesApp::WavesApp()
 {
@@ -95,7 +99,7 @@ void WavesApp::Update(float deltaSeconds)
     XMStoreFloat4x4(&viewMatrix, XMMatrixLookAtLH(eyePosition, focusPosition, upDirection));
 
     static float elapsedTime = 0.0f;
-    if (timer.GetTotalSeconds() - elapsedTime >= 0.1f)
+    if (timer->GetTotalSeconds() - elapsedTime >= 0.1f)
     {
         elapsedTime += 0.1f;
 

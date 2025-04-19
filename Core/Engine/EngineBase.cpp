@@ -1,9 +1,10 @@
 #include "EngineBase.h"
 
-#include "Utilities/Utility.h"
-
-#include <windowsx.h>
 #include <thread>
+#include <windowsx.h>
+
+#include "Common/Timer.h"
+#include "Utilities/Utility.h"
 
 namespace
 {
@@ -34,13 +35,19 @@ namespace
     }
 }
 
+EngineBase::EngineBase() = default;
+
+EngineBase::~EngineBase() = default;
+
 bool EngineBase::Init(HINSTANCE inInstanceHandle)
 {
-    CreateDebugConsole();
+    timer = std::make_unique<Timer>();
 
     instanceHandle = inInstanceHandle;
     className = L"Engine";
     windowName = L"DirectX11";
+
+    CreateDebugConsole();
 
     if (!InitWindow())
     {
@@ -52,14 +59,12 @@ bool EngineBase::Init(HINSTANCE inInstanceHandle)
         return false;
     }
 
-    gameInstance = std::make_unique<GameInstance>();
-
     return true;
 }
 
 void EngineBase::Run()
 {
-    timer.Start();
+    timer->Start();
 
     MSG message{};
     while (message.message != WM_QUIT)
@@ -83,12 +88,12 @@ LRESULT EngineBase::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM
         if (LOWORD(wParam) == WA_INACTIVE)
         {
             isPaused = true;
-            timer.Stop();
+            timer->Stop();
         }
         else
         {
             isPaused = false;
-            timer.Start();
+            timer->Start();
         }
 
         return 0;
@@ -142,14 +147,14 @@ LRESULT EngineBase::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM
     {
         isPaused = true;
         isResizing = true;
-        timer.Stop();
+        timer->Stop();
         return 0;
     }
     case WM_EXITSIZEMOVE:
     {
         isPaused = false;
         isResizing = false;
-        timer.Start();
+        timer->Start();
         OnResize();
         return 0;
     }
@@ -217,11 +222,11 @@ LRESULT EngineBase::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 
 void EngineBase::Tick()
 {
-    timer.Tick();
+    timer->Tick();
 
     if (!isPaused)
     {
-        const float deltaSeconds = timer.GetDeltaSeconds();
+        const float deltaSeconds = timer->GetDeltaSeconds();
         UpdateFrameInfo(deltaSeconds);
         Update(deltaSeconds);
         Render();
@@ -296,13 +301,14 @@ void EngineBase::OnResize()
 bool EngineBase::InitWindow()
 {
     // 윈도우 클래스 정의 및 등록
-    WNDCLASSEX wc{};
-    wc.cbSize = sizeof(WNDCLASSEX);
-    wc.style = CS_HREDRAW | CS_VREDRAW;
-    wc.lpfnWndProc = WndProc;
-    wc.hInstance = instanceHandle;
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.lpszClassName = className.c_str();
+    const WNDCLASSEX wc{
+        .cbSize = sizeof(WNDCLASSEX),
+        .style = CS_HREDRAW | CS_VREDRAW,
+        .lpfnWndProc = WndProc,
+        .hInstance = instanceHandle,
+        .hCursor = LoadCursor(nullptr, IDC_ARROW),
+        .lpszClassName = className.c_str()
+    };
     if (!RegisterClassEx(&wc))
     {
         MessageBox(nullptr, L"클래스 등록 실패", L"Error", MB_OK | MB_ICONERROR);

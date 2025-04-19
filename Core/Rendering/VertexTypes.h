@@ -1,12 +1,10 @@
 #pragma once
 
-#include "Core/Utilities/Color.h"
-
+#include <array>
 #include <d3d11.h>
 #include <DirectXMath.h>
-#include <array>
 
-using namespace DirectX;
+#include "Core/Data/Color.h"
 
 struct Vertex
 {
@@ -16,8 +14,8 @@ struct Vertex
         D3D11_INPUT_ELEMENT_DESC{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA}
     };
 
-    XMFLOAT3 position;
-    XMFLOAT3 normal;
+    DirectX::XMFLOAT3 position;
+    DirectX::XMFLOAT3 normal;
 };
 
 struct VertexWithColor
@@ -28,7 +26,7 @@ struct VertexWithColor
         D3D11_INPUT_ELEMENT_DESC{"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA}
     };
 
-    XMFLOAT3 position;
+    DirectX::XMFLOAT3 position;
     Color color;
 };
 
@@ -46,6 +44,6 @@ struct VertexWithLinearColor
         return os;
     }
 
-    XMFLOAT3 position;
-    XMFLOAT4 linearColor;
+    DirectX::XMFLOAT3 position;
+    DirectX::XMFLOAT4 linearColor;
 };
