@@ -32,20 +32,20 @@ LightingApp::LightingApp()
     XMStoreFloat4x4(&landWorldMatrix, identityMatrix);
     XMStoreFloat4x4(&wavesWorldMatrix, identityMatrix);
 
-    directionalLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-    directionalLight.diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-    directionalLight.specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+    directionalLight.ambient = XMFLOAT4(0.2f, 0.0f, 0.0f, 1.0f);
+    directionalLight.diffuse = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+    directionalLight.specular = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
     directionalLight.direction = XMFLOAT3(std::numbers::inv_sqrt3_v<float>, -std::numbers::inv_sqrt3_v<float>, std::numbers::inv_sqrt3_v<float>);
 
-    pointLight.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-    pointLight.diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-    pointLight.specular = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+    pointLight.ambient = XMFLOAT4(0.0f, 0.2f, 0.0f, 1.0f);
+    pointLight.diffuse = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+    pointLight.specular = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
     pointLight.attenuation = XMFLOAT3(0.0f, 0.1f, 0.0f);
     pointLight.range = 25.0f;
 
-    spotLight.ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-    spotLight.diffuse = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
-    spotLight.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    spotLight.ambient = XMFLOAT4(0.0f, 0.0f, 0.2f, 1.0f);
+    spotLight.diffuse = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+    spotLight.specular = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
     spotLight.attenuation = XMFLOAT3(1.0f, 0.0f, 0.0f);
     spotLight.spot = 96.0f;
     spotLight.range = 10000.0f;
