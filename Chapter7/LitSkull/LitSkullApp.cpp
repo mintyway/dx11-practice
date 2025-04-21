@@ -72,7 +72,7 @@ LitSkullApp::LitSkullApp()
                   .specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 16.0f)}}}
       })
 {
-    SetCameraSphericalCoord(10.0f, -XM_PIDIV4, XM_PIDIV4);
+    SetCameraSphericalCoord(25.0f, -XM_PIDIV4 - XM_PIDIV2, XM_PIDIV4);
 
     XMStoreFloat4x4(&skullWorldMatrix, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixTranslation(0.0f, 1.0f, 0.0f));
     XMStoreFloat4x4(&boxWorldMatrix, XMMatrixScaling(3.0f, 1.0f, 3.0f) * XMMatrixTranslation(0.0f, 0.5f, 0.0f));
@@ -106,11 +106,6 @@ bool LitSkullApp::Init(HINSTANCE inInstanceHandle)
     InitGeometryBuffer();
 
     return true;
-}
-
-LRESULT LitSkullApp::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    return Super::HandleMessage(hWnd, message, wParam, lParam);
 }
 
 void LitSkullApp::OnResize()

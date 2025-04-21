@@ -35,7 +35,6 @@ public:
     ~LitSkullApp() override = default;
 
     bool Init(HINSTANCE inInstanceHandle) override;
-    LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override;
     void OnResize() override;
 
 protected:
