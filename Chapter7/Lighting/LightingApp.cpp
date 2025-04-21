@@ -126,6 +126,15 @@ void LightingApp::Update(float deltaSeconds)
 
     spotLight.position = eyePosition;
     XMStoreFloat3(&spotLight.direction, XMVector3Normalize(focusPosition - cameraPosition));
+
+    if (GetAsyncKeyState(VK_UP))
+    {
+        spotLight.spot += 30.0f * deltaSeconds;
+    }
+    else if (GetAsyncKeyState(VK_DOWN))
+    {
+        spotLight.spot -= 30.0f * deltaSeconds;
+    }
 }
 
 void LightingApp::Render()
