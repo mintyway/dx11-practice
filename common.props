@@ -25,7 +25,7 @@
     <HLSLFile Include="Shaders\**\*Pass.hlsl" />
   </ItemGroup>
   <Target Name="ShaderCompile" BeforeTargets="Build" Condition="'@(HLSLFile)' != ''">
-    <Exec Command='fxc -T vs_5_0 -E VS_Main -Fo "$(OutDir)Shaders\%(HLSLFile.Filename)_vs.cso" %(HLSLFile.FullPath)' />
-    <Exec Command='fxc -T ps_5_0 -E PS_Main -Fo "$(OutDir)Shaders\%(HLSLFile.Filename)_ps.cso" %(HLSLFile.FullPath)' />
+    <Exec Command='fxc -T vs_5_0 -E VS_Main -Fo "$(OutDir)Shaders\%(HLSLFile.Filename)_vs.cso" -I $(SolutionDir) %(HLSLFile.FullPath)' />
+    <Exec Command='fxc -T ps_5_0 -E PS_Main -Fo "$(OutDir)Shaders\%(HLSLFile.Filename)_ps.cso" -I $(SolutionDir) %(HLSLFile.FullPath)' />
   </Target>
 </Project>

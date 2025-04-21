@@ -5,14 +5,33 @@
 #include "Core/Rendering/Submesh.h"
 
 #include <array>
-#include <numbers>
 #include <unordered_map>
+
+#include "Core/Rendering/Vertex.h"
+
+class ShaderPass;
 
 class LitSkullApp final : public SphericalCamera
 {
+    enum class ObjectType : uint8_t
+    {
+        Grid,
+        Box,
+        Sphere,
+        Cylinder,
+        Skull
+    };
+
+    struct RenderAsset
+    {
+        Material material;
+        Submesh submesh;
+    };
+
     DECLARE_ENGINE(LitSkullApp, SphericalCamera)
 
 public:
+    LitSkullApp();
     ~LitSkullApp() override = default;
 
     bool Init(HINSTANCE inInstanceHandle) override;
@@ -20,50 +39,37 @@ public:
     void OnResize() override;
 
 protected:
-    LitSkullApp();
-
     void Update(float deltaSeconds) override;
     void Render() override;
 
+    void RenderObject(DirectX::XMMATRIX worldMatrix, const Material& material, const Submesh& submesh);
+
 private:
-    void InitShaderResource();
+    void InitShaderPass();
     void InitGeometryBuffer();
-    void InitSkullBuffer();
-    void InitShapeBuffer();
+    void InitSkullBuffer(std::vector<Vertex::PN>& inoutVertices, std::vector<UINT>& inoutIndices);
+    void InitShapeBuffer(std::vector<Vertex::PN>& inoutVertices, std::vector<UINT>& inoutIndices);
 
-    ComPtr<ID3D11InputLayout> inputLayout;
-    ComPtr<ID3D11VertexShader> vertexShader;
-    ComPtr<ID3D11PixelShader> pixelShader;
+    std::unique_ptr<ShaderPass> shaderPass;
 
-    ComPtr<ID3D11Buffer> objectCB;
-    ComPtr<ID3D11Buffer> sceneCB;
-
-    XMFLOAT4X4 viewProjectionMatrix{};
+    DirectX::XMFLOAT3 eyePosition{};
+    DirectX::XMFLOAT4X4 viewMatrix{};
+    DirectX::XMFLOAT4X4 projectionMatrix{};
 
     const std::array<DirectionalLight, 3> DirectionalLights;
+    UINT activeLightCount = static_cast<UINT>(DirectionalLights.size());
 
     ComPtr<ID3D11Buffer> skullVertexBuffer;
     ComPtr<ID3D11Buffer> skullIndexBuffer;
-    Submesh skullSubmesh{};
 
     ComPtr<ID3D11Buffer> vertexBuffer;
     ComPtr<ID3D11Buffer> indexBuffer;
-    Submesh boxSubmesh{};
-    Submesh gridSubmesh{};
-    Submesh sphereSubmesh{};
-    Submesh cylinderSubmesh{};
 
-    XMFLOAT4X4 skullWorldMatrix{};
-    XMFLOAT4X4 boxWorldMatrix{};
-    XMFLOAT4X4 gridWorldMatrix{};
-    std::array<XMFLOAT4X4, 10> sphereWorldMatrices{};
-    std::array<XMFLOAT4X4, 10> cylinderMatrices{};
+    DirectX::XMFLOAT4X4 skullWorldMatrix{};
+    DirectX::XMFLOAT4X4 boxWorldMatrix{};
+    DirectX::XMFLOAT4X4 gridWorldMatrix{};
+    std::array<DirectX::XMFLOAT4X4, 10> sphereWorldMatrices{};
+    std::array<DirectX::XMFLOAT4X4, 10> cylinderMatrices{};
 
-    const std::unordered_map<std::string, Material> MaterialMap;
-
-    Material skullMaterial{};
-    Material BoxMaterial{};
-    Material GridMaterial{};
-    Material SphereMaterial{};
-    Material CylinderMaterial{};
+    std::unordered_map<ObjectType, RenderAsset> RenderAssetMap;
 };
