@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lighting", "Chapter7\Lighti
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LitSkull", "Chapter7\LitSkull\LitSkull.vcxproj", "{7AEA481E-0155-43C5-88AA-EC791124E15F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Crate", "Chapter8\Crate\Crate.vcxproj", "{48DF1AF1-349A-4CCC-B2A4-7DE54D9FC0AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -27,6 +29,10 @@ Global
 		{7AEA481E-0155-43C5-88AA-EC791124E15F}.Debug|x64.Build.0 = Debug|x64
 		{7AEA481E-0155-43C5-88AA-EC791124E15F}.Release|x64.ActiveCfg = Release|x64
 		{7AEA481E-0155-43C5-88AA-EC791124E15F}.Release|x64.Build.0 = Release|x64
+		{48DF1AF1-349A-4CCC-B2A4-7DE54D9FC0AF}.Debug|x64.ActiveCfg = Debug|x64
+		{48DF1AF1-349A-4CCC-B2A4-7DE54D9FC0AF}.Debug|x64.Build.0 = Debug|x64
+		{48DF1AF1-349A-4CCC-B2A4-7DE54D9FC0AF}.Release|x64.ActiveCfg = Release|x64
+		{48DF1AF1-349A-4CCC-B2A4-7DE54D9FC0AF}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
