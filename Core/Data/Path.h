@@ -27,4 +27,10 @@ namespace Path
     {
         return Detail::GetExePath().parent_path() / L"Models" / fileName;
     }
+
+    [[nodiscard]]
+    inline std::filesystem::path GetTexturePath(const std::wstring& fileName)
+    {
+        return Detail::GetExePath().parent_path() / L"Textures" / fileName;
+    }
 }

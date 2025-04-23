@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/Engine/SphericalCamera.h"
 
-class CrateApp : public SphericalCamera
+class CrateApp final : public SphericalCamera
 {
     DECLARE_ENGINE(CrateApp, SphericalCamera)
 
@@ -15,4 +15,6 @@ public:
 protected:
     void Update(float deltaSeconds) override;
     void Render() override;
+
+    ComPtr<ID3D11ShaderResourceView> diffuseMapSRV;
 };
