@@ -6,7 +6,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <FxCompile>
@@ -16,11 +16,13 @@
     </FxCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>$(SolutionDir)External\DirectXTex;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />
 
-<!-- vs와 ps를 하나의 hlsl에서 사용하기 위한 커스텀 빌드 옵션입니다. -->
+  <!-- vs와 ps를 하나의 hlsl에서 사용하기 위한 커스텀 빌드 옵션입니다. -->
   <ItemGroup>
     <HLSLFile Include="Shaders\**\*Pass.hlsl" />
   </ItemGroup>
