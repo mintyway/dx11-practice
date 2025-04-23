@@ -73,9 +73,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CrateApp.h" />
+    <ClInclude Include="Shaders\CrateShaderPass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CrateApp.cpp" />
+    <None Include="Shaders\CraftPass.hlsl" />
+    <ClCompile Include="Shaders\CrateShaderPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.vcxproj">
