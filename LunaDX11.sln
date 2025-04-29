@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LitSkull", "Chapter7\LitSku
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Crate", "Chapter8\Crate\Crate.vcxproj", "{48DF1AF1-349A-4CCC-B2A4-7DE54D9FC0AF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TexturedHillsAndWaves", "Chapter8\TexturedHillsAndWaves\TexturedHillsAndWaves.vcxproj", "{A99A7FE4-672E-43A4-A5FE-F7A33B525979}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -33,6 +35,10 @@ Global
 		{48DF1AF1-349A-4CCC-B2A4-7DE54D9FC0AF}.Debug|x64.Build.0 = Debug|x64
 		{48DF1AF1-349A-4CCC-B2A4-7DE54D9FC0AF}.Release|x64.ActiveCfg = Release|x64
 		{48DF1AF1-349A-4CCC-B2A4-7DE54D9FC0AF}.Release|x64.Build.0 = Release|x64
+		{A99A7FE4-672E-43A4-A5FE-F7A33B525979}.Debug|x64.ActiveCfg = Debug|x64
+		{A99A7FE4-672E-43A4-A5FE-F7A33B525979}.Debug|x64.Build.0 = Debug|x64
+		{A99A7FE4-672E-43A4-A5FE-F7A33B525979}.Release|x64.ActiveCfg = Release|x64
+		{A99A7FE4-672E-43A4-A5FE-F7A33B525979}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
