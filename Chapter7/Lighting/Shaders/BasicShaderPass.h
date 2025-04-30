@@ -28,7 +28,7 @@ public:
     BasicShaderPass(ID3D11Device* device);
     ~BasicShaderPass() override = default;
 
-    void Bind(ID3D11DeviceContext* immediateContext) override;
+    void Bind(ID3D11DeviceContext* context) override;
 
     void UpdateCBuffer(ID3D11DeviceContext* immediateContext);
 

@@ -19,10 +19,10 @@ ShaderPassBase::ShaderPassBase(ID3D11Device* device, const std::wstring& vertexS
     device->CreateInputLayout(inputElementDescs.data(), static_cast<UINT>(inputElementDescs.size()), vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout);
 }
 
-void ShaderPassBase::Bind(ID3D11DeviceContext* immediateContext)
+void ShaderPassBase::Bind(ID3D11DeviceContext* context)
 {
-    immediateContext->VSSetShader(vertexShader.Get(), nullptr, 0);
-    immediateContext->PSSetShader(pixelShader.Get(), nullptr, 0);
-    immediateContext->IASetInputLayout(inputLayout.Get());
-    immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    context->VSSetShader(vertexShader.Get(), nullptr, 0);
+    context->PSSetShader(pixelShader.Get(), nullptr, 0);
+    context->IASetInputLayout(inputLayout.Get());
+    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

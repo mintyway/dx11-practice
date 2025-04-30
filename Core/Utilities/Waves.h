@@ -9,6 +9,7 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <concepts>
 
 /** 해당 클래스는 아직 분석하지 않았습니다. */
 class Waves
@@ -25,10 +26,12 @@ public:
     float Depth() const { return static_cast<float>(mNumRows) * mSpatialStep; }
 
     // Returns the solution at the ith grid point.
-    const DirectX::XMFLOAT3& operator[](int i) const { return mCurrSolution[i]; }
+    template <std::integral IndexType>
+    const DirectX::XMFLOAT3& operator[](IndexType i) const { return mCurrSolution[i]; }
 
     // Returns the solution normal at the ith grid point.
-    const DirectX::XMFLOAT3& Normal(int i) const { return mNormals[i]; }
+    template <std::integral IndexType>
+    const DirectX::XMFLOAT3& Normal(IndexType i) const { return mNormals[i]; }
 
     // Returns the unit tangent vector at the ith grid point in the local x-axis direction.
     const DirectX::XMFLOAT3& TangentX(int i) const { return mTangentX[i]; }

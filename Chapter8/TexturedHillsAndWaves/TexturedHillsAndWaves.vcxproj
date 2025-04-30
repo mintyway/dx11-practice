@@ -78,7 +78,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\TexturedHillsAndWavesShaderPass.hlsl">
+    <None Include="Shaders\TexturedHillsAndWavesShader.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

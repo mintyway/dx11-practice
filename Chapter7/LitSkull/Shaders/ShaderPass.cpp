@@ -18,13 +18,13 @@ ShaderPass::ShaderPass(ID3D11Device* device)
 
 ShaderPass::~ShaderPass() = default;
 
-void ShaderPass::Bind(ID3D11DeviceContext* immediateContext)
+void ShaderPass::Bind(ID3D11DeviceContext* context)
 {
-    ShaderPassBase::Bind(immediateContext);
+    ShaderPassBase::Bind(context);
 
     ID3D11Buffer* cBuffers[] = {renderDataCBuffer.Get(), lightDataCBuffer.Get()};
-    immediateContext->VSSetConstantBuffers(0, 2, cBuffers);
-    immediateContext->PSSetConstantBuffers(0, 2, cBuffers);
+    context->VSSetConstantBuffers(0, 2, cBuffers);
+    context->PSSetConstantBuffers(0, 2, cBuffers);
 }
 
 void ShaderPass::UpdateCBuffer(ID3D11DeviceContext* immediateContext)

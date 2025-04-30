@@ -1,12 +1,16 @@
 #include "TexturedHillsAndWavesApp.h"
 
+#include <array>
 #include <numbers>
+#include <span>
+#include <External/DirectXTex/DirectXTex.h>
 
 #include "Core/Common/GeometryGenerator.h"
 #include "Core/Common/Timer.h"
+#include "Core/Data/Color.h"
 #include "Core/Data/Path.h"
 #include "Core/Data/SphericalCoord.h"
-#include "Core/Rendering/VertexTypes.h"
+#include "Core/Rendering/Vertex.h"
 #include "Core/Utilities/Utility.h"
 #include "Shaders/TexturedHillsAndWavesShaderPass.h"
 
@@ -29,7 +33,7 @@ TexturedHillsAndWavesApp::TexturedHillsAndWavesApp()
     SetZoomSpeed(0.25f);
 
     const XMMATRIX identityMatrix = XMMatrixIdentity();
-    XMStoreFloat4x4(&landWorldMatrix, identityMatrix);
+    XMStoreFloat4x4(&hillsWorldMatrix, identityMatrix);
     XMStoreFloat4x4(&wavesWorldMatrix, identityMatrix);
 
     directionalLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
@@ -50,13 +54,15 @@ TexturedHillsAndWavesApp::TexturedHillsAndWavesApp()
     spotLight.spot = 96.0f;
     spotLight.range = 10000.0f;
 
-    landMaterial.ambient = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
-    landMaterial.diffuse = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
-    landMaterial.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
+    hillsMaterial.ambient = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
+    hillsMaterial.diffuse = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
+    hillsMaterial.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
 
     wavesMaterial.ambient = XMFLOAT4(0.137f, 0.42f, 0.556f, 1.0f);
     wavesMaterial.diffuse = XMFLOAT4(0.137f, 0.42f, 0.556f, 1.0f);
     wavesMaterial.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 96.0f);
+
+    XMStoreFloat4x4(&hillsUVMatrix, XMMatrixScaling(5.0f, 5.0f, 0.0f));
 }
 
 TexturedHillsAndWavesApp::~TexturedHillsAndWavesApp() = default;
@@ -70,11 +76,8 @@ bool TexturedHillsAndWavesApp::Init(HINSTANCE inInstanceHandle)
 
     basicShader = std::make_unique<TexturedHillsAndWavesShaderPass>(device.Get());
     basicShader->Bind(immediateContext.Get());
-
-    if (!CreateGeometry())
-    {
-        return false;
-    }
+    CreateGeometry();
+    InitTexture();
 
     return true;
 }
@@ -111,11 +114,13 @@ void TexturedHillsAndWavesApp::Update(float deltaSeconds)
     D3D11_MAPPED_SUBRESOURCE mapped;
     immediateContext->Map(wavesVertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
 
-    Vertex* vertices = static_cast<Vertex*>(mapped.pData);
+    Vertex::PNT* waveVertices = static_cast<Vertex::PNT*>(mapped.pData);
     for (UINT i = 0; i < waves.VertexCount(); ++i)
     {
-        vertices[i].position = waves[static_cast<int>(i)];
-        vertices[i].normal = waves.Normal(static_cast<int>(i));
+        waveVertices[i].position = waves[i];
+        waveVertices[i].normal = waves.Normal(i);
+        waveVertices[i].tex.x = 0.5f + waves[i].x / waves.Width();
+        waveVertices[i].tex.y = 0.5f - waves[i].z / waves.Depth();
     }
 
     immediateContext->Unmap(wavesVertexBuffer.Get(), 0);
@@ -126,6 +131,8 @@ void TexturedHillsAndWavesApp::Update(float deltaSeconds)
 
     spotLight.position = eyePosition;
     XMStoreFloat3(&spotLight.direction, XMVector3Normalize(focusPosition - cameraPosition));
+
+    XMStoreFloat4x4(&wavesUVMatrix, XMMatrixScaling(5.0f, 5.0f, 0.0f) + XMMatrixTranslation(static_cast<float>(timer->GetTotalSeconds() * 0.05f), static_cast<float>(timer->GetTotalSeconds() * 0.1f), 0.0f));
 }
 
 void TexturedHillsAndWavesApp::Render()
@@ -134,69 +141,74 @@ void TexturedHillsAndWavesApp::Render()
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     const XMMATRIX viewProjectionMatrix = XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix);
-    RenderObject(landVertexBuffer.Get(), landIndexBuffer.Get(), XMLoadFloat4x4(&landWorldMatrix), viewProjectionMatrix, landMaterial, gridSubmesh.indexCount);
-    RenderObject(wavesVertexBuffer.Get(), wavesIndexBuffer.Get(), XMLoadFloat4x4(&wavesWorldMatrix), viewProjectionMatrix, wavesMaterial, wavesSubmesh.indexCount);
+    RenderObject(
+        hillsVertexBuffer.Get(), hillsIndexBuffer.Get(),
+        XMLoadFloat4x4(&hillsWorldMatrix), viewProjectionMatrix, XMLoadFloat4x4(&hillsUVMatrix),
+        hillsDiffuseMapSRV.Get(), hillsMaterial, hillsSubmesh.indexCount
+    );
+    RenderObject(
+        wavesVertexBuffer.Get(), wavesIndexBuffer.Get(),
+        XMLoadFloat4x4(&wavesWorldMatrix), viewProjectionMatrix, XMLoadFloat4x4(&wavesUVMatrix),
+        wavesDiffuseMapSRV.Get(), wavesMaterial, wavesSubmesh.indexCount
+    );
 
     swapChain->Present(0, 0);
 }
 
-void TexturedHillsAndWavesApp::RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr, FXMMATRIX worldMatrix, CXMMATRIX viewProjectionMatrix, const Material& material, UINT indexCount)
+void TexturedHillsAndWavesApp::RenderObject(
+    ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr,
+    FXMMATRIX worldMatrix, CXMMATRIX viewProjectionMatrix, CXMMATRIX uvMatrix,
+    ID3D11ShaderResourceView* diffuseMapSRV, const Material& material, UINT indexCount
+)
 {
     basicShader->SetMatrix(worldMatrix, viewProjectionMatrix);
+    basicShader->SetUVMatrix(uvMatrix);
     basicShader->SetMaterial(material);
     basicShader->SetLights(directionalLight, pointLight, spotLight);
     basicShader->SetEyePosition(eyePosition);
     basicShader->UpdateCBuffer(immediateContext.Get());
 
-    constexpr UINT stride = sizeof(Vertex);
+    constexpr UINT stride = sizeof(Vertex::PNT);
     constexpr UINT offset = 0;
     immediateContext->IASetVertexBuffers(0, 1, &vertexBufferPtr, &stride, &offset);
     immediateContext->IASetIndexBuffer(indexBufferPtr, DXGI_FORMAT_R32_UINT, 0);
+    immediateContext->PSSetShaderResources(0, 1, std::array{diffuseMapSRV}.data());
 
     immediateContext->DrawIndexed(indexCount, 0, 0);
 }
 
-bool TexturedHillsAndWavesApp::CreateGeometry()
+void TexturedHillsAndWavesApp::CreateGeometry()
 {
-    if (!CreateLandGeometry())
-    {
-        return false;
-    }
-
-    if (!CreateWaveGeometry())
-    {
-        return false;
-    }
-
-    return true;
+    CreateLandGeometry();
+    CreateWaveGeometry();
 }
 
-bool TexturedHillsAndWavesApp::CreateLandGeometry()
+void TexturedHillsAndWavesApp::CreateLandGeometry()
 {
-    const GeometryGenerator::MeshData grid = GeometryGenerator::CreateGrid(160.0f, 160.0f, 50, 50);
-    gridSubmesh = Submesh(grid.indices.size(), 0, 0);
+    const auto [meshVertices, meshIndices] = GeometryGenerator::CreateGrid(160.0f, 160.0f, 50, 50);
+    hillsSubmesh = Submesh(meshIndices.size(), 0, 0);
 
-    std::vector<Vertex> vertices(grid.vertices.size());
-    for (size_t i = 0; i < vertices.size(); ++i)
+    std::vector<Vertex::PNT> vertices(meshVertices.size());
+    std::ranges::transform(meshVertices, vertices.begin(), [](const GeometryGenerator::Vertex& vertex)
     {
-        XMFLOAT3 position = grid.vertices[i].position;
-        position.y = GetHeight(position.x, position.z);
-        vertices[i].position = position;
-        vertices[i].normal = GetHillNormal(position.x, position.z);
-    }
+        return Vertex::PNT
+        {
+            .position = XMFLOAT3(vertex.position.x, GetHeight(vertex.position.x, vertex.position.z), vertex.position.z),
+            .normal = GetHillNormal(vertex.position.x, vertex.position.z),
+            .tex = vertex.texC
+        };
+    });
 
-    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex::PNT) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA vertexInitData{vertices.data()};
-    CHECK_HR(device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &landVertexBuffer), L"Failed to create land vertex buffer", false);
+    device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &hillsVertexBuffer);
 
-    const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * gridSubmesh.indexCount), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
-    const D3D11_SUBRESOURCE_DATA indexInitData{grid.indices.data()};
-    CHECK_HR(device->CreateBuffer(&indexBufferDesc, &indexInitData, &landIndexBuffer), L"Failed to create land index buffer", false);
-
-    return true;
+    const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * hillsSubmesh.indexCount), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const D3D11_SUBRESOURCE_DATA indexInitData{meshIndices.data()};
+    device->CreateBuffer(&indexBufferDesc, &indexInitData, &hillsIndexBuffer);
 }
 
-bool TexturedHillsAndWavesApp::CreateWaveGeometry()
+void TexturedHillsAndWavesApp::CreateWaveGeometry()
 {
     waves.Init(200, 200, 0.8f, 0.03f, 3.25f, 0.4f);
     const UINT wavesRowCount = waves.RowCount();
@@ -225,12 +237,33 @@ bool TexturedHillsAndWavesApp::CreateWaveGeometry()
         }
     }
 
-    const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(Vertex) * waves.VertexCount(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-    CHECK_HR(device->CreateBuffer(&vertexBufferDesc, nullptr, &wavesVertexBuffer), L"Failed to create wave vertex buffer", false);
+    const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(Vertex::PNT) * waves.VertexCount(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    device->CreateBuffer(&vertexBufferDesc, nullptr, &wavesVertexBuffer);
 
     const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * indices.size()), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
     const D3D11_SUBRESOURCE_DATA indexInitData{indices.data()};
-    CHECK_HR(device->CreateBuffer(&indexBufferDesc, &indexInitData, &wavesIndexBuffer), L"Failed to create wave index buffer", false);
+    device->CreateBuffer(&indexBufferDesc, &indexInitData, &wavesIndexBuffer);
+}
 
-    return true;
+void TexturedHillsAndWavesApp::InitTexture()
+{
+    const CD3D11_SAMPLER_DESC samplerDesc(
+        D3D11_FILTER_ANISOTROPIC,
+        D3D11_TEXTURE_ADDRESS_WRAP, D3D11_TEXTURE_ADDRESS_WRAP, D3D11_TEXTURE_ADDRESS_WRAP,
+        0.0f, 8,
+        D3D11_COMPARISON_NEVER,
+        LinearColors::Black,
+        0.0f, FLT_MAX
+    );
+    device->CreateSamplerState(&samplerDesc, &samplerState);
+    immediateContext->PSSetSamplers(0, 1, samplerState.GetAddressOf());
+
+    ScratchImage image;
+    TexMetadata metaData;
+
+    LoadFromDDSFile(Path::GetTexturePath(L"water2.dds").c_str(), DDS_FLAGS_NONE, &metaData, image);
+    CreateShaderResourceView(device.Get(), image.GetImages(), image.GetImageCount(), metaData, &wavesDiffuseMapSRV);
+
+    LoadFromDDSFile(Path::GetTexturePath(L"grass.dds").c_str(), DDS_FLAGS_NONE, &metaData, image);
+    CreateShaderResourceView(device.Get(), image.GetImages(), image.GetImageCount(), metaData, &hillsDiffuseMapSRV);
 }

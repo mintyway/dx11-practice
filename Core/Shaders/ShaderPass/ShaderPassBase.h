@@ -31,7 +31,7 @@ public:
     ShaderPassBase& operator=(const ShaderPassBase&) = default;
     ShaderPassBase& operator=(ShaderPassBase&&) = default;
 
-    virtual void Bind(ID3D11DeviceContext* immediateContext);
+    virtual void Bind(ID3D11DeviceContext* context);
 
 protected:
     ComPtr<ID3D11VertexShader> vertexShader;

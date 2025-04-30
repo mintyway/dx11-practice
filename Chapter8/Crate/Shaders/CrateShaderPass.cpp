@@ -27,14 +27,14 @@ CrateShaderPass::CrateShaderPass(ID3D11Device* device)
 
 CrateShaderPass::~CrateShaderPass() = default;
 
-void CrateShaderPass::Bind(ID3D11DeviceContext* immediateContext)
+void CrateShaderPass::Bind(ID3D11DeviceContext* context)
 {
-    Super::Bind(immediateContext);
+    Super::Bind(context);
 
     ID3D11Buffer* cBuffers[] = {renderDataCBuffer.Get(), lightDataCBuffer.Get()};
-    immediateContext->VSSetConstantBuffers(0, 2, cBuffers);
-    immediateContext->PSSetConstantBuffers(0, 2, cBuffers);
-    immediateContext->PSSetSamplers(0, 1, std::array{samplerState.Get()}.data());
+    context->VSSetConstantBuffers(0, 2, cBuffers);
+    context->PSSetConstantBuffers(0, 2, cBuffers);
+    context->PSSetSamplers(0, 1, std::array{samplerState.Get()}.data());
 }
 
 void CrateShaderPass::UpdateCBuffer(ID3D11DeviceContext* immediateContext)

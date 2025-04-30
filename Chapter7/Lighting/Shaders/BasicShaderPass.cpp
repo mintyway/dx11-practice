@@ -15,13 +15,13 @@ BasicShaderPass::BasicShaderPass(ID3D11Device* device)
     device->CreateBuffer(&sceneLightDataCBufferDesc, nullptr, &sceneLightCBuffer);
 }
 
-void BasicShaderPass::Bind(ID3D11DeviceContext* immediateContext)
+void BasicShaderPass::Bind(ID3D11DeviceContext* context)
 {
-    Super::Bind(immediateContext);
+    Super::Bind(context);
 
     ID3D11Buffer* cBuffers[] = {objectRenderCBuffer.Get(), sceneLightCBuffer.Get()};
-    immediateContext->VSSetConstantBuffers(0, 2, cBuffers);
-    immediateContext->PSSetConstantBuffers(0, 2, cBuffers);
+    context->VSSetConstantBuffers(0, 2, cBuffers);
+    context->PSSetConstantBuffers(0, 2, cBuffers);
 }
 
 void BasicShaderPass::UpdateCBuffer(ID3D11DeviceContext* immediateContext)

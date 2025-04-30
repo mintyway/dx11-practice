@@ -6,84 +6,71 @@
 using namespace DirectX;
 
 TexturedHillsAndWavesShaderPass::TexturedHillsAndWavesShaderPass(ID3D11Device* device)
-    : Super(device, L"TexturedHillsAndWavesShaderPass_vs", L"TexturedHillsAndWavesShaderPass_ps", Vertex::PN::Desc)
+    : Super(device, L"TexturedHillsAndWavesShader_vs", L"TexturedHillsAndWavesShader_ps", Vertex::PNT::Desc)
 {
-    const CD3D11_BUFFER_DESC objectRenderCBufferDesc(sizeof(ObjectRenderData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-    device->CreateBuffer(&objectRenderCBufferDesc, nullptr, &objectRenderCBuffer);
+    const CD3D11_BUFFER_DESC objectRenderCBufferDesc(sizeof(RenderData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    device->CreateBuffer(&objectRenderCBufferDesc, nullptr, &renderCBuffer);
 
-    const CD3D11_BUFFER_DESC sceneLightDataCBufferDesc(sizeof(SceneLightData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-    device->CreateBuffer(&sceneLightDataCBufferDesc, nullptr, &sceneLightCBuffer);
+    const CD3D11_BUFFER_DESC sceneLightDataCBufferDesc(sizeof(LightData), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    device->CreateBuffer(&sceneLightDataCBufferDesc, nullptr, &lightCBuffer);
 }
 
-void TexturedHillsAndWavesShaderPass::Bind(ID3D11DeviceContext* immediateContext)
+void TexturedHillsAndWavesShaderPass::Bind(ID3D11DeviceContext* context)
 {
-    Super::Bind(immediateContext);
+    Super::Bind(context);
 
-    ID3D11Buffer* cBuffers[] = {objectRenderCBuffer.Get(), sceneLightCBuffer.Get()};
-    immediateContext->VSSetConstantBuffers(0, 2, cBuffers);
-    immediateContext->PSSetConstantBuffers(0, 2, cBuffers);
+    ID3D11Buffer* cBuffers[] = {renderCBuffer.Get(), lightCBuffer.Get()};
+    context->VSSetConstantBuffers(0, 2, cBuffers);
+    context->PSSetConstantBuffers(0, 2, cBuffers);
 }
 
-void TexturedHillsAndWavesShaderPass::UpdateCBuffer(ID3D11DeviceContext* immediateContext)
+void TexturedHillsAndWavesShaderPass::UpdateCBuffer(ID3D11DeviceContext* context)
 {
-    UpdateObjectRenderData(immediateContext);
-    UpdateSceneLightData(immediateContext);
+    UpdateRenderData(context);
+    UpdateLightData(context);
 }
 
 void TexturedHillsAndWavesShaderPass::SetMatrix(DirectX::FXMMATRIX worldMatrix, DirectX::CXMMATRIX viewProjectionMatrix)
 {
-    XMStoreFloat4x4(&objectRenderData.worldMatrix, worldMatrix);
-    XMStoreFloat4x4(&objectRenderData.worldInverseTransposeMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)));
-    XMStoreFloat4x4(&objectRenderData.wvpMatrix, worldMatrix * viewProjectionMatrix);
-    objectRenderDataDirty = true;
+    XMStoreFloat4x4(&renderData.worldMatrix, worldMatrix);
+    XMStoreFloat4x4(&renderData.worldInverseTransposeMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)));
+    XMStoreFloat4x4(&renderData.wvpMatrix, worldMatrix * viewProjectionMatrix);
+}
+
+void TexturedHillsAndWavesShaderPass::SetUVMatrix(DirectX::FXMMATRIX uvMatrix)
+{
+    XMStoreFloat4x4(&renderData.uvMatrix, uvMatrix);
 }
 
 void TexturedHillsAndWavesShaderPass::SetMaterial(const Material& material)
 {
-    objectRenderData.material = material;
-    objectRenderDataDirty = true;
+    renderData.material = material;
 }
 
 void TexturedHillsAndWavesShaderPass::SetLights(const DirectionalLight& directionalLight, const PointLight& pointLight, const SpotLight& spotLight)
 {
-    sceneLightData.directionalLight = directionalLight;
-    sceneLightData.pointLight = pointLight;
-    sceneLightData.spotLight = spotLight;
-    sceneLightDataDirty = true;
+    lightData.directionalLight = directionalLight;
+    lightData.pointLight = pointLight;
+    lightData.spotLight = spotLight;
 }
 
-void TexturedHillsAndWavesShaderPass::SetEyePosition(const DirectX::XMFLOAT3& eyeWorldPosition)
+void TexturedHillsAndWavesShaderPass::SetEyePosition(const DirectX::XMFLOAT3& eyePosition)
 {
-    sceneLightData.eyeWorldPosition = eyeWorldPosition;
-    sceneLightDataDirty = true;
+    lightData.eyePosition = eyePosition;
 }
 
-void TexturedHillsAndWavesShaderPass::UpdateObjectRenderData(ID3D11DeviceContext* immediateContext)
+void TexturedHillsAndWavesShaderPass::UpdateRenderData(ID3D11DeviceContext* context)
 {
-    if (!objectRenderDataDirty)
-    {
-        return;
-    }
-
     D3D11_MAPPED_SUBRESOURCE mapped;
-    immediateContext->Map(objectRenderCBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    *static_cast<ObjectRenderData*>(mapped.pData) = objectRenderData;
-    immediateContext->Unmap(objectRenderCBuffer.Get(), 0);
-
-    objectRenderDataDirty = false;
+    context->Map(renderCBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+    *static_cast<RenderData*>(mapped.pData) = renderData;
+    context->Unmap(renderCBuffer.Get(), 0);
 }
 
-void TexturedHillsAndWavesShaderPass::UpdateSceneLightData(ID3D11DeviceContext* immediateContext)
+void TexturedHillsAndWavesShaderPass::UpdateLightData(ID3D11DeviceContext* context)
 {
-    if (!sceneLightDataDirty)
-    {
-        return;
-    }
-
     D3D11_MAPPED_SUBRESOURCE mapped;
-    immediateContext->Map(sceneLightCBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    *static_cast<SceneLightData*>(mapped.pData) = sceneLightData;
-    immediateContext->Unmap(sceneLightCBuffer.Get(), 0);
-
-    sceneLightDataDirty = false;
+    context->Map(lightCBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+    *static_cast<LightData*>(mapped.pData) = lightData;
+    context->Unmap(lightCBuffer.Get(), 0);
 }
