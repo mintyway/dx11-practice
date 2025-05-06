@@ -8,6 +8,7 @@ cbuffer ConstantBufferPerObject : register(b0)
     row_major float4x4 wvpMatrix;
     row_major float4x4 uvMatrix;
     Material material;
+    bool useTexture = true;
 };
 
 cbuffer ConstantBufferPerFrame : register(b1)
@@ -15,6 +16,11 @@ cbuffer ConstantBufferPerFrame : register(b1)
     DirectionalLight directionalLights[3];
     float3 eyePosition;
     uint activeCount;
+
+    float4 fogColor;
+    float fogStart;
+    float fogRange;
+    bool useFog;
 }
 
 Texture2D diffuseMap : register(t0);
@@ -49,9 +55,15 @@ float4 PS_Main(VertexOut input) : SV_Target
 {
     input.normalWS = normalize(input.normalWS);
 
-    const float3 toEyeWS = normalize(eyePosition - input.positionWS);
+    const float3 toEye = eyePosition - input.positionWS;
+    const float distanceToEye = length(toEye);
+    const float3 toEyeDirection = toEye / distanceToEye;
 
-    const float4 texColor = diffuseMap.Sample(diffuseMapSampler, input.tex);
+    float4 texColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    if (useTexture)
+    {
+        texColor = diffuseMap.Sample(diffuseMapSampler, input.tex);
+    }
 
     float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
     float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -61,13 +73,20 @@ float4 PS_Main(VertexOut input) : SV_Target
 
     for (uint i = 0; i < activeCount; ++i)
     {
-        ComputeDirectionalLight(material, directionalLights[i], input.normalWS, toEyeWS, outAmbient, outDiffuse, outSpecular);
+        ComputeDirectionalLight(material, directionalLights[i], input.normalWS, toEyeDirection, outAmbient, outDiffuse, outSpecular);
         ambient += outAmbient;
         diffuse += outDiffuse;
         specular += outSpecular;
     }
 
     float4 litColor = (ambient + diffuse) * texColor + specular;
+
+    if (useFog)
+    {
+        const float fogFactor = saturate((distanceToEye - fogStart) / fogRange);
+        litColor = lerp(litColor, fogColor, fogFactor);
+    }
+
     litColor.a = material.diffuse.a * texColor.a;
     return litColor;
 }

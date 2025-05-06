@@ -62,7 +62,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 BlendDemoApp::BlendDemoApp()
     : directionalLights(DefaultDirectionalLights)
 {
-    SetCameraSphericalCoord(200.f, -XM_PIDIV4, XM_PIDIV4);
+    SetCameraSphericalCoord(75.f, XMConvertToRadians(-70.0f), XMConvertToRadians(75.0f));
     SetZoomSpeed(0.25f);
 
     const XMMATRIX identityMatrix = XMMatrixIdentity();
@@ -78,7 +78,7 @@ BlendDemoApp::BlendDemoApp()
     hillsMaterial.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
 
     wavesMaterial.ambient = XMFLOAT4(0.137f, 0.42f, 0.556f, 1.0f);
-    wavesMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    wavesMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.75f);
     wavesMaterial.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 96.0f);
 
     wireFenceMaterial.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -121,18 +121,26 @@ void BlendDemoApp::Update(float deltaSeconds)
     if (GetAsyncKeyState('0') & 0x8000)
     {
         shaderPass->SetActiveDirectionalLightCount(0);
+        shaderPass->SetUseTexture(false);
+        shaderPass->SetUseFog(false);
     }
     if (GetAsyncKeyState('1') & 0x8000)
     {
-        shaderPass->SetActiveDirectionalLightCount(1);
+        shaderPass->SetActiveDirectionalLightCount(3);
+        shaderPass->SetUseTexture(false);
+        shaderPass->SetUseFog(false);
     }
     if (GetAsyncKeyState('2') & 0x8000)
     {
-        shaderPass->SetActiveDirectionalLightCount(2);
+        shaderPass->SetActiveDirectionalLightCount(3);
+        shaderPass->SetUseTexture(true);
+        shaderPass->SetUseFog(false);
     }
     if (GetAsyncKeyState('3') & 0x8000)
     {
         shaderPass->SetActiveDirectionalLightCount(3);
+        shaderPass->SetUseTexture(true);
+        shaderPass->SetUseFog(true);
     }
 
     static float elapsedTime = 0.0f;
@@ -174,20 +182,19 @@ void BlendDemoApp::Render()
     const XMMATRIX viewProjectionMatrix = XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix);
     RenderObject(
         hillsVertexBuffer.Get(), hillsIndexBuffer.Get(), nullptr, nullptr,
-        XMLoadFloat4x4(&hillsWorldMatrix),
-        viewProjectionMatrix, XMLoadFloat4x4(&hillsUVMatrix), hillsDiffuseMapSRV.Get(), hillsMaterial, hillsSubmesh.indexCount
-    );
-    RenderObject(
-        wavesVertexBuffer.Get(), wavesIndexBuffer.Get(), nullptr, nullptr,
-        XMLoadFloat4x4(&wavesWorldMatrix),
-        viewProjectionMatrix, XMLoadFloat4x4(&wavesUVMatrix), wavesDiffuseMapSRV.Get(), wavesMaterial, wavesSubmesh.indexCount
+        XMLoadFloat4x4(&hillsWorldMatrix), viewProjectionMatrix, XMLoadFloat4x4(&hillsUVMatrix),
+        hillsDiffuseMapSRV.Get(), hillsMaterial, hillsSubmesh.indexCount
     );
     RenderObject(
         wireFenceVertexBuffer.Get(), wireFenceIndexBuffer.Get(), noCullRasterizerState.Get(), alphaToCoverageBlendState.Get(),
-        XMLoadFloat4x4(&wireFenceWorldMatrix),
-        viewProjectionMatrix, XMLoadFloat4x4(&wireFenceUVMatrix), wireFenceDiffuseMapSRV.Get(), wireFenceMaterial, wireFenceSubmesh.indexCount
+        XMLoadFloat4x4(&wireFenceWorldMatrix), viewProjectionMatrix, XMLoadFloat4x4(&wireFenceUVMatrix),
+        wireFenceDiffuseMapSRV.Get(), wireFenceMaterial, wireFenceSubmesh.indexCount
     );
-
+    RenderObject(
+        wavesVertexBuffer.Get(), wavesIndexBuffer.Get(), nullptr, transparentBlendState.Get(),
+        XMLoadFloat4x4(&wavesWorldMatrix), viewProjectionMatrix, XMLoadFloat4x4(&wavesUVMatrix),
+        wavesDiffuseMapSRV.Get(), wavesMaterial, wavesSubmesh.indexCount
+    );
     swapChain->Present(0, 0);
 }
 
@@ -202,6 +209,8 @@ void BlendDemoApp::RenderObject(
     shaderPass->SetMaterial(material);
     shaderPass->SetLights(directionalLights);
     shaderPass->SetEyePosition(eyePosition);
+    shaderPass->SetFogColor(LinearColors::LightSteelBlue);
+    shaderPass->SetFogRange(15.0f, 200.0f);
     shaderPass->UpdateCBuffer(immediateContext.Get());
 
     constexpr UINT stride = sizeof(Vertex::PNT);

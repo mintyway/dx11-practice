@@ -18,6 +18,7 @@ public:
         DirectX::XMFLOAT4X4 wvpMatrix;
         DirectX::XMFLOAT4X4 uvMatrix;
         Material material;
+        bool useTexture = true;
     };
 
     struct alignas(16) LightData
@@ -25,6 +26,11 @@ public:
         DirectionalLight directionalLight[3];
         DirectX::XMFLOAT3 eyePosition;
         UINT activeDirectionalLightCount = 3;
+
+        DirectX::XMFLOAT4 fogColor;
+        float fogStart;
+        float fogRange;
+        bool useFog = true;
     };
 
     BlendDemoShaderPass(ID3D11Device* device);
@@ -37,10 +43,14 @@ public:
     void SetMatrix(DirectX::FXMMATRIX worldMatrix, DirectX::CXMMATRIX viewProjectionMatrix);
     void SetUVMatrix(DirectX::FXMMATRIX uvMatrix);
     void SetMaterial(const Material& material);
+    void SetUseTexture(bool isEnable) { renderData.useTexture = isEnable; }
 
     void SetLights(std::span<const DirectionalLight, 3> directionalLights);
     void SetEyePosition(const DirectX::XMFLOAT3& eyePosition);
     void SetActiveDirectionalLightCount(UINT count);
+    void SetFogColor(DirectX::FXMVECTOR color);
+    void SetFogRange(float start, float end);
+    void SetUseFog(bool isEnable) { lightData.useFog = isEnable; }
 
 protected:
     void UpdateRenderData(ID3D11DeviceContext* context);

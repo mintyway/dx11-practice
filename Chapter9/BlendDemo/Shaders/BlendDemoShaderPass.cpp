@@ -64,6 +64,17 @@ void BlendDemoShaderPass::SetActiveDirectionalLightCount(UINT count)
     lightData.activeDirectionalLightCount = count;
 }
 
+void BlendDemoShaderPass::SetFogColor(DirectX::FXMVECTOR color)
+{
+    XMStoreFloat4(&lightData.fogColor, color);
+}
+
+void BlendDemoShaderPass::SetFogRange(float start, float end)
+{
+    lightData.fogStart = start;
+    lightData.fogRange = std::max(end - start, 0.0f);
+}
+
 void BlendDemoShaderPass::UpdateRenderData(ID3D11DeviceContext* context)
 {
     D3D11_MAPPED_SUBRESOURCE mapped;
