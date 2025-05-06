@@ -63,6 +63,8 @@ protected:
     virtual void Update(float deltaSeconds) = 0;
     virtual void Render() = 0;
 
+    bool IsWireframe() { return bUseWireframeView; }
+
     HINSTANCE instanceHandle = nullptr;
     HWND windowHandle = nullptr;
     std::wstring className;
@@ -88,6 +90,9 @@ protected:
     ComPtr<ID3D11RenderTargetView> renderTargetView;
     ComPtr<ID3D11DepthStencilView> depthStencilView;
     ComPtr<ID3D11RasterizerState> wireframeRasterizerState;
+    ComPtr<ID3D11RasterizerState> noCullRasterizerState;
+    ComPtr<ID3D11BlendState> alphaToCoverageBlendState;
+    ComPtr<ID3D11BlendState> transparentBlendState;
     UINT msaaQuality = 0;
 
 private:

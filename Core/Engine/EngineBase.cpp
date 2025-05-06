@@ -409,10 +409,32 @@ bool EngineBase::InitDirectX()
     CHECK_HR(hr, L"스왑체인 생성 실패", false);
 
     // 와이어 프레임으로 보기위한 RS 생성
-    CD3D11_RASTERIZER_DESC WireframeRasterizerDesc(CD3D11_DEFAULT{});
-    WireframeRasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
-    WireframeRasterizerDesc.CullMode = D3D11_CULL_NONE;
-    CHECK_HR(device->CreateRasterizerState(&WireframeRasterizerDesc, &wireframeRasterizerState), L"와이어프레임 RS 생성 실패", false);
+    CD3D11_RASTERIZER_DESC wireframeRasterizerDesc(CD3D11_DEFAULT{});
+    wireframeRasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+    wireframeRasterizerDesc.CullMode = D3D11_CULL_NONE;
+    wireframeRasterizerDesc.MultisampleEnable = true;
+    CHECK_HR(device->CreateRasterizerState(&wireframeRasterizerDesc, &wireframeRasterizerState), L"와이어프레임 RS 생성 실패", false);
+
+    CD3D11_RASTERIZER_DESC noCullRasterizerDesc(CD3D11_DEFAULT{});
+    noCullRasterizerDesc.CullMode = D3D11_CULL_NONE;
+    device->CreateRasterizerState(&noCullRasterizerDesc, &noCullRasterizerState);
+
+    CD3D11_BLEND_DESC alphaToCoverageBlendDesc(CD3D11_DEFAULT{});
+    alphaToCoverageBlendDesc.AlphaToCoverageEnable = true;
+    alphaToCoverageBlendDesc.RenderTarget[0].BlendEnable = false;
+    alphaToCoverageBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+    device->CreateBlendState(&alphaToCoverageBlendDesc, &alphaToCoverageBlendState);
+
+    CD3D11_BLEND_DESC transparentBlendDesc(CD3D11_DEFAULT{});
+    transparentBlendDesc.RenderTarget[0].BlendEnable = true;
+    transparentBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    transparentBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    transparentBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    transparentBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    transparentBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    transparentBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    transparentBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+    device->CreateBlendState(&transparentBlendDesc, &transparentBlendState);
 
     OnResize();
 
