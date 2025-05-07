@@ -1,16 +1,15 @@
 #include "MirrorDemoApp.h"
 
+#include <fstream>
 #include <numbers>
 #include <span>
 #include <External/DirectXTex/DirectXTex.h>
 
 #include "Core/Common/GeometryGenerator.h"
-#include "Core/Common/Timer.h"
 #include "Core/Data/Color.h"
 #include "Core/Data/Path.h"
 #include "Core/Data/SphericalCoord.h"
 #include "Core/Rendering/Vertex.h"
-#include "Core/Utilities/Utility.h"
 #include "Shaders/MirrorDemoShaderPass.h"
 
 using namespace DirectX;
@@ -44,8 +43,6 @@ namespace
             .direction = {0.0f, -InvSqrt2, -InvSqrt2}
         }
     };
-
-    constexpr float Zero4[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 }
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
@@ -62,28 +59,26 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 MirrorDemoApp::MirrorDemoApp()
     : directionalLights(DefaultDirectionalLights)
 {
-    SetCameraSphericalCoord(75.f, XMConvertToRadians(-70.0f), XMConvertToRadians(75.0f));
-    SetZoomSpeed(0.25f);
+    SetCameraSphericalCoord(25.f, XMConvertToRadians(-70.0f), XMConvertToRadians(75.0f));
+    SetZoomSpeed(0.05f);
 
     const XMMATRIX identityMatrix = XMMatrixIdentity();
-    XMStoreFloat4x4(&hillsUVMatrix, XMMatrixScaling(5.0f, 5.0f, 0.0f));
-    XMStoreFloat4x4(&hillsWorldMatrix, identityMatrix);
-    XMStoreFloat4x4(&wavesWorldMatrix, identityMatrix);
-    XMStoreFloat4x4(&wavesWorldMatrix, identityMatrix);
-    XMStoreFloat4x4(&wireFenceWorldMatrix, XMMatrixScalingFromVector(XMVectorReplicate(15.0f)) * XMMatrixTranslation(8.0f, 5.0f, -15.0f));
-    XMStoreFloat4x4(&wireFenceUVMatrix, identityMatrix);
+    XMStoreFloat4x4(&skullWorldMatrix, identityMatrix);
+    XMStoreFloat4x4(&roomWorldMatrix, identityMatrix);
 
-    hillsMaterial.ambient = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
-    hillsMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    hillsMaterial.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
+    skullTranslation = XMFLOAT3(0.0f, 1.0f, -5.0f);
 
-    wavesMaterial.ambient = XMFLOAT4(0.137f, 0.42f, 0.556f, 1.0f);
-    wavesMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.75f);
-    wavesMaterial.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 96.0f);
+    skullMaterial.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+    skullMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    skullMaterial.specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 16.0f);
 
-    wireFenceMaterial.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-    wireFenceMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    wireFenceMaterial.specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 16.0f);
+    roomMaterial.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+    roomMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    roomMaterial.specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 16.0f);
+
+    mirrorMaterial.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+    mirrorMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.25f);
+    mirrorMaterial.specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 16.0f);
 }
 
 MirrorDemoApp::~MirrorDemoApp() = default;
@@ -143,35 +138,26 @@ void MirrorDemoApp::Update(float deltaSeconds)
         shaderPass->SetUseFog(true);
     }
 
-    static float elapsedTime = 0.0f;
-    if (timer->GetTotalSeconds() - elapsedTime >= 0.1f)
+    if (GetAsyncKeyState('A') & 0x8000)
     {
-        elapsedTime += 0.1f;
-
-        const UINT i = Math::GetRandomInt(5, 194);
-        const UINT j = Math::GetRandomInt(5, 194);
-        const float magnitude = Math::GetRandomFloat(0.5f, 1.0f);
-
-        waves.Disturb(i, j, magnitude);
+        skullTranslation.x -= 1.0f * deltaSeconds;
+    }
+    if (GetAsyncKeyState('D') & 0x8000)
+    {
+        skullTranslation.x += 1.0f * deltaSeconds;
+    }
+    if (GetAsyncKeyState('W') & 0x8000)
+    {
+        skullTranslation.y += 1.0f * deltaSeconds;
+    }
+    if (GetAsyncKeyState('S') & 0x8000)
+    {
+        skullTranslation.y -= 1.0f * deltaSeconds;
     }
 
-    waves.Update(deltaSeconds);
+    skullTranslation.y = std::max(skullTranslation.y, 0.0f);
 
-    D3D11_MAPPED_SUBRESOURCE mapped;
-    immediateContext->Map(wavesVertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-
-    Vertex::PNT* waveVertices = static_cast<Vertex::PNT*>(mapped.pData);
-    for (UINT i = 0; i < waves.VertexCount(); ++i)
-    {
-        waveVertices[i].position = waves[i];
-        waveVertices[i].normal = waves.Normal(i);
-        waveVertices[i].tex.x = 0.5f + waves[i].x / waves.Width();
-        waveVertices[i].tex.y = 0.5f - waves[i].z / waves.Depth();
-    }
-
-    immediateContext->Unmap(wavesVertexBuffer.Get(), 0);
-
-    XMStoreFloat4x4(&wavesUVMatrix, XMMatrixScaling(5.0f, 5.0f, 0.0f) + XMMatrixTranslation(static_cast<float>(timer->GetTotalSeconds() * 0.05f), static_cast<float>(timer->GetTotalSeconds() * 0.1f), 0.0f));
+    XMStoreFloat4x4(&skullWorldMatrix, XMMatrixScaling(0.45f, 0.45f, 0.45f) * XMMatrixRotationY(XM_PIDIV2) * XMMatrixTranslationFromVector(XMLoadFloat3(&skullTranslation)));
 }
 
 void MirrorDemoApp::Render()
@@ -180,37 +166,125 @@ void MirrorDemoApp::Render()
     immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     const XMMATRIX viewProjectionMatrix = XMLoadFloat4x4(&viewMatrix) * XMLoadFloat4x4(&projectionMatrix);
-    RenderObject(
-        hillsVertexBuffer.Get(), hillsIndexBuffer.Get(), nullptr, nullptr,
-        XMLoadFloat4x4(&hillsWorldMatrix), viewProjectionMatrix, XMLoadFloat4x4(&hillsUVMatrix),
-        hillsDiffuseMapSRV.Get(), hillsMaterial, hillsSubmesh.indexCount
-    );
-    RenderObject(
-        wireFenceVertexBuffer.Get(), wireFenceIndexBuffer.Get(), noCullRasterizerState.Get(), alphaToCoverageBlendState.Get(),
-        XMLoadFloat4x4(&wireFenceWorldMatrix), viewProjectionMatrix, XMLoadFloat4x4(&wireFenceUVMatrix),
-        wireFenceDiffuseMapSRV.Get(), wireFenceMaterial, wireFenceSubmesh.indexCount
-    );
-    RenderObject(
-        wavesVertexBuffer.Get(), wavesIndexBuffer.Get(), nullptr, transparentBlendState.Get(),
-        XMLoadFloat4x4(&wavesWorldMatrix), viewProjectionMatrix, XMLoadFloat4x4(&wavesUVMatrix),
-        wavesDiffuseMapSRV.Get(), wavesMaterial, wavesSubmesh.indexCount
-    );
+
+    shaderPass->SetLights(directionalLights);
+    shaderPass->SetEyePosition(eyePosition);
+    shaderPass->SetFogColor(LinearColors::LightSteelBlue);
+    shaderPass->SetFogRange(15.0f, 200.0f);
+
+    // 해골 렌더링
+    shaderPass->SetMatrix(XMLoadFloat4x4(&skullWorldMatrix), viewProjectionMatrix);
+    shaderPass->SetMaterial(skullMaterial);
+    shaderPass->SetUseTexture(false);
+    shaderPass->UpdateCBuffer(immediateContext.Get());
+
+    immediateContext->IASetVertexBuffers(0, 1, skullVertexBuffer.GetAddressOf(), std::array{static_cast<UINT>(sizeof(Vertex::PNT))}.data(), std::array{0u}.data());
+    immediateContext->IASetIndexBuffer(skullIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+    immediateContext->DrawIndexed(skullSubmesh.indexCount, skullSubmesh.startIndexLocation, skullSubmesh.baseVertexLocation);
+
+    // 방 렌더링
+    shaderPass->SetMatrix(XMLoadFloat4x4(&roomWorldMatrix), viewProjectionMatrix);
+    shaderPass->SetUVMatrix(XMMatrixIdentity());
+    shaderPass->SetMaterial(roomMaterial);
+    shaderPass->SetUseTexture(true);
+    shaderPass->UpdateCBuffer(immediateContext.Get());
+
+    immediateContext->IASetVertexBuffers(0, 1, roomVertexBuffer.GetAddressOf(), std::array{static_cast<UINT>(sizeof(Vertex::PNT))}.data(), std::array{0u}.data());
+
+    immediateContext->PSSetShaderResources(0, 1, std::array{floorDiffuseMapSrv.Get()}.data());
+    immediateContext->Draw(6, 0);
+
+    immediateContext->PSSetShaderResources(0, 1, std::array{wallDiffuseMapSrv.Get()}.data());
+    immediateContext->Draw(18, 6);
+
+    // 거울을 스텐실 버퍼에 기록
+    shaderPass->SetMatrix(XMLoadFloat4x4(&roomWorldMatrix), viewProjectionMatrix);
+    shaderPass->SetUseTexture(true);
+    shaderPass->UpdateCBuffer(immediateContext.Get());
+
+    immediateContext->IASetVertexBuffers(0, 1, roomVertexBuffer.GetAddressOf(), std::array{static_cast<UINT>(sizeof(Vertex::PNT))}.data(), std::array{0u}.data());
+    immediateContext->OMSetDepthStencilState(markMirrorDepthStencilState.Get(), 1);
+    immediateContext->OMSetBlendState(noRenderTargetWriteBlendState.Get(), nullptr, 0xffffffff);
+    immediateContext->Draw(6, 24);
+
+    immediateContext->OMSetDepthStencilState(nullptr, 0);
+    immediateContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+
+    // 반사된 해골 렌더링
+    const XMMATRIX reflectionMatrix = XMMatrixReflect(XMVECTORF32{0.0f, 0.0f, 1.0f, 0.0f});
+
+    shaderPass->SetMatrix(XMLoadFloat4x4(&skullWorldMatrix) * reflectionMatrix, viewProjectionMatrix);
+    shaderPass->SetUseTexture(false);
+    shaderPass->SetMaterial(skullMaterial);
+
+    std::array<DirectionalLight, 3> reflectedDirectionalLights = directionalLights;
+    for (int i = 0; i < reflectedDirectionalLights.size(); ++i)
+    {
+        const XMVECTOR reflectedLightDirection = XMVector3TransformNormal(XMLoadFloat3(&reflectedDirectionalLights[i].direction), reflectionMatrix);
+        XMStoreFloat3(&reflectedDirectionalLights[i].direction, reflectedLightDirection);
+    }
+    shaderPass->SetLights(reflectedDirectionalLights);
+
+    shaderPass->UpdateCBuffer(immediateContext.Get());
+
+    immediateContext->IASetVertexBuffers(0, 1, skullVertexBuffer.GetAddressOf(), std::array{static_cast<UINT>(sizeof(Vertex::PNT))}.data(), std::array{0u}.data());
+    immediateContext->IASetIndexBuffer(skullIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+    immediateContext->RSSetState(counterClockwiseRasterizerState.Get());
+    immediateContext->OMSetDepthStencilState(renderReflectionDepthStencilState.Get(), 1);
+    immediateContext->DrawIndexed(skullSubmesh.indexCount, skullSubmesh.startIndexLocation, skullSubmesh.baseVertexLocation);
+
+    shaderPass->SetLights(directionalLights);
+    immediateContext->RSSetState(nullptr);
+    immediateContext->OMSetDepthStencilState(nullptr, 0);
+
+    // 반사된 방 렌더링
+    shaderPass->SetMatrix(XMLoadFloat4x4(&roomWorldMatrix) * reflectionMatrix, viewProjectionMatrix);
+    shaderPass->SetUVMatrix(XMMatrixIdentity());
+    shaderPass->SetMaterial(roomMaterial);
+    shaderPass->SetLights(reflectedDirectionalLights);
+    shaderPass->SetUseTexture(true);
+    shaderPass->UpdateCBuffer(immediateContext.Get());
+
+    immediateContext->IASetVertexBuffers(0, 1, roomVertexBuffer.GetAddressOf(), std::array{static_cast<UINT>(sizeof(Vertex::PNT))}.data(), std::array{0u}.data());
+    immediateContext->RSSetState(counterClockwiseRasterizerState.Get());
+    immediateContext->OMSetDepthStencilState(renderReflectionDepthStencilState.Get(), 1);
+
+    immediateContext->PSSetShaderResources(0, 1, std::array{floorDiffuseMapSrv.Get()}.data());
+    immediateContext->Draw(6, 0);
+
+    immediateContext->PSSetShaderResources(0, 1, std::array{wallDiffuseMapSrv.Get()}.data());
+    immediateContext->Draw(18, 6);
+
+    shaderPass->SetLights(directionalLights);
+    immediateContext->RSSetState(nullptr);
+    immediateContext->OMSetDepthStencilState(nullptr, 0);
+
+    // 거울 머티리얼 렌더링
+    shaderPass->SetMatrix(XMLoadFloat4x4(&roomWorldMatrix), viewProjectionMatrix);
+    shaderPass->SetUVMatrix(XMMatrixIdentity());
+    shaderPass->SetMaterial(mirrorMaterial);
+    shaderPass->SetUseTexture(true);
+    shaderPass->UpdateCBuffer(immediateContext.Get());
+
+    immediateContext->IASetVertexBuffers(0, 1, roomVertexBuffer.GetAddressOf(), std::array{static_cast<UINT>(sizeof(Vertex::PNT))}.data(), std::array{0u}.data());
+    immediateContext->PSSetShaderResources(0, 1, std::array{mirrorDiffuseMapSrv.Get()}.data());
+    immediateContext->OMSetBlendState(transparentBlendState.Get(), nullptr, 0xffffffff);
+    immediateContext->Draw(6, 24);
+
+    immediateContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+
     swapChain->Present(0, 0);
 }
 
 void MirrorDemoApp::RenderObject(
-    ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr, ID3D11RasterizerState* rasterizerState, ID3D11BlendState* blendState,
+    ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr,
     FXMMATRIX worldMatrix, CXMMATRIX viewProjectionMatrix, CXMMATRIX uvMatrix,
-    ID3D11ShaderResourceView* diffuseMapSRV, const Material& material, UINT indexCount
+    ID3D11ShaderResourceView* diffuseMapSRV, const Material& material, Submesh submesh
 )
 {
     shaderPass->SetMatrix(worldMatrix, viewProjectionMatrix);
     shaderPass->SetUVMatrix(uvMatrix);
     shaderPass->SetMaterial(material);
-    shaderPass->SetLights(directionalLights);
-    shaderPass->SetEyePosition(eyePosition);
-    shaderPass->SetFogColor(LinearColors::LightSteelBlue);
-    shaderPass->SetFogRange(15.0f, 200.0f);
     shaderPass->UpdateCBuffer(immediateContext.Get());
 
     constexpr UINT stride = sizeof(Vertex::PNT);
@@ -219,121 +293,104 @@ void MirrorDemoApp::RenderObject(
     immediateContext->IASetIndexBuffer(indexBufferPtr, DXGI_FORMAT_R32_UINT, 0);
     immediateContext->PSSetShaderResources(0, 1, std::array{diffuseMapSRV}.data());
 
-    if (IsWireframe())
-    {
-        immediateContext->RSSetState(wireframeRasterizerState.Get());
-    }
-    else
-    {
-        if (blendState)
-        {
-            immediateContext->OMSetBlendState(blendState, Zero4, 0xffffffff);
-        }
-
-        if (rasterizerState)
-        {
-            immediateContext->RSSetState(rasterizerState);
-        }
-    }
-
-    immediateContext->DrawIndexed(indexCount, 0, 0);
-
-    immediateContext->OMSetBlendState(nullptr, Zero4, 0xffffffff);
-    immediateContext->RSSetState(nullptr);
+    immediateContext->DrawIndexed(submesh.indexCount, submesh.startIndexLocation, submesh.baseVertexLocation);
 }
 
 void MirrorDemoApp::CreateGeometry()
 {
-    CreateLandGeometry();
-    CreateWaveGeometry();
-    CreateWireFenceGeometry();
+    CreateSkullGeometry();
+    CreateRoomGeometry();
 }
 
-void MirrorDemoApp::CreateLandGeometry()
+void MirrorDemoApp::CreateSkullGeometry()
 {
-    const auto [meshVertices, meshIndices] = GeometryGenerator::CreateGrid(160.0f, 160.0f, 50, 50);
-    hillsSubmesh = Submesh(meshIndices.size(), 0, 0);
+    std::ifstream ifs(Path::GetModelPath(L"skull.txt").c_str());
 
-    std::vector<Vertex::PNT> vertices(meshVertices.size());
-    std::ranges::transform(meshVertices, vertices.begin(), [](const GeometryGenerator::Vertex& vertex)
+    UINT vertexCount = 0;
+    UINT triangleCount = 0;
+    std::string ignore;
+
+    ifs >> ignore >> vertexCount;
+    ifs >> ignore >> triangleCount;
+    ifs >> ignore >> ignore >> ignore >> ignore;
+
+    std::vector<Vertex::PNT> vertices(vertexCount);
+    for (UINT i = 0; i < vertexCount; ++i)
     {
-        return Vertex::PNT
-        {
-            .position = XMFLOAT3(vertex.position.x, GetHeight(vertex.position.x, vertex.position.z), vertex.position.z),
-            .normal = GetHillNormal(vertex.position.x, vertex.position.z),
-            .tex = vertex.texC
-        };
-    });
-
-    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex::PNT) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
-    const D3D11_SUBRESOURCE_DATA vertexInitData{vertices.data()};
-    device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &hillsVertexBuffer);
-
-    const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * hillsSubmesh.indexCount), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
-    const D3D11_SUBRESOURCE_DATA indexInitData{meshIndices.data()};
-    device->CreateBuffer(&indexBufferDesc, &indexInitData, &hillsIndexBuffer);
-}
-
-void MirrorDemoApp::CreateWaveGeometry()
-{
-    waves.Init(200, 200, 0.8f, 0.03f, 3.25f, 0.4f);
-    const UINT wavesRowCount = waves.RowCount();
-    const UINT wavesColumnCount = waves.ColumnCount();
-
-    std::vector<UINT> indices(waves.TriangleCount() * 3);
-    wavesSubmesh.indexCount = static_cast<UINT>(indices.size());
-
-    int k = 0;
-    for (UINT i = 0; i < wavesRowCount - 1; ++i)
-    {
-        for (UINT j = 0; j < wavesColumnCount - 1; ++j)
-        {
-            const UINT current = i * wavesColumnCount + j;
-            const UINT next = current + 1;
-            const UINT bottom = current + wavesColumnCount;
-            const UINT bottomNext = bottom + 1;
-
-            indices[k++] = current;
-            indices[k++] = next;
-            indices[k++] = bottom;
-
-            indices[k++] = bottom;
-            indices[k++] = next;
-            indices[k++] = bottomNext;
-        }
+        ifs >> vertices[i].position.x >> vertices[i].position.y >> vertices[i].position.z;
+        ifs >> vertices[i].normal.x >> vertices[i].normal.y >> vertices[i].normal.z;
     }
 
-    const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(Vertex::PNT) * waves.VertexCount(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-    device->CreateBuffer(&vertexBufferDesc, nullptr, &wavesVertexBuffer);
+    ifs >> ignore >> ignore >> ignore;
 
-    const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * indices.size()), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
-    const D3D11_SUBRESOURCE_DATA indexInitData{indices.data()};
-    device->CreateBuffer(&indexBufferDesc, &indexInitData, &wavesIndexBuffer);
-}
-
-void MirrorDemoApp::CreateWireFenceGeometry()
-{
-    const auto [meshVertices, meshIndices] = GeometryGenerator::CreateBox(1.0f, 1.0f, 1.0f);
-    wireFenceSubmesh = Submesh(meshIndices.size(), 0, 0);
-
-    std::vector<Vertex::PNT> vertices(meshVertices.size());
-    std::ranges::transform(meshVertices, vertices.begin(), [](const GeometryGenerator::Vertex& vertex)
+    std::vector<UINT> indices(triangleCount * 3);
+    for (UINT i = 0; i < triangleCount; ++i)
     {
-        return Vertex::PNT
-        {
-            .position = vertex.position,
-            .normal = vertex.normal,
-            .tex = vertex.texC
-        };
-    });
+        const UINT currentIndex = i * 3;
+        ifs >> indices[currentIndex] >> indices[currentIndex + 1] >> indices[currentIndex + 2];
+    }
+
+    skullSubmesh = Submesh(indices.size(), 0, 0);
 
     const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex::PNT) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
-    const D3D11_SUBRESOURCE_DATA vertexInitData{vertices.data()};
-    device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &wireFenceVertexBuffer);
+    const D3D11_SUBRESOURCE_DATA vertexInitData{.pSysMem = vertices.data()};
+    device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &skullVertexBuffer);
 
-    const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * wireFenceSubmesh.indexCount), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
-    const D3D11_SUBRESOURCE_DATA indexInitData{meshIndices.data()};
-    device->CreateBuffer(&indexBufferDesc, &indexInitData, &wireFenceIndexBuffer);
+    const CD3D11_BUFFER_DESC indexBufferDesc(static_cast<UINT>(sizeof(UINT) * indices.size()), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const D3D11_SUBRESOURCE_DATA indexInitData{.pSysMem = indices.data()};
+    device->CreateBuffer(&indexBufferDesc, &indexInitData, &skullIndexBuffer);
+}
+
+void MirrorDemoApp::CreateRoomGeometry()
+{
+    std::array<Vertex::PNT, 30> vertices;
+
+    // 바닥: 텍스처 좌표를 통해 타일링 적용
+    vertices[0] = Vertex::PNT{.position = XMFLOAT3(-3.5f, 0.0f, -10.0f), .normal = XMFLOAT3(0.0f, 1.0f, 0.0f), .tex = XMFLOAT2(0.0f, 4.0f)};
+    vertices[1] = Vertex::PNT{.position = XMFLOAT3(-3.5f, 0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 1.0f, 0.0f), .tex = XMFLOAT2(0.0f, 0.0f)};
+    vertices[2] = Vertex::PNT{.position = XMFLOAT3(7.5f, 0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 1.0f, 0.0f), .tex = XMFLOAT2(4.0f, 0.0f)};
+
+    vertices[3] = Vertex::PNT{.position = XMFLOAT3(-3.5f, 0.0f, -10.0f), .normal = XMFLOAT3(0.0f, 1.0f, 0.0f), .tex = XMFLOAT2(0.0f, 4.0f)};
+    vertices[4] = Vertex::PNT{.position = XMFLOAT3(7.5f, 0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 1.0f, 0.0f), .tex = XMFLOAT2(4.0f, 0.0f)};
+    vertices[5] = Vertex::PNT{.position = XMFLOAT3(7.5f, 0.0f, -10.0f), .normal = XMFLOAT3(0.0f, 1.0f, 0.0f), .tex = XMFLOAT2(4.0f, 4.0f)};
+
+    // 벽: 텍스처 좌표를 통한 타일링
+    vertices[6] = Vertex::PNT{.position = XMFLOAT3(-3.5f, 0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.0f, 2.0f)};
+    vertices[7] = Vertex::PNT{.position = XMFLOAT3(-3.5f, 4.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.0f, 0.0f)};
+    vertices[8] = Vertex::PNT{.position = XMFLOAT3(-2.5f, 4.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.5f, 0.0f)};
+
+    vertices[9] = Vertex::PNT{.position = XMFLOAT3(-3.5f, 0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.0f, 2.0f)};
+    vertices[10] = Vertex::PNT{.position = XMFLOAT3(-2.5f, 4.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.5f, 0.0f)};
+    vertices[11] = Vertex::PNT{.position = XMFLOAT3(-2.5f, 0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.5f, 2.0f)};
+
+    vertices[12] = Vertex::PNT{.position = XMFLOAT3(2.5f, 0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.0f, 2.0f)};
+    vertices[13] = Vertex::PNT{.position = XMFLOAT3(2.5f, 4.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.0f, 0.0f)};
+    vertices[14] = Vertex::PNT{.position = XMFLOAT3(7.5f, 4.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(2.0f, 0.0f)};
+
+    vertices[15] = Vertex::PNT{.position = XMFLOAT3(2.5f, 0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.0f, 2.0f)};
+    vertices[16] = Vertex::PNT{.position = XMFLOAT3(7.5f, 4.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(2.0f, 0.0f)};
+    vertices[17] = Vertex::PNT{.position = XMFLOAT3(7.5f, 0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(2.0f, 2.0f)};
+
+    vertices[18] = Vertex::PNT{.position = XMFLOAT3(-3.5f, 4.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.0f, 1.0f)};
+    vertices[19] = Vertex::PNT{.position = XMFLOAT3(-3.5f, 6.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.0f, 0.0f)};
+    vertices[20] = Vertex::PNT{.position = XMFLOAT3(7.5f, 6.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(6.0f, 0.0f)};
+
+    vertices[21] = Vertex::PNT{.position = XMFLOAT3(-3.5f, 4.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.0f, 1.0f)};
+    vertices[22] = Vertex::PNT{.position = XMFLOAT3(7.5f, 6.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(6.0f, 0.0f)};
+    vertices[23] = Vertex::PNT{.position = XMFLOAT3(7.5f, 4.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(6.0f, 1.0f)};
+
+    // 거울
+    vertices[24] = Vertex::PNT{.position = XMFLOAT3(-2.5f, 0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.0f, 1.0f)};
+    vertices[25] = Vertex::PNT{.position = XMFLOAT3(-2.5f, 4.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.0f, 0.0f)};
+    vertices[26] = Vertex::PNT{.position = XMFLOAT3(2.5f, 4.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(1.0f, 0.0f)};
+
+    vertices[27] = Vertex::PNT{.position = XMFLOAT3(-2.5f, 0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(0.0f, 1.0f)};
+    vertices[28] = Vertex::PNT{.position = XMFLOAT3(2.5f, 4.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(1.0f, 0.0f)};
+    vertices[29] = Vertex::PNT{.position = XMFLOAT3(2.5f, 0.0f, 0.0f), .normal = XMFLOAT3(0.0f, 0.0f, -1.0f), .tex = XMFLOAT2(1.0f, 1.0f)};
+
+    const CD3D11_BUFFER_DESC vertexBufferDesc(static_cast<UINT>(sizeof(Vertex::PNT) * vertices.size()), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+    const D3D11_SUBRESOURCE_DATA vertexInitData{.pSysMem = vertices.data()};
+    device->CreateBuffer(&vertexBufferDesc, &vertexInitData, &roomVertexBuffer);
 }
 
 void MirrorDemoApp::InitTexture()
@@ -352,12 +409,12 @@ void MirrorDemoApp::InitTexture()
     ScratchImage image;
     TexMetadata metaData;
 
-    LoadFromDDSFile(Path::GetTexturePath(L"water2.dds").c_str(), DDS_FLAGS_NONE, &metaData, image);
-    CreateShaderResourceView(device.Get(), image.GetImages(), image.GetImageCount(), metaData, &wavesDiffuseMapSRV);
+    LoadFromDDSFile(Path::GetTexturePath(L"checkboard.dds").c_str(), DDS_FLAGS_NONE, &metaData, image);
+    CreateShaderResourceView(device.Get(), image.GetImages(), image.GetImageCount(), metaData, &floorDiffuseMapSrv);
 
-    LoadFromDDSFile(Path::GetTexturePath(L"grass.dds").c_str(), DDS_FLAGS_NONE, &metaData, image);
-    CreateShaderResourceView(device.Get(), image.GetImages(), image.GetImageCount(), metaData, &hillsDiffuseMapSRV);
+    LoadFromDDSFile(Path::GetTexturePath(L"ice.dds").c_str(), DDS_FLAGS_NONE, &metaData, image);
+    CreateShaderResourceView(device.Get(), image.GetImages(), image.GetImageCount(), metaData, &mirrorDiffuseMapSrv);
 
-    LoadFromDDSFile(Path::GetTexturePath(L"WireFence.dds").c_str(), DDS_FLAGS_NONE, &metaData, image);
-    CreateShaderResourceView(device.Get(), image.GetImages(), image.GetImageCount(), metaData, &wireFenceDiffuseMapSRV);
+    LoadFromDDSFile(Path::GetTexturePath(L"brick01.dds").c_str(), DDS_FLAGS_NONE, &metaData, image);
+    CreateShaderResourceView(device.Get(), image.GetImages(), image.GetImageCount(), metaData, &wallDiffuseMapSrv);
 }

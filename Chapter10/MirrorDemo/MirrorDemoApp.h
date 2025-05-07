@@ -24,24 +24,14 @@ protected:
     virtual void Update(float deltaSeconds) override;
     virtual void Render() override;
 
-    void RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr, ID3D11RasterizerState* rasterizerState, ID3D11BlendState* blendState, DirectX::XMMATRIX worldMatrix, DirectX::CXMMATRIX viewProjectionMatrix, DirectX::CXMMATRIX uvMatrix, ID3D11ShaderResourceView* diffuseMapSRV, const Material& material, UINT indexCount);
+    void RenderObject(ID3D11Buffer* vertexBufferPtr, ID3D11Buffer* indexBufferPtr, DirectX::XMMATRIX worldMatrix, DirectX::CXMMATRIX viewProjectionMatrix, DirectX::CXMMATRIX uvMatrix, ID3D11ShaderResourceView* diffuseMapSRV, const Material& material, Submesh submesh);
 
 private:
     void CreateGeometry();
-    void CreateLandGeometry();
-    void CreateWaveGeometry();
-    void CreateWireFenceGeometry();
+    void CreateSkullGeometry();
+    void CreateRoomGeometry();
 
     void InitTexture();
-
-    static float GetHeight(float x, float z) { return 0.3f * (z * std::sin(0.1f * x) + x * std::cos(0.1f * z)); }
-
-    static DirectX::XMFLOAT3 GetHillNormal(float x, float z)
-    {
-        DirectX::XMFLOAT3 n(-0.03f * z * std::cos(0.1f * x) - 0.3f * std::cos(0.1f * z), 1.0f, -0.3f * std::sin(0.1f * x) + 0.03f * x * std::sin(0.1f * z));
-        XMStoreFloat3(&n, DirectX::XMVector3Normalize(XMLoadFloat3(&n)));
-        return n;
-    }
 
     std::unique_ptr<MirrorDemoShaderPass> shaderPass;
     ComPtr<ID3D11SamplerState> samplerState;
@@ -52,28 +42,19 @@ private:
 
     std::array<DirectionalLight, 3> directionalLights;
 
-    ComPtr<ID3D11Buffer> hillsVertexBuffer;
-    ComPtr<ID3D11Buffer> hillsIndexBuffer;
-    ComPtr<ID3D11ShaderResourceView> hillsDiffuseMapSRV;
-    DirectX::XMFLOAT4X4 hillsWorldMatrix;
-    DirectX::XMFLOAT4X4 hillsUVMatrix;
-    Material hillsMaterial;
-    Submesh hillsSubmesh{};
+    ComPtr<ID3D11Buffer> skullVertexBuffer;
+    ComPtr<ID3D11Buffer> skullIndexBuffer;
+    DirectX::XMFLOAT4X4 skullWorldMatrix;
+    DirectX::XMFLOAT3 skullTranslation;
+    Material skullMaterial;
+    Submesh skullSubmesh;
 
-    Waves waves;
-    ComPtr<ID3D11Buffer> wavesVertexBuffer;
-    ComPtr<ID3D11Buffer> wavesIndexBuffer;
-    ComPtr<ID3D11ShaderResourceView> wavesDiffuseMapSRV;
-    DirectX::XMFLOAT4X4 wavesWorldMatrix;
-    DirectX::XMFLOAT4X4 wavesUVMatrix;
-    Material wavesMaterial;
-    Submesh wavesSubmesh{};
+    ComPtr<ID3D11Buffer> roomVertexBuffer;
+    DirectX::XMFLOAT4X4 roomWorldMatrix;
+    Material roomMaterial;
+    ComPtr<ID3D11ShaderResourceView> floorDiffuseMapSrv;
+    ComPtr<ID3D11ShaderResourceView> mirrorDiffuseMapSrv;
+    Material mirrorMaterial;
 
-    ComPtr<ID3D11Buffer> wireFenceVertexBuffer;
-    ComPtr<ID3D11Buffer> wireFenceIndexBuffer;
-    ComPtr<ID3D11ShaderResourceView> wireFenceDiffuseMapSRV;
-    DirectX::XMFLOAT4X4 wireFenceWorldMatrix;
-    DirectX::XMFLOAT4X4 wireFenceUVMatrix;
-    Material wireFenceMaterial;
-    Submesh wireFenceSubmesh{};
+    ComPtr<ID3D11ShaderResourceView> wallDiffuseMapSrv;
 };

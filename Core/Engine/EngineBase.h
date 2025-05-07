@@ -89,11 +89,19 @@ protected:
     ComPtr<IDXGISwapChain> swapChain;
     ComPtr<ID3D11RenderTargetView> renderTargetView;
     ComPtr<ID3D11DepthStencilView> depthStencilView;
+    UINT msaaQuality = 0;
+
     ComPtr<ID3D11RasterizerState> wireframeRasterizerState;
     ComPtr<ID3D11RasterizerState> noCullRasterizerState;
+    ComPtr<ID3D11RasterizerState> counterClockwiseRasterizerState;
+
     ComPtr<ID3D11BlendState> alphaToCoverageBlendState;
     ComPtr<ID3D11BlendState> transparentBlendState;
-    UINT msaaQuality = 0;
+    ComPtr<ID3D11BlendState> noRenderTargetWriteBlendState;
+
+    ComPtr<ID3D11DepthStencilState> markMirrorDepthStencilState;
+    ComPtr<ID3D11DepthStencilState> renderReflectionDepthStencilState;
+    ComPtr<ID3D11DepthStencilState> noDoubleBlendDepthStencilState;
 
 private:
     static std::unique_ptr<EngineBase> engineInstance;

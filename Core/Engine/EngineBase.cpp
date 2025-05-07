@@ -419,22 +419,44 @@ bool EngineBase::InitDirectX()
     noCullRasterizerDesc.CullMode = D3D11_CULL_NONE;
     device->CreateRasterizerState(&noCullRasterizerDesc, &noCullRasterizerState);
 
+    CD3D11_RASTERIZER_DESC counterClockwiseRasterizerDesc(CD3D11_DEFAULT{});
+    noCullRasterizerDesc.FrontCounterClockwise = true;
+    device->CreateRasterizerState(&noCullRasterizerDesc, &counterClockwiseRasterizerState);
+
     CD3D11_BLEND_DESC alphaToCoverageBlendDesc(CD3D11_DEFAULT{});
     alphaToCoverageBlendDesc.AlphaToCoverageEnable = true;
-    alphaToCoverageBlendDesc.RenderTarget[0].BlendEnable = false;
-    alphaToCoverageBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
     device->CreateBlendState(&alphaToCoverageBlendDesc, &alphaToCoverageBlendState);
 
     CD3D11_BLEND_DESC transparentBlendDesc(CD3D11_DEFAULT{});
     transparentBlendDesc.RenderTarget[0].BlendEnable = true;
     transparentBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
     transparentBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-    transparentBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-    transparentBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-    transparentBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-    transparentBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-    transparentBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
     device->CreateBlendState(&transparentBlendDesc, &transparentBlendState);
+
+    // 뎁스 스텐실만 기록하고 색을 기록하지 않는 용도
+    CD3D11_BLEND_DESC noRenderTargetWriteDesc(CD3D11_DEFAULT{});
+    noRenderTargetWriteDesc.RenderTarget[0].RenderTargetWriteMask = 0;
+    device->CreateBlendState(&noRenderTargetWriteDesc, &noRenderTargetWriteBlendState);
+
+    // 거울 마킹용
+    CD3D11_DEPTH_STENCIL_DESC mirrorDepthStencilDesc(CD3D11_DEFAULT{});
+    mirrorDepthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    mirrorDepthStencilDesc.StencilEnable = true;
+    mirrorDepthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+    device->CreateDepthStencilState(&mirrorDepthStencilDesc, &markMirrorDepthStencilState);
+
+    // 마킹된 거울에만 픽셀을 그림
+    CD3D11_DEPTH_STENCIL_DESC renderReflectDepthStencilDesc(CD3D11_DEFAULT{});
+    renderReflectDepthStencilDesc.StencilEnable = true;
+    renderReflectDepthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+    renderReflectDepthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+    device->CreateDepthStencilState(&renderReflectDepthStencilDesc, &renderReflectionDepthStencilState);
+
+    CD3D11_DEPTH_STENCIL_DESC noDoubleBlendDepthStencilDesc(CD3D11_DEFAULT{});
+    noDoubleBlendDepthStencilDesc.StencilEnable = true;
+    noDoubleBlendDepthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INCR;
+    noDoubleBlendDepthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+    device->CreateDepthStencilState(&noDoubleBlendDepthStencilDesc, &noDoubleBlendDepthStencilState);
 
     OnResize();
 
