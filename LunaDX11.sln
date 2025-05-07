@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TexturedHillsAndWaves", "Ch
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlendDemo", "Chapter9\BlendDemo\BlendDemo.vcxproj", "{A91B65B6-8E1C-4DA8-9ADE-5F3A46ECB525}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MirrorDemo", "Chapter10\MirrorDemo\MirrorDemo.vcxproj", "{93DAD36C-2B03-4C87-AB1C-DA57F47373D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -45,6 +47,10 @@ Global
 		{A91B65B6-8E1C-4DA8-9ADE-5F3A46ECB525}.Debug|x64.Build.0 = Debug|x64
 		{A91B65B6-8E1C-4DA8-9ADE-5F3A46ECB525}.Release|x64.ActiveCfg = Release|x64
 		{A91B65B6-8E1C-4DA8-9ADE-5F3A46ECB525}.Release|x64.Build.0 = Release|x64
+		{93DAD36C-2B03-4C87-AB1C-DA57F47373D5}.Debug|x64.ActiveCfg = Debug|x64
+		{93DAD36C-2B03-4C87-AB1C-DA57F47373D5}.Debug|x64.Build.0 = Debug|x64
+		{93DAD36C-2B03-4C87-AB1C-DA57F47373D5}.Release|x64.ActiveCfg = Release|x64
+		{93DAD36C-2B03-4C87-AB1C-DA57F47373D5}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
